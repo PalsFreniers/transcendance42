@@ -1,0 +1,112 @@
+version: '3.8'
+
+services:
+  # FRONT
+  frontend:
+    build: ./frontend
+    container_name: frontend
+    restart: always
+    ports:
+      - "${FRONTEND_PORT}:${FRONTEND_PORT}"
+    depends_on:
+      - user
+      - game
+      - tournament
+    networks:
+      - app-network
+  
+  # NGINX
+  nginx:
+    build: ./nginx
+    container_name: nginx
+    restart: always
+    ports:
+      - "{NGINX_HTTP_PORT}:{NGINX_HTTP_PORT}"
+      - "${NGINX_HTTPS_PORT}:${NGINX_HTTPS_PORT}"
+    depend_on:
+      - frontend
+    networks:
+      - app-network
+
+  # Microservices
+  user:
+    build: ./microservices/usermanagement
+    container_name: user-service
+    restart: always
+    depends_on:
+      - db
+    environment:
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_USER: ${POSTGRES_USER}
+      DB_PASS: ${POSTGRES_PASSWORD}
+      DB_NAME: ${POSTGRES_DB}
+    networks:
+      - app-network
+
+  game:
+    build: ./microservices/game
+    container_name: game-service
+    restart: always
+    networks:
+      - app-network
+
+  tournament:
+    build: ./microservices/tournament
+    container_name: tournament-service
+    restart: always
+    networks:
+      - app-network
+
+  redis:
+    build: ./microservices/redis
+    container_name: redis
+    restart: always
+    ports:
+      - "{REDIS_PORT}:${REDIS_PORT}"
+    networks:
+      - app-network
+  
+  # ELK Stack - Logging
+  elasticsearch:
+    build: ./log/elasticsearch
+    container_name: elasticsearch
+    environment:
+      - discovery.type=single-node
+    volumes:
+      - esdata:/user/share/elasticsearch/data
+    ports:
+      - "${ELASTICSEARCH_PORT}:${ELASTICSEARCH_PORT}"
+    networks:
+      - observability
+
+  # Prometheus & Grafana
+  prometheus:
+    build: ./metrics/prometheus
+    container_name: prometheus
+    ports:
+      - "${PROMETHEUS_PORT}:${PROMETHEUS_PORT}"
+    networks:
+      - observability
+
+  grafana:
+    build: ./metrics/grafna
+    container_name: grafana
+    ports:
+      - "${GRAFANA_PORT}:{GRAFANA_PORT}"
+    volumes:
+      grafana_data:/var/lib/grafana
+    networks:
+      - observability
+
+# Volumes
+volumes:
+  db_data:
+  esdata:
+  prometheus_data:
+  grafana_data:
+
+# Networks
+networks:
+  app-network:
+  observability:
