@@ -1,14 +1,14 @@
 FROM node:20-alpine
 
-# Create the directory of the API
-WORKDIR /app
+# Create the directory of the API (Microservice)
+WORKDIR /src
 
 # Install dependencies
 COPY package*.json ./
 RUN npm install
 
 # Copy source code
-COPY ..
+COPY . .
 
 # Build TS
 RUN npm run build
@@ -17,4 +17,4 @@ RUN npm run build
 EXPOSE 3001
 
 #Start user services
-CMD ["node", "dist/index.js"]
+CMD ["npm", "run", "Start"]

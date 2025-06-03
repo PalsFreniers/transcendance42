@@ -23,8 +23,9 @@ services:
     ports:
       - "{NGINX_HTTP_PORT}:{NGINX_HTTP_PORT}"
       - "${NGINX_HTTPS_PORT}:${NGINX_HTTPS_PORT}"
-    depend_on:
+    depends_on:
       - frontend
+      - user
     networks:
       - app-network
 
@@ -32,38 +33,39 @@ services:
   user:
     build: ./microservices/usermanagement
     container_name: user-service
-    restart: always
-    depends_on:
-      - db
-    environment:
-      DB_HOST: db
-      DB_PORT: 5432
-      DB_USER: ${POSTGRES_USER}
-      DB_PASS: ${POSTGRES_PASSWORD}
-      DB_NAME: ${POSTGRES_DB}
+    volumes:
+      - user_db_data:/app/src/dbSqlite
+    ports:
+      - "${USER_MANA_PORT}:${USER_MANA_PORT}"
     networks:
       - app-network
 
   game:
     build: ./microservices/game
     container_name: game-service
-    restart: always
+    volumes:
+      - game_db_data:/app/src/dbSqlite
+    ports:
+      - "${GAME_PORT}:${GAME_PORT}"
     networks:
       - app-network
 
   tournament:
     build: ./microservices/tournament
     container_name: tournament-service
-    restart: always
+    volumes:
+      - tournament_db_data:/app/src/dbSqlite
+    ports:
+      - "${TOURNAMENT_PORT}:${TOURNAMENT_PORT}"
     networks:
       - app-network
 
   redis:
-    build: ./microservices/redis
+    image: redis:7-alpine
     container_name: redis
     restart: always
     ports:
-      - "{REDIS_PORT}:${REDIS_PORT}"
+      - "${REDIS_PORT}:${REDIS_PORT}"
     networks:
       - app-network
   
@@ -74,7 +76,7 @@ services:
     environment:
       - discovery.type=single-node
     volumes:
-      - esdata:/user/share/elasticsearch/data
+      - esdata:/usr/share/elasticsearch/data
     ports:
       - "${ELASTICSEARCH_PORT}:${ELASTICSEARCH_PORT}"
     networks:
@@ -93,7 +95,7 @@ services:
     build: ./metrics/grafna
     container_name: grafana
     ports:
-      - "${GRAFANA_PORT}:{GRAFANA_PORT}"
+      - "${GRAFANA_PORT}:${GRAFANA_PORT}"
     volumes:
       grafana_data:/var/lib/grafana
     networks:
@@ -101,7 +103,9 @@ services:
 
 # Volumes
 volumes:
-  db_data:
+  user_db_data:
+  game_db_data:
+  tournament_db_data:
   esdata:
   prometheus_data:
   grafana_data:
