@@ -2,6 +2,7 @@ import Fastify from 'fastify';
 import Database from 'better-sqlite3';
 import path from 'path';
 import dotenv from 'dotenv';
+import fastifyJwt from 'fastify-jwt';
 import {
   authRoutes,
   registerRoutes,
@@ -45,6 +46,7 @@ app.register(profilRoutes, { prefix: '/api/user' });
 app.register(friendRoutes, { prefix: '/api/user' })
 app.register(updateRoutes, { prefix: '/api/user' });
 app.register(deleteRoutes, { prefix: '/api/user' });
+app.register(fastifyJwt, { secret: process.env.JWT_SECRET });
 
 app.listen({ port: Number(PORT), host: '0.0.0.0' }, err => {
   if (err) throw err;
