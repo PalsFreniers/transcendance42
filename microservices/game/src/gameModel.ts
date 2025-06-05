@@ -11,7 +11,7 @@ export interface Game {
 export function gameSession(game: Game) {
     const stmt = db.prepare(`
         INSERT INTO games (player_one_id, player_two_id, lobby_name, game_score, date)
-        VALUES (?, ?, ?, ?)
+        VALUES (?, ?, ?, ?, ?)
     `);
 
     const result = stmt.run(
