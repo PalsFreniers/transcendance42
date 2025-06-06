@@ -7,17 +7,17 @@ import dotenv from 'dotenv';
 import fastifyJwt from 'fastify-jwt';
 import { verifJWTToken } from './userMiddlewares';
 import {
-  authRoutes,
-  registerRoutes,
+  auth,
+  register,
 } from './authService';
 import {
-  friendListRoutes,
-  profilRoutes,
-  updateRoutes,
-  deleteRoutes,
-  friendAddRoutes,
-  friendDeleteRoutes,
-  friendSendMsgRoutes
+  friendList,
+  profil,
+  updateProfile,
+  deleteProfile,
+  friendAdd,
+  friendDelete,
+  friendSendMsg
 
 } from './userRoutes';
 
@@ -75,15 +75,15 @@ db.exec(`
 
 // ROUTES
 app.register(fastifyJwt, { secret: process.env.JWT_SECRET! });
-app.register(registerRoutes, { prefix: '/api/user' });
-app.register(authRoutes, { prefix: '/api/user' });
-app.register(profilRoutes, { prefix: '/api/user' });
-app.register(friendListRoutes, { prefix: '/api/user' });
-app.register(updateRoutes, { prefix: '/api/user' });
-app.register(deleteRoutes, { prefix: '/api/user' });
-app.register(friendAddRoutes, { prefix: '/api/user' });
-app.register(friendDeleteRoutes, { prefix: '/api/user' });
-app.register(friendSendMsgRoutes, { prefix: '/api/user' });
+app.register(register, { prefix: '/api/user' });
+app.register(auth, { prefix: '/api/user' });
+app.register(profil, { prefix: '/api/user' });
+app.register(friendList, { prefix: '/api/user' });
+app.register(updateProfile, { prefix: '/api/user' });
+app.register(deleteProfile, { prefix: '/api/user' });
+app.register(friendAdd, { prefix: '/api/user' });
+app.register(friendDelete, { prefix: '/api/user' });
+app.register(friendSendMsg, { prefix: '/api/user' });
 
 //HOOK REQUEST NEED AUTH
 app.addHook('onRequest', async (request) => {

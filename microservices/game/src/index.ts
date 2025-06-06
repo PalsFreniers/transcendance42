@@ -4,11 +4,12 @@ import path from 'path';
 import dotenv from 'dotenv';
 import fastifyJwt from 'fastify-jwt';
 import {
-  createRoomRoutes,
-  startGameRoutes,
-  searchGameRoutes,
-  historyGameRoutes,
-  postGameRoutes
+  createRoom,
+  inGame,
+  awaitforOpponent,
+  joinLobby,
+  historyGame,
+  postGame
 } from './gameRoutes';
 
 //START FOR GAME SERVICES
@@ -24,19 +25,23 @@ db.exec(
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   lobby_name TEXT NOT NULL,
   player_one_id INTEGER NOT NULL,
-  player_two_id INTEGER NOT NULL,
+  player_two_id INTEGER,
   game_score TEXT NOT NULL,
+  status TEXT DEFAULT 'waiting',
+  start_time TIMESTAMP DEFAULT NULL,
+  end_time TIMESTAMP DEFAULT NULL,
   date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );`
 );
 
 //ROUTES
 app.register(fastifyJwt, {secret: process.env.JWT_SECRET!});
-app.register(createRoomRoutes, { prefix: 'api/game' });
-app.register(startGameRoutes, { prefix: 'api/game' });
-app.register(searchGameRoutes, {prefix: 'api/game' });
-app.register(historyGameRoutes, {prefix: 'api/game' });
-app.register(postGameRoutes, { prefix: 'api/game' });
+app.register(createRoom, { prefix: 'api/game' });
+app.register(inGame, { prefix: 'api/game' });
+app.register(awaitforOpponent, {prefix: 'api/game' });
+app.register(joinLobby, {prefix: 'api/game' })
+app.register(historyGame, {prefix: 'api/game' });
+app.register(postGame, { prefix: 'api/game' });
 
 app.listen({ port: Number(PORT), host: '0.0.0.0' }, err => {
   if (err) throw err;

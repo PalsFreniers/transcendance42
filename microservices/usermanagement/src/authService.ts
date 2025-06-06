@@ -2,7 +2,7 @@ import { FastifyInstance } from 'fastify';
 import { createUser } from './userModel';
 import bcrypt from 'bcrypt';
 
-export async function registerRoutes(app: FastifyInstance) {
+export async function register(app: FastifyInstance) {
     app.post('/register', async (request, reply) => {
     
     const { username, email, password } = request.body as {
@@ -29,7 +29,7 @@ export async function registerRoutes(app: FastifyInstance) {
   });
 }
 
-export async function authRoutes(app: FastifyInstance) {
+export async function auth(app: FastifyInstance) {
     app.post('/login', async (request, reply) => {
     const { username, password } = request.body;
     //GET USER FROM DB

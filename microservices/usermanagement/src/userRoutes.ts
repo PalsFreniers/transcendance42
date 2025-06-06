@@ -1,7 +1,7 @@
 import { FastifyInstance } from 'fastify';
 import { getUserId } from './userMiddlewares'
  
-export async function profilRoutes(app: FastifyInstance) {
+export async function profil(app: FastifyInstance) {
     app.get('/profile', async (request, reply) => {
     try {
         const userId = getUserId(request);
@@ -13,7 +13,7 @@ export async function profilRoutes(app: FastifyInstance) {
   });
 }
 
-export async function friendAddRoutes(app: FastifyInstance) {
+export async function friendAdd(app: FastifyInstance) {
     app.post('/add-friend', async (request, reply) => {
     try {
         const userId = getUserId(request);
@@ -34,7 +34,7 @@ export async function friendAddRoutes(app: FastifyInstance) {
   });
 }
 
-export async function friendDeleteRoutes(app: FastifyInstance) {
+export async function friendDelete(app: FastifyInstance) {
     app.post('/delete-friend', async (request, reply) => {
     try {
         const userId = getUserId(request);
@@ -53,7 +53,7 @@ export async function friendDeleteRoutes(app: FastifyInstance) {
   });
 }
 
-export async function friendSendMsgRoutes(app: FastifyInstance) {
+export async function friendSendMsg(app: FastifyInstance) {
     app.post('/priv-msg/:username', async (request, reply) => {
     try {
         const userId = getUserId(request);
@@ -70,7 +70,7 @@ export async function friendSendMsgRoutes(app: FastifyInstance) {
   });
 }
 
-export async function friendListRoutes(app: FastifyInstance) {
+export async function friendList(app: FastifyInstance) {
     app.get('/friendList', async (request, reply) => {
     try {
         const userId = getUserId(request);
@@ -86,7 +86,7 @@ export async function friendListRoutes(app: FastifyInstance) {
   });
 }
 
-export async function updateRoutes(app: FastifyInstance) {
+export async function updateProfile(app: FastifyInstance) {
     app.put('/update', { preValidation: [app.authenticate] }, async (request, reply) => {
     const userId = getUserId(request);
     const { bio, profile_image_url } = request.body;
@@ -100,12 +100,12 @@ export async function updateRoutes(app: FastifyInstance) {
     });
 }
 
-export async function deleteRoutes(app: FastifyInstance) {
+export async function deleteProfile(app: FastifyInstance) {
     app.delete('/api/user/profile-delete', { preValidation: [app.authenticate] }, async (request, reply) => {
     const userId = getUserId(request);
     const stmt = db.prepare('DELETE FROM users WHERE id = ?');
     stmt.run(userId);
     return reply.send({ success: true });
-});
+    });
 
 }
