@@ -1,20 +1,15 @@
 FROM node:20-alpine
 
-# Create the directory of the API (Microservice)
+# Set working directory
 WORKDIR /src
 
-# Install dependencies
-COPY package*.json ./
-RUN npm install
-
-# Copy source code
 COPY . .
 
-# Build TS
-RUN npm run build
+RUN chmod +x ./init.sh
+RUN ./init.sh
 
-# Expose port
+# Expose the port
 EXPOSE 3001
 
-#Start user services
-CMD ["npm", "run", "Start"]
+# Run the service
+CMD ["npm", "run", "start"]

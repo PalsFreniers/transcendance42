@@ -5,7 +5,6 @@ import { Server } from 'socket.io';
 import path from 'path';
 import dotenv from 'dotenv';
 import fastifyJwt from 'fastify-jwt';
-import { verifJWTToken } from './userMiddlewares';
 import {
   auth,
   register,

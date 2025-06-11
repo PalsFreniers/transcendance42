@@ -1,14 +1,13 @@
 #!/bin/sh
 
-echo "📦 Setting up frontend..."
+echo "📦 Initializing Node project for Tournament..."
 
-# Initialize package.json
-
+# Create package.json
 cat <<EOF > package.json
 {
-  "name": "frontend",
+  "name": "tournament",
   "version": "1.0.0",
-  "description": "Fastify-based frontend service",
+  "description": "tournament microservice for Transcendence",
   "main": "src/index.ts",
   "scripts": {
     "dev": "ts-node-dev --respawn src/index.ts",
@@ -26,15 +25,13 @@ cat <<EOF > package.json
 }
 EOF
 
-# Install dependencies
 echo "📁 Installing dependencies..."
 npm install
 
-# Build project
-echo "🛠️ Building project..."
-npm run build
+echo "🛠️ Installing dev dependencies..."
+npm install --save-dev typescript ts-node-dev
 
-# Install static server
-npm install -g serve
+echo "📄 Creating tsconfig.json..."
+npx tsc --init --rootDir src --outDir dist --module commonjs --target es2020 --esModuleInterop
 
-echo "✅ Frontend setup complete!"
+echo "✅ Tournament setup complete!"
