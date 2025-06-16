@@ -1,5 +1,7 @@
 import { FastifyInstance } from 'fastify';
-import { getUserId } from './userMiddlewares'
+import { getUserId } from './userMiddlewares';
+import db from './dbSqlite/db';
+
  
 export async function profil(app: FastifyInstance) {
     app.get('/profile', async (request, reply) => {

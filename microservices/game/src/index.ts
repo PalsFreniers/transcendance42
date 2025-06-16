@@ -2,7 +2,7 @@ import Fastify from 'fastify';
 import Database from 'better-sqlite3';
 import path from 'path';
 import dotenv from 'dotenv';
-import fastifyJwt from 'fastify-jwt';
+import jwt from '@fastify/jwt';
 import {
   createRoom,
   inGame,
@@ -15,7 +15,7 @@ import {
 //START FOR GAME SERVICES
 const app = Fastify();
 dotenv.config();
-const dbPath = path.join(_dirname, 'dbSqlite', 'db.sqlite');
+const dbPath = path.join(__dirname, 'dbSqlite', 'db.sqlite');
 const db = new Database(dbPath);
 const PORT = process.env.GAME_PORT;
 
@@ -35,7 +35,7 @@ db.exec(
 );
 
 //ROUTES
-app.register(fastifyJwt, {secret: process.env.JWT_SECRET!});
+app.register(jwt , {secret: process.env.JWT_SECRET!});
 app.register(createRoom, { prefix: 'api/game' });
 app.register(inGame, { prefix: 'api/game' });
 app.register(awaitforOpponent, {prefix: 'api/game' });

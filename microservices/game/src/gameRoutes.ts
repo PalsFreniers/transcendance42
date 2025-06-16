@@ -1,4 +1,6 @@
 import { FastifyInstance } from 'fastify';
+import db from './dbSqlite/db';
+
 
 export async function createRoom(app: FastifyInstance) {
   app.post('/create-game', { preHandler: app.verifJWTToken }, async (request, reply) => {

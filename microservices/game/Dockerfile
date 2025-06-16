@@ -1,15 +1,18 @@
 FROM node:20-alpine
 
-# Set working directory
 WORKDIR /src
 
+# Copy package files first to leverage caching
+COPY package*.json ./
+
+# Install dependencies
+RUN npm install
+
+# Copy the rest of the source
 COPY . .
 
-RUN chmod +x ./init.sh
-RUN ./init.sh
+# Compile TypeScript
+RUN npx tsc
 
-# Expose the port
-EXPOSE 3002
-
-# Run the service
-CMD ["npm", "run", "start"]
+# Start the service
+CMD ["node", "js/index.js"]

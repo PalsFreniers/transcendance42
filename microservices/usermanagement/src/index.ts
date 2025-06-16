@@ -4,7 +4,7 @@ import http from 'http';
 import { Server } from 'socket.io';
 import path from 'path';
 import dotenv from 'dotenv';
-import fastifyJwt from 'fastify-jwt';
+import jwt from '@fastify/jwt';
 import {
   auth,
   register,
@@ -17,7 +17,6 @@ import {
   friendAdd,
   friendDelete,
   friendSendMsg
-
 } from './userRoutes';
 
 dotenv.config();
@@ -73,7 +72,7 @@ db.exec(`
 `);
 
 // ROUTES
-app.register(fastifyJwt, { secret: process.env.JWT_SECRET! });
+app.register(jwt, { secret: process.env.JWT_SECRET! });
 app.register(register, { prefix: '/api/user' });
 app.register(auth, { prefix: '/api/user' });
 app.register(profil, { prefix: '/api/user' });

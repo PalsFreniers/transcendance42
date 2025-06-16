@@ -1,4 +1,4 @@
-COMPOSE=docker-compose
+COMPOSE=docker compose
 COMPOSE_FILE=docker-compose.yml
 
 help:
@@ -14,7 +14,6 @@ help:
 	@echo " -clean:	Remove containers, images, volumes"
 	@echo " -user:		Run only user management service"
 	@echo " -game:		Run only game service"
-	@echo " -tournament:	Run only tournament service"
 	@echo " -nginx:	Run only nginx"
 	@echo " -metrics:	Run metrics (Prometheus, Grafana)"
 	@echo " -front:	Run front"
@@ -32,7 +31,7 @@ logs:
 	$(COMPOSE) -f $(COMPOSE_FILE) logs -f --tail=100
 
 build:
-	$(COMPOSE) -f $(COMPOSE_FILE) build
+	$(COMPOSE) -f $(COMPOSE_FILE) build --no-cache
 
 clean:
 	$(COMPOSE) -f $(COMPOSE_FILE) down -v --rmi all --remove-orphans
@@ -42,9 +41,6 @@ user:
 
 game:
 	docker-compose up -d game
-
-tournament:
-	docker-compose up -d tournament
 
 nginx:
 	docker-compose up -d nginx

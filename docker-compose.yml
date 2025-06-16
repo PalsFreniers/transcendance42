@@ -9,7 +9,6 @@ services:
     depends_on:
       - user
       - game
-      - tournament
     networks:
       - app-network
   
@@ -25,7 +24,6 @@ services:
       - frontend
       - user
       - game
-      - tournament
     networks:
       - app-network
 
@@ -47,16 +45,6 @@ services:
       - game_db_data:/app/src/dbSqlite
     ports:
       - "${GAME_PORT}:${GAME_PORT}"
-    networks:
-      - app-network
-
-  tournament:
-    build: ./microservices/tournament
-    container_name: tournament-service
-    volumes:
-      - tournament_db_data:/app/src/dbSqlite
-    ports:
-      - "${TOURNAMENT_PORT}:${TOURNAMENT_PORT}"
     networks:
       - app-network
 
@@ -107,7 +95,6 @@ services:
 volumes:
   user_db_data:
   game_db_data:
-  tournament_db_data:
   esdata:
   prometheus_data:
   grafana_data:

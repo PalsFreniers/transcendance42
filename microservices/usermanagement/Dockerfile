@@ -1,15 +1,13 @@
 FROM node:20-alpine
 
-# Set working directory
 WORKDIR /src
+
+COPY package*.json ./
+
+RUN npm install
 
 COPY . .
 
-RUN chmod +x ./init.sh
-RUN ./init.sh
+RUN npx tsc
 
-# Expose the port
-EXPOSE 3001
-
-# Run the service
-CMD ["npm", "run", "start"]
+CMD ["node", "js/index.js"]

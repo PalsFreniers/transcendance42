@@ -1,4 +1,5 @@
-import db from '../dbSqlite';
+import db from './dbSqlite/db';
+
 
 export interface User {
   username: string;

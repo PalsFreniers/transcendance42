@@ -1,14 +1,21 @@
-# Dockerfile
 FROM node:20-alpine
 
 WORKDIR /src
 
+# Copy only package files first (for better layer caching)
+COPY package*.json ./
+
+# Install all dependencies (fastify, etc.)
+RUN npm install
+
+# Now copy rest of your source code
 COPY . .
 
-RUN chmod +x ./front.sh
-RUN ./front.sh
+# Compile TypeScript
+RUN npx tsc
 
-# Serve with a simple static server (or nginx)
-CMD ["serve", "-s", "dist", "-l", "5173"]
-
+# Expose the port Fastify will run on
 EXPOSE 5173
+
+# Run the compiled server
+CMD ["node", "js/index.js"]
