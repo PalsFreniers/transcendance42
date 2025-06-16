@@ -1,5 +1,5 @@
 import { FastifyInstance } from 'fastify';
-import db from './dbSqlite/db';
+import db from './dbSqlite';
 
 
 export async function createRoom(app: FastifyInstance) {

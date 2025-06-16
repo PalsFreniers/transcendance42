@@ -1,5 +1,4 @@
-import db from './dbSqlite/db';
-
+import db from './dbSqlite';
 
 export interface Game {
     playerOne: number;
