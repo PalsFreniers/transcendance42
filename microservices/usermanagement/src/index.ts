@@ -3,7 +3,7 @@ import http from 'http';
 import { Server } from 'socket.io';
 import dotenv from 'dotenv';
 import jwt from '@fastify/jwt';
-import db from './dbSqlite';
+import db from './dbSqlite/db';
 import {
   auth,
   register,
@@ -50,8 +50,10 @@ io.on('connection', (socket) => {
   });
 });
 
-// ROUTES
+//TOKEN
 app.register(jwt, { secret: process.env.JWT_SECRET! });
+
+// ROUTES
 app.register(register, { prefix: '/api/user' });
 app.register(auth, { prefix: '/api/user' });
 app.register(profil, { prefix: '/api/user' });
@@ -63,9 +65,19 @@ app.register(friendDelete, { prefix: '/api/user' });
 app.register(friendSendMsg, { prefix: '/api/user' });
 
 //HOOK REQUEST NEED AUTH
-app.addHook('onRequest', async (request) => {
-  if (request.headers.authorization) {
-    await request.jwtVerify();
+app.addHook('onRequest', async (request, reply) => {
+  const publicRoutes = ['api/user/login', '/api/user/signup']; // ROUTES NOT NEED TO BE AUTH
+  if (publicRoutes.includes(request.routerPath)) {
+    return;
+  }
+  try {
+    if (request.headers.authorization) {
+      await request.jwtVerify();
+    } else {
+      reply.status(401).send({ error: 'Unauthorized: No token provided' });
+    }
+  } catch (err) {
+    reply.status(401).send({ error: 'Unauthorized: Invalid token' });
   }
 });
 

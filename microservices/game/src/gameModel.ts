@@ -1,4 +1,4 @@
-import db from './dbSqlite';
+import db from './dbSqlite/db';
 
 export interface Game {
     playerOne: number;
@@ -27,6 +27,5 @@ export function createGameLobby(game: Game) {
     game.endTime ?? null,
     game.gameDate ?? new Date().toISOString()
   );
-
   return result.lastInsertRowid;
 }

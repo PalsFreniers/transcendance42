@@ -1,25 +1,28 @@
 import { FastifyInstance } from 'fastify';
-import db from './dbSqlite';
-
+import { createGameLobby, Game } from './gameModel';
+import db from './dbSqlite/db';
 
 export async function createRoom(app: FastifyInstance) {
-  app.post('/create-game', { preHandler: app.verifJWTToken }, async (request, reply) => {
+  app.post('/create-game', async (request, reply) => {
     const user = request.user as { id: number };
     const { lobbyName, opponentId } = request.body as {
       lobbyName: string;
       opponentId: number;
     };
-    const playerOne = user.id;
-    const playerTwo = opponentId;
-    // Save minimal lobby data for now
-    const stmt = db.prepare(`
-      INSERT INTO games (lobby_name, player_one_id, player_two_id, game_score)
-      VALUES (?, ?, ?, ?)
-    `);
-    const result = stmt.run(lobbyName, playerOne, playerTwo, '0-0');
+    // Prepare game object according to your interface
+    const newGame: Game = {
+      playerOne: user.id,
+      playerTwo: opponentId,
+      lobbyName,
+      finalScore: '0-0',
+      status: 'waiting',
+      gameDate: new Date().toISOString(),
+    };
+    // Use createGameLobby to insert and get the ID
+    const gameId = createGameLobby(newGame);
     return {
       success: true,
-      gameId: result.lastInsertRowid, // GAMEID NEED FOR IDENTIFIES THE ROOM
+      gameId,
     };
   });
 }
@@ -38,7 +41,7 @@ export async function awaitforOpponent(app:FastifyInstance) {
 }
 
 export async function joinLobby(app:FastifyInstance) {
-    app.post('/join-lobby', { preHandler: app.verifJWTToken }, async (request, reply) => {
+    app.post('/join-lobby', async (request, reply) => {
     const { gameId } = request.body as { gameId: number };
     const user = request.user as { id: number };
     const update = db.prepare(`
@@ -53,18 +56,18 @@ export async function joinLobby(app:FastifyInstance) {
 }
 
 export async function inGame(app:FastifyInstance) {
-    app.post('/in-game', async (request, reply) => {
-    const { gameId } = request.body;
-    const update = db.prepare(`
-      UPDATE games SET status = 'playing', start_time = CURRENT_TIMESTAMP WHERE id = ?
-    `);
-    update.run(gameId);
-    return { success: true };
-  });
+  app.post('/in-game', async (request, reply) => {
+  const { gameId } = request.body as { gameId: number };
+  const update = db.prepare(`
+    UPDATE games SET status = 'playing', start_time = CURRENT_TIMESTAMP WHERE id = ?
+  `);
+  update.run(gameId);
+  return { success: true };
+});
 }
 
 export async function historyGame(app:FastifyInstance) {
-    app.post('/history', { preHandler: app.verifJWTToken }, async (request, reply) => {
+    app.post('/history', async (request, reply) => {
     const user = request.user as { id: number };
     const stmt = db.prepare(`
       SELECT * FROM games
@@ -80,15 +83,14 @@ export async function historyGame(app:FastifyInstance) {
 }
 
 export async function postGame(app:FastifyInstance) {
-    app.post('/end-game', async (request, reply) => {
-    const { gameId, finalScore } = request.body;
-
-    const update = db.prepare(`
-      UPDATE games
-      SET game_score = ?, status = 'finished', end_time = CURRENT_TIMESTAMP
-      WHERE id = ?
-    `);
-    update.run(finalScore, gameId);
-    return { success: true };
-  });
+  app.post('/end-game', async (request, reply) => {
+  const { gameId, finalScore } = request.body as { gameId: number; finalScore: string };
+  const update = db.prepare(`
+    UPDATE games
+    SET game_score = ?, status = 'finished', end_time = CURRENT_TIMESTAMP
+    WHERE id = ?
+  `);
+  update.run(finalScore, gameId);
+  return { success: true };
+});
 }

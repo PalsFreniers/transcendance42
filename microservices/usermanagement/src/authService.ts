@@ -1,29 +1,31 @@
 import { FastifyInstance } from 'fastify';
-import { createUser } from './userModel';
-import bcrypt from '@fastify/bcrypt';
-import db from './dbSqlite';
+import { createUser, User } from './userModel';
+import bcrypt from 'bcrypt';
+import db from './dbSqlite/db';
 
 export async function register(app: FastifyInstance) {
-    app.post('/register', async (request, reply) => {
-    
+  app.post('/register', async (request, reply) => {
     const { username, email, password } = request.body as {
       username: string;
       email: string;
       password: string;
     };
-
     if (!username || !email || !password) {
       return reply.status(400).send({ error: 'Missing required fields' });
     }
+    const existingUser = db.prepare('SELECT 1 FROM users WHERE username = ? OR email = ?').get(username, email);
+    if (existingUser)
+      return reply.status(409).send({ error: 'Username or email already in use' });
     try {
       const password_hash = await bcrypt.hash(password, 10);
-      const userId = createUser({
+      const newUser: User = {
         username,
         email,
         password_hash,
-      });
+      };
+      const userId = createUser(newUser);
       return reply.status(201).send({ success: true, userId });
-    } catch (err: any) {
+    } catch (err) {
       console.error(err);
       return reply.status(500).send({ error: 'Failed to register user' });
     }
@@ -32,9 +34,16 @@ export async function register(app: FastifyInstance) {
 
 export async function auth(app: FastifyInstance) {
     app.post('/login', async (request, reply) => {
-    const { username, password } = request.body;
+    const { username, password } = request.body as {
+      username: string;
+      password: string;
+    };
     //GET USER FROM DB
-    const user = db.prepare('SELECT * FROM users WHERE username = ?').get(username);
+    const user = db.prepare('SELECT * FROM users WHERE username = ?').get(username) as {
+      id: number;
+      username: string;
+      password_hash: string;
+    };
     if (!user)
         return reply.code(401).send({ error: 'Invalid username or password' });
     // COMPARE HASHED PASSWORD RESULT

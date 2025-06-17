@@ -7,6 +7,7 @@ COPY package*.json ./
 
 # Install dependencies
 RUN npm install
+RUN npm install --save-dev @types/better-sqlite3
 
 # Copy the rest of the source
 COPY . .
