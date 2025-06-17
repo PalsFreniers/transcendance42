@@ -2,7 +2,7 @@ import { FastifyInstance } from 'fastify';
 import db from './dbSqlite/db';
 
 export async function profil(app: FastifyInstance) {
-  app.get('/profile', async (request, reply) => {
+  app.get('/profil', async (request, reply) => {
     try {
       const user = request.user as { userId: number};
       const result = db
@@ -74,7 +74,7 @@ export async function friendSendMsg(app: FastifyInstance) {
 }
 
 export async function friendList(app: FastifyInstance) {
-    app.get('/friendList', async (request, reply) => {
+    app.get('/friend-list', async (request, reply) => {
     try {
         const user = request.user as { userId: number };
         const result = db.prepare('SELECT friends FROM users WHERE id = ?').get(user.userId) as { friends: string };
@@ -111,7 +111,7 @@ export async function updateProfile(app: FastifyInstance) {
 }
 
 export async function deleteProfile(app: FastifyInstance) {
-  app.delete('/profile-delete', async (request, reply) => {
+  app.delete('/profil-delete', async (request, reply) => {
     try {
       const user = request.user as { userId: number };
       const stmt = db.prepare('DELETE FROM users WHERE id = ?');
