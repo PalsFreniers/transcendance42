@@ -3,11 +3,11 @@ import http from 'http';
 import { Server } from 'socket.io';
 import dotenv from 'dotenv';
 import jwt from '@fastify/jwt';
-import db from './dbSqlite/db';
+import db from './dbSqlite/db.js';
 import {
   auth,
   register,
-} from './authService';
+} from './authService.js';
 import {
   friendList,
   profil,
@@ -16,7 +16,7 @@ import {
   friendAdd,
   friendDelete,
   friendSendMsg
-} from './userRoutes';
+} from './userRoutes.js';
 
 dotenv.config();
 // START APP FOR USERMANAGEMENT

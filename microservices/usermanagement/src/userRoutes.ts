@@ -1,5 +1,5 @@
 import { FastifyInstance } from 'fastify';
-import db from './dbSqlite/db';
+import db from './dbSqlite/db.js';
 
 export async function profil(app: FastifyInstance) {
   app.get('/profil', async (request, reply) => {

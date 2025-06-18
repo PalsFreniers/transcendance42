@@ -1,9 +1,11 @@
 import Database from 'better-sqlite3';
-import path from 'path';
+import { fileURLToPath } from 'url';
+import path, { dirname } from 'path';
 import fs from 'fs';
 
 // Directory and file setup
-const dbDir = __dirname;
+const __filename = fileURLToPath(import.meta.url);
+const dbDir = dirname(__filename);
 const dbPath = path.join(dbDir, 'db.sqlite');
 
 // Ensure dbSqlite folder exists

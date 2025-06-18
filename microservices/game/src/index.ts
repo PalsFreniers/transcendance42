@@ -8,7 +8,7 @@ import {
   joinLobby,
   historyGame,
   postGame
-} from './gameRoutes';
+} from './gameRoutes.js';
 
 //START FOR GAME SERVICES
 const app = Fastify();

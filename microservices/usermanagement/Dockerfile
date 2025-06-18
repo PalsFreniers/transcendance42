@@ -11,4 +11,4 @@ COPY . .
 
 RUN npx tsc
 
-CMD ["node", "js/index.js"]
+CMD ["node", "dist/index.js"]

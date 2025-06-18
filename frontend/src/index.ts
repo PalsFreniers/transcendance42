@@ -1,10 +1,11 @@
 import Fastify from 'fastify';
 import fastifyStatic from '@fastify/static';
-import path from 'path'
+import { fileURLToPath } from 'url';
+import path, { dirname } from 'path';
 import {
   login,
-  register,
-} from './routes/auth';
+  register
+} from './routes/auth.js';
 import {
   friendList,
   profil,
@@ -13,7 +14,7 @@ import {
   friendAdd,
   friendDelete,
   friendSendMsg
-} from './routes/user';
+} from './routes/user.js';
 import {
   createRoom,
   inGame,
@@ -21,12 +22,15 @@ import {
   joinLobby,
   historyGame,
   postGame
-} from './routes/game';
+} from './routes/game.js';
 
 const app = Fastify();
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
 app.register(fastifyStatic, {
-  root: path.join(__dirname, '../public'), // adjust to where index.html lives
+  root: path.join(__dirname, '../public'),
   wildcard: false,
 });
 
@@ -51,6 +55,8 @@ app.setNotFoundHandler((req, reply) => {
   reply.sendFile('index.html');
 });
 
-app.listen({ port: 5173, host: '0.0.0.0' }, () => {
-  console.log('✅ Frontend running on http://localhost:5173');
-});
+app.listen({ port: 5173, host: '0.0.0.0' })
+  .then(() => console.log('✅ Frontend running on http://localhost:5173'))
+  .catch(err => {
+    console.error('❌ Fastify failed to start:', err);
+  });

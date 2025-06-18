@@ -2,8 +2,9 @@ services:
   # FRONT
   frontend:
     build: ./frontend
+    env_file:
+      - .env
     container_name: frontend
-    restart: always
     ports:
       - "${FRONTEND_PORT}:${FRONTEND_PORT}"
     depends_on:
@@ -15,6 +16,8 @@ services:
   # NGINX
   nginx:
     build: ./nginx
+    env_file:
+      - .env
     container_name: nginx
     restart: always
     ports:
@@ -22,14 +25,14 @@ services:
       - "8443:${NGINX_HTTPS_PORT}"
     depends_on:
       - frontend
-      - user
-      - game
     networks:
       - app-network
 
   # Microservices
   user:
     build: ./microservices/usermanagement
+    env_file:
+      - .env
     container_name: user-service
     volumes:
       - user_db_data:/app/src/dbSqlite
@@ -40,6 +43,8 @@ services:
 
   game:
     build: ./microservices/game
+    env_file:
+      - .env
     container_name: game-service
     volumes:
       - game_db_data:/app/src/dbSqlite
@@ -60,6 +65,8 @@ services:
   # ELK Stack - Logging
   elasticsearch:
     build: ./log/elasticsearch
+    env_file:
+      - .env
     container_name: elasticsearch
     environment:
       - discovery.type=single-node
@@ -73,6 +80,8 @@ services:
   # Prometheus & Grafana
   prometheus:
     build: ./metrics/prometheus
+    env_file:
+      - .env
     container_name: prometheus
     ports:
       - "${PROMETHEUS_PORT}:${PROMETHEUS_PORT}"
@@ -81,6 +90,8 @@ services:
 
   grafana:
     build: ./metrics/grafana
+    env_file:
+      - .env
     container_name: grafana
     ports:
       - "${GRAFANA_PORT}:${GRAFANA_PORT}"

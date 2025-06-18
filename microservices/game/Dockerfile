@@ -16,4 +16,4 @@ COPY . .
 RUN npx tsc
 
 # Start the service
-CMD ["node", "js/index.js"]
+CMD ["node", "dist/index.js"]

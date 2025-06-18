@@ -1,7 +1,7 @@
 import { FastifyInstance } from 'fastify';
-import { createUser, User } from './userModel';
+import { createUser, User } from './userModel.js';
 import bcrypt from 'bcrypt';
-import db from './dbSqlite/db';
+import db from './dbSqlite/db.js';
 
 export async function register(app: FastifyInstance) {
   app.post('/register', async (request, reply) => {

@@ -1,21 +1,24 @@
+# Use Node.js with Debian base
 FROM node:20-alpine
 
-WORKDIR /src
+# Set working directory
+WORKDIR /app
 
-# Copy only package files first (for better layer caching)
-COPY package*.json ./
+# Copy dependency declarations
+COPY package.json package-lock.json* ./
 
-# Install all dependencies (fastify, etc.)
+# Install dependencies
 RUN npm install
 
-# Now copy rest of your source code
+# Copy app source
 COPY . .
 
-# Compile TypeScript
+# Build TypeScript
 RUN npx tsc
 
-# Expose the port Fastify will run on
+# Expose frontend port
 EXPOSE 5173
 
-# Run the compiled server
-CMD ["node", "js/index.js"]
+# Run the compiled JS
+CMD ["node", "dist/index.js"]
+
