@@ -1,6 +1,6 @@
 import Database from 'better-sqlite3';
 import { fileURLToPath } from 'url';
-import path, { dirname } from 'path';
+import  path, { dirname } from 'path';
 import fs from 'fs';
 
 // Create the dbSqlite folder and db file if it doesn't exist

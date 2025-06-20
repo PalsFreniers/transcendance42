@@ -1,6 +1,6 @@
 import Database from 'better-sqlite3';
 import { fileURLToPath } from 'url';
-import path, { dirname } from 'path';
+import  path, { dirname } from 'path';
 import fs from 'fs';
 
 // Directory and file setup

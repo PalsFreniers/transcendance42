@@ -27,6 +27,8 @@ services:
       - frontend
     networks:
       - app-network
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
 
   # Microservices
   user:

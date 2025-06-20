@@ -1,4 +1,4 @@
-COMPOSE=docker compose
+COMPOSE=sudo docker compose
 COMPOSE_FILE=docker-compose.yml
 
 help:
