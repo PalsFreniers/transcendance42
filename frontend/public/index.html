@@ -3,12 +3,27 @@
 <head>
   <meta charset="UTF-8" />
   <title>Pong Game</title>
-  <script src="navClient.js" type="module"></script>
+  <script src="/scripts/navClient.js" type="module"></script>
+  <script src="/scripts/registerClient.js" type="module"></script>
+  <script src="/scripts/loginClient.js" type="module"></script>
 </head>
 <body>
   <div id="app">
     <h1>Welcome to Pong!</h1>
     <a href="login">Login</a> | <a href="/register">Register</a> | <a href="/game">Play</a>
+    <!-- Your form for register -->
+  <form id="registerForm">
+    <input type="text" id="username" placeholder="Username" required />
+    <input type="password" id="password" placeholder="Password" required />
+    <input type="email" id="email" placeholder="Email" required />
+    <button type="submit">Register</button>
+  </form>
+  <!-- Your form for login -->
+  <form id="loginForm">
+  <input id="loginUsername" type="text" name="username" required />
+  <input id="loginPassword" type="password" name="password" required />
+  <button type="submit">Login</button>
+</form>
   </div>
 </body>
 </html>

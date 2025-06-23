@@ -2,9 +2,9 @@ import { FastifyInstance } from 'fastify';
 import fetch from 'node-fetch';
 
 export async function register(app: FastifyInstance) {
-  app.post('/api/register', async (req, reply) => {
-    const body = req.body;
-    const response = await fetch('http://usermanagement:3001/api/user/register', {
+  app.post('/register', async (req, reply) => {
+    const body = req.body;  
+    const response = await fetch('http://user-service:3001/api/user/register', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(body),
@@ -15,9 +15,9 @@ export async function register(app: FastifyInstance) {
 }
 
 export async function login(app: FastifyInstance){
-    app.post('/api/login', async (req, reply) => {
+    app.post('/login', async (req, reply) => {
         const body = req.body;
-        const response = await fetch('http://usermanagement:3001/api/user/login', {
+        const response = await fetch('http://user-service:3001/api/user/login', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json'},
             body: JSON.stringify(body),

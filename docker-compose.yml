@@ -104,6 +104,37 @@ services:
     depends_on:
       - prometheus
 
+  kibana:
+    build: ./log/kibana
+    env_file:
+      - .env
+    container_name: kibana
+    environment:
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+    ports:
+      - "${KIBANA_PORT}:${KIBANA_PORT}"
+    depends_on:
+      - elasticsearch
+    networks:
+      - observability
+  
+  logstash:
+    build: ./log/logstash
+    env_file:
+      - .env
+    container_name: logstash
+    volumes:
+      - ./log/logstash/pipeline:/usr/share/logstash/pipeline
+    ports:
+      - "${LOGSTASH_PORT}:${LOGSTASH_PORT}"
+    environment:
+      - LOGSTASH_PIPELINE_YAML_LOCATION=/usr/share/logstash/pipeline/logstash.yml
+    depends_on:
+      - elasticsearch
+    networks:
+      - observability
+
+
 # Volumes
 volumes:
   user_db_data:

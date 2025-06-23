@@ -12,7 +12,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
   window.onpopstate = () => loadPage(location.pathname);
-
   function loadPage(path: string) {
     if (path === '/login') {
       app.innerHTML = '<h2>Login Page</h2>';

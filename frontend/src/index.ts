@@ -31,24 +31,24 @@ const __dirname = dirname(__filename);
 
 app.register(fastifyStatic, {
   root: path.join(__dirname, '../public'),
-  wildcard: false,
+  prefix: '/',
 });
 
-app.register(register, { prefix: '/api/user' });
-app.register(login, { prefix: '/api/user' });
-app.register(friendList, { prefix: '/api/user' });
-app.register(profil), { prefix: '/api/user' };
-app.register(updateProfile, { prefix: '/api/user' });
-app.register(deleteProfile, { prefix: '/api/user' });
-app.register(friendAdd, { prefix: '/api/user' });
-app.register(friendDelete, { prefix: '/api/user' });
-app.register(friendSendMsg, { prefix: '/api/user' });
-app.register(createRoom, { prefix: 'api/game' });
-app.register(inGame, { prefix: 'api/game' });
-app.register(awaitforOpponent, { prefix: 'api/game' });
-app.register(joinLobby, { prefix: 'api/game' });
-app.register(historyGame, { prefix: 'api/game' });
-app.register(postGame, { prefix: 'api/game' });
+app.register(register);
+app.register(login);
+app.register(friendList);
+app.register(profil);
+app.register(updateProfile);
+app.register(deleteProfile);
+app.register(friendAdd);
+app.register(friendDelete);
+app.register(friendSendMsg);
+app.register(createRoom);
+app.register(inGame);
+app.register(awaitforOpponent);
+app.register(joinLobby);
+app.register(historyGame);
+app.register(postGame);
 
 app.setNotFoundHandler((req, reply) => {
   // For SPA navigation (back/forward buttons)
