@@ -7,8 +7,8 @@ export async function register(app: FastifyInstance) {
   app.post('/register', async (request, reply) => {
     const { username, email, password } = request.body as {
       username: string;
-      email: string;
       password: string;
+      email: string;
     };
     if (!username || !email || !password) {
       return reply.status(400).send({ error: 'Missing required fields' });
@@ -20,8 +20,8 @@ export async function register(app: FastifyInstance) {
       const password_hash = await bcrypt.hash(password, 10);
       const newUser: User = {
         username,
-        email,
         password_hash,
+        email,
       };
       const userId = createUser(newUser);
       return reply.status(201).send({ success: true, userId });
