@@ -4,4 +4,5 @@
     "outDir": "./public/scripts",
     "rootDir": "./src/client"
   },
+  "include": ["src/client/**/*.ts"]
 }

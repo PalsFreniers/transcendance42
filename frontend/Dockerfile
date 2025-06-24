@@ -14,11 +14,10 @@ RUN npm install
 COPY . .
 
 # Build TypeScript
-RUN npx tsc
+RUN npm run build-all
 
 # Expose frontend port
 EXPOSE 5173
 
 # Run the compiled JS
 CMD ["node", "dist/index.js"]
-
