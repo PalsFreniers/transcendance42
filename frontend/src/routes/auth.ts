@@ -3,7 +3,7 @@ import fetch from 'node-fetch';
 
 export async function register(app: FastifyInstance) {
   app.post('/register', async (req, reply) => {
-    const body = req.body;  
+    const body = req.body;
     const response = await fetch('http://user-service:3001/api/user/register', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },

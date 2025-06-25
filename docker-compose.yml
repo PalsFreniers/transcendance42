@@ -37,9 +37,9 @@ services:
       - .env
     container_name: user-service
     volumes:
-      - user_db_data:/src/dist/dbSqlite
-    expose:
-      - "${USER_MANA_PORT}"
+      - user_db_data:/data
+    ports:
+      - "${USER_MANA_PORT}:${USER_MANA_PORT}"
     networks:
       - app-network
 
@@ -49,9 +49,9 @@ services:
       - .env
     container_name: game-service
     volumes:
-      - game_db_data:/src/dist/dbSqlite
-    expose:
-      - "${GAME_PORT}"
+      - game_db_data:/data
+    ports:
+      - "${GAME_PORT}:${GAME_PORT}"
     networks:
       - app-network
 

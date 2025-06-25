@@ -1,14 +1,11 @@
 import Database from 'better-sqlite3';
-import { fileURLToPath } from 'url';
-import  path, { dirname } from 'path';
 import fs from 'fs';
 
-// Directory and file setup
-const __filename = fileURLToPath(import.meta.url);
-const dbDir = dirname(__filename);
-const dbPath = path.join(dbDir, 'db.sqlite');
+const dbPath = '/data/db.sqlite'; // .ENV
 
-// Ensure dbSqlite folder exists
+// Ensure directory exists (safe to skip in Docker, but optional)
+const dbDir = '/data';
+
 if (!fs.existsSync(dbDir)) {
   fs.mkdirSync(dbDir, { recursive: true });
 }

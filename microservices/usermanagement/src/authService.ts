@@ -17,7 +17,9 @@ export async function register(app: FastifyInstance) {
     if (existingUser)
       return reply.status(409).send({ error: 'Username or email already in use' });
     try {
+      console.log("Hashing password...");
       const password_hash = await bcrypt.hash(password, 10);
+      console.log("Password hashed!");
       const newUser: User = {
         username,
         password_hash,

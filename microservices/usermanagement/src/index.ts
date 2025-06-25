@@ -66,23 +66,24 @@ app.register(friendSendMsg, { prefix: '/api/user' });
 
 //HOOK REQUEST NEED AUTH
 app.addHook('onRequest', async (request, reply) => {
-  const publicRoutes = ['api/user/login', '/api/user/signup']; // ROUTES NOT NEED TO BE AUTH
-  if (publicRoutes.includes(request.routerPath)) {
-    return;
+  const url = request.raw.url || '';
+  const publicRoutes = ['/api/user/login', '/api/user/register'];
+
+  if (publicRoutes.some(route => url.startsWith(route))) {
+    return; // Safe to return here, Fastify continues
   }
+
   try {
     if (request.headers.authorization) {
       await request.jwtVerify();
     } else {
-      reply.status(401).send({ error: 'Unauthorized: No token provided' });
+      reply.code(401).send({ error: 'Unauthorized: No token provided' });
     }
   } catch (err) {
-    reply.status(401).send({ error: 'Unauthorized: Invalid token' });
+    reply.code(401).send({ error: 'Unauthorized: Invalid token' });
   }
 });
 
 server.listen(Number(PORT), '0.0.0.0', () => {
   console.log(`User service running on port ${PORT}`);
 });
-
-export default db;
