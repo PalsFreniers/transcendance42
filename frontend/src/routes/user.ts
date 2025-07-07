@@ -4,7 +4,7 @@ import fetch from 'node-fetch';
 export async function friendList(app: FastifyInstance){
     app.get('/friend-list', async (req, reply) => {
         const body = req.body;
-        const response = await fetch('http://user-service:3001/api/user/friend-list', {
+        const response = await fetch('http://localhost/api/user/friend-list', {
             method: 'GET',
             headers: { 'Content-Type': 'application/json'},
             body: JSON.stringify(body),
@@ -17,7 +17,7 @@ export async function friendList(app: FastifyInstance){
 export async function friendAdd(app: FastifyInstance){
     app.post('/add-friend', async (req, reply) => {
         const body = req.body;
-        const response = await fetch('http://user-service:3001/api/user/add-friend', {
+        const response = await fetch('http://localhost/api/user/add-friend', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json'},
             body: JSON.stringify(body),
@@ -30,7 +30,7 @@ export async function friendAdd(app: FastifyInstance){
 export async function friendDelete(app: FastifyInstance){
     app.post('/delete-friend', async (req, reply) => {
         const body = req.body;
-        const response = await fetch('http://user-service:3001/api/user/delete-friend', {
+        const response = await fetch('http://localhost/api/user/delete-friend', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json'},
             body: JSON.stringify(body),
@@ -43,7 +43,7 @@ export async function friendDelete(app: FastifyInstance){
 export async function friendSendMsg(app: FastifyInstance){
     app.post('/priv-msg/:username', async (req, reply) => {
         const body = req.body;
-        const response = await fetch('http://user-service:3001/api/user/priv-msg/:username', {
+        const response = await fetch('http://localhost/api/user/priv-msg/:username', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json'},
             body: JSON.stringify(body),
@@ -56,7 +56,7 @@ export async function friendSendMsg(app: FastifyInstance){
 export async function profil(app: FastifyInstance){
     app.get('/profil', async (req, reply) => {
         const body = req.body;
-        const response = await fetch('http://user-service:3001/api/user/profil', {
+        const response = await fetch('http://localhost/api/user/profil', {
             method: 'GET',
             headers: { 'Content-Type': 'application/json'},
             body: JSON.stringify(body),
@@ -69,7 +69,7 @@ export async function profil(app: FastifyInstance){
 export async function updateProfile(app: FastifyInstance){
     app.put('/update', async (req, reply) => {
         const body = req.body;
-        const response = await fetch('http://user-service:3001/api/user/update', {
+        const response = await fetch('http://localhost/api/user/update', {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json'},
             body: JSON.stringify(body),
@@ -82,7 +82,7 @@ export async function updateProfile(app: FastifyInstance){
 export async function deleteProfile(app: FastifyInstance){
     app.delete('/profil-delete', async (req, reply) => {
         const body = req.body;
-        const response = await fetch('http://user-service:3001/api/user/profil-delete', {
+        const response = await fetch('http://localhost/api/user/profil-delete', {
             method: 'DELETE',
             headers: { 'Content-Type': 'application/json'},
             body: JSON.stringify(body),

@@ -5,6 +5,7 @@ import db from './dbSqlite/db.js';
 
 export async function register(app: FastifyInstance) {
   app.post('/register', async (request, reply) => {
+    console.log("register reach");
     const { username, email, password } = request.body as {
       username: string;
       password: string;

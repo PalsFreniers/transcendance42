@@ -15,5 +15,7 @@ COPY . .
 # Compile TypeScript
 RUN npx tsc
 
+EXPOSE 3002
+
 # Start the service
 CMD ["node", "dist/index.js"]
