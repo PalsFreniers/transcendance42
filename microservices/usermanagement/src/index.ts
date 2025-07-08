@@ -90,6 +90,6 @@ app.addHook('onRequest', async (request, reply) => {
   }
 });
 
-app.listen(Number(PORT), '0.0.0.0', () => {
+app.server.listen(Number(PORT), '0.0.0.0', () => {
   console.log(`User service running on port ${PORT}`);
 });
