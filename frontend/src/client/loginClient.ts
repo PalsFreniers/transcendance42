@@ -7,13 +7,14 @@ export function init() {
     const username = (document.getElementById('loginUsername') as HTMLInputElement).value;
     const password = (document.getElementById('loginPassword') as HTMLInputElement).value;
     try {
-      const res = await fetch('api/user/login', {
+      const res = await fetch('http://localhost:3001/api/user/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username, password }),
       });
-      if (res.ok) {
-        alert('Login successful!');
+      const data = await res.json();
+      if (res.ok && data.token) {
+        localStorage.setItem('token', data.token);
       } else {
         alert('Login failed.');
       }

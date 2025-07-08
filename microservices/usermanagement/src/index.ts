@@ -4,6 +4,7 @@ import { Server } from 'socket.io';
 import dotenv from 'dotenv';
 import jwt from '@fastify/jwt';
 import db from './dbSqlite/db.js';
+import cors from '@fastify/cors';
 import {
   auth,
   register,
@@ -25,6 +26,11 @@ const app = Fastify();
 const server = http.createServer(app.server);
 // CREATE PATH DO SQLITE FOR STOCK DATA-USER
 const PORT = process.env.USER_MANA_PORT;
+
+await app.register(cors, {
+  origin: '*',
+  credentials: true,
+});
 
 // CREATE SOCKET.IO SERVER
 const io = new Server(server, {

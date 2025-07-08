@@ -33,9 +33,7 @@ function handleRoute() {
           <input id="loginPassword" type="password" name="password" required />
           <button type="submit">Login</button>
         </form>`;
-        setTimeout (() => {
         import('./loginClient.js').then((mod) => mod.init?.());
-        }, 0);
       break;
     case '/register':
       app.innerHTML = `
@@ -46,12 +44,14 @@ function handleRoute() {
           <input type="email" id="email" placeholder="Email" required />
           <button type="submit">Register</button>
         </form>`;
-        setTimeout(() => {
-          import('./registerClient.js').then((mod) => mod.init?.());
-        }, 0);
+        import('./registerClient.js').then((mod) => mod.init?.());
       break;
     case '/game':
       app.innerHTML = `<h2>Game Area</h2>`;
+      break;
+    case '/profil':
+      app.innerHTML = `<h2>Your Profil</h2>`;
+      import('./userProfil.js').then((mod) => mod.init?.());
       break;
     default:
       app.innerHTML = `<h2>404 - Page not found</h2>`;
