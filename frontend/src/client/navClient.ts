@@ -10,24 +10,33 @@ window.addEventListener('DOMContentLoaded', () => {
       }
     }
   });
-
   window.addEventListener('popstate', handleRoute);
 
   handleRoute(); // On first load
 });
 function handleRoute() {
   const path = window.location.pathname;
-
+  const token = localStorage.getItem('token');
   const app = document.getElementById('app');
   if (!app) 
     return;
   switch (path) {
     case '/':
-      app.innerHTML = `<h1>Welcome to Pong!</h1>`;
+        if (!token) {
+        app.innerHTML = `<h1>Welcome to Pong!</h1>
+        <a href="/login" data-link>Login</a>
+        <a href="/register" data-link>Register</a>`;
+        }
+        else {
+          app.innerHTML = `<h1>Welcome to Pong!</h1>
+        <a href="/profil" data-link>Profil</a>
+        <a href="/game" data-link>Game</a>`;
+        }
       break;
     case '/login':
       app.innerHTML = `
         <h2>Login</h2>
+        <a href="/register" data-link>Register</a>
         <form id="loginForm">
           <input id="loginUsername" type="text" name="username" required />
           <input id="loginPassword" type="password" name="password" required />
@@ -38,6 +47,7 @@ function handleRoute() {
     case '/register':
       app.innerHTML = `
         <h2>Register</h2>
+        <a href="/login" data-link>Login</a>
         <form id="registerForm">
           <input type="text" id="username" placeholder="Username" required />
           <input type="password" id="password" placeholder="Password" required />
@@ -47,10 +57,12 @@ function handleRoute() {
         import('./registerClient.js').then((mod) => mod.init?.());
       break;
     case '/game':
-      app.innerHTML = `<h2>Game Area</h2>`;
+      app.innerHTML = `<h2>Game Area</h2>
+      <a href="/profil" data-link>Profil</a>`;
       break;
     case '/profil':
-      app.innerHTML = `<h2>Your Profil</h2>`;
+      app.innerHTML = `<h2>Your Profil</h2>
+      <a href="/game" data-link>Game</a>`;
       import('./userProfil.js').then((mod) => mod.init?.());
       break;
     default:

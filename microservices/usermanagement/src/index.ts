@@ -1,10 +1,10 @@
 import Fastify from 'fastify';
 import http from 'http';
+import cors from '@fastify/cors';
 import { Server } from 'socket.io';
 import dotenv from 'dotenv';
 import jwt from '@fastify/jwt';
 import db from './dbSqlite/db.js';
-import cors from '@fastify/cors';
 import {
   auth,
   register,
@@ -76,20 +76,20 @@ app.addHook('onRequest', async (request, reply) => {
   const publicRoutes = ['/api/user/login', '/api/user/register'];
 
   if (publicRoutes.some(route => url.startsWith(route))) {
-    return; // Safe to return here, Fastify continues
+    return; // Allow public route
   }
 
   try {
     if (request.headers.authorization) {
       await request.jwtVerify();
     } else {
-      reply.code(401).send({ error: 'Unauthorized: No token provided' });
+      return reply.code(401).send({ error: 'Unauthorized: No token provided' });
     }
   } catch (err) {
-    reply.code(401).send({ error: 'Unauthorized: Invalid token' });
+    return reply.code(401).send({ error: 'Unauthorized: Invalid token' });
   }
 });
 
-app.server.listen(Number(PORT), '0.0.0.0', () => {
+app.listen(Number(PORT), '0.0.0.0', () => {
   console.log(`User service running on port ${PORT}`);
 });
