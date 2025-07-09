@@ -90,6 +90,10 @@ app.addHook('onRequest', async (request, reply) => {
   }
 });
 
+server.listen(3004, '0.0.0.0', () => {
+  console.log(`Chat service runing on port 3004`);
+});
+
 app.listen(Number(PORT), '0.0.0.0', () => {
   console.log(`User service running on port ${PORT}`);
 });

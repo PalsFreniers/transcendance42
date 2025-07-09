@@ -32,10 +32,10 @@ app.addHook('onRequest', async (request, reply) => {
     if (request.headers.authorization) {
       await request.jwtVerify();
     } else {
-      reply.status(401).send({ error: 'Unauthorized: No token provided' });
+     return reply.status(401).send({ error: 'Unauthorized: No token provided' });
     }
   } catch (err) {
-    reply.status(401).send({ error: 'Unauthorized: Invalid token' });
+    return reply.status(401).send({ error: 'Unauthorized: Invalid token' });
   }
 });
 

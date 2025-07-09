@@ -12,6 +12,8 @@ services:
       - game
     networks:
       - app-network
+    volumes:
+      - front_data:/data
   
   # NGINX
   nginx:
@@ -40,6 +42,7 @@ services:
       - user_db_data:/data
     ports:
       - "${USER_MANA_PORT}:${USER_MANA_PORT}"
+      - "3004:3004"
     networks:
       - app-network
 
@@ -139,6 +142,7 @@ services:
 volumes:
   user_db_data:
   game_db_data:
+  front_data:
   esdata:
   prometheus_data:
   grafana_data:
