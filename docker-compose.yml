@@ -13,7 +13,7 @@ services:
     networks:
       - app-network
     volumes:
-      - front_data:/data
+      - frontend_db_data:/data
   
   # NGINX
   nginx:
@@ -140,9 +140,9 @@ services:
 
 # Volumes
 volumes:
+  frontend_db_data:
   user_db_data:
   game_db_data:
-  front_data:
   esdata:
   prometheus_data:
   grafana_data:

@@ -1,5 +1,4 @@
 import Fastify from 'fastify';
-import http from 'http';
 import cors from '@fastify/cors';
 import { Server } from 'socket.io';
 import dotenv from 'dotenv';
@@ -20,11 +19,8 @@ import {
 } from './userRoutes.js';
 
 dotenv.config();
-// START APP FOR USERMANAGEMENT
+
 const app = Fastify();
-// CREATE SERVER
-const server = http.createServer(app.server);
-// CREATE PATH DO SQLITE FOR STOCK DATA-USER
 const PORT = process.env.USER_MANA_PORT;
 
 await app.register(cors, {
@@ -32,14 +28,45 @@ await app.register(cors, {
   credentials: true,
 });
 
-// CREATE SOCKET.IO SERVER
-const io = new Server(server, {
+await app.register(jwt, { secret: process.env.JWT_SECRET! });
+
+// Register routes
+app.register(register, { prefix: '/api/user' });
+app.register(auth, { prefix: '/api/user' });
+app.register(profil, { prefix: '/api/user' });
+app.register(friendList, { prefix: '/api/user' });
+app.register(updateProfile, { prefix: '/api/user' });
+app.register(deleteProfile, { prefix: '/api/user' });
+app.register(friendAdd, { prefix: '/api/user' });
+app.register(friendDelete, { prefix: '/api/user' });
+app.register(friendSendMsg, { prefix: '/api/user' });
+
+// JWT auth hook
+app.addHook('onRequest', async (request, reply) => {
+  const url = request.raw.url || '';
+  const publicRoutes = ['/api/user/login', '/api/user/register'];
+
+  if (publicRoutes.some(route => url.startsWith(route))) return;
+
+  try {
+    if (request.headers.authorization) {
+      await request.jwtVerify();
+    } else {
+      return reply.code(401).send({ error: 'Unauthorized: No token provided' });
+    }
+  } catch (err) {
+    return reply.code(401).send({ error: 'Unauthorized: Invalid token' });
+  }
+});
+
+// Create Socket.io server using Fastify's HTTP server
+const io = new Server(app.server, {
   cors: {
-    origin: '*', // ALL ORIGIN REQUEST ALLOWED
+    origin: '*',
   },
 });
 
-//SOCKET LOGIC
+// Socket.io logic
 io.on('connection', (socket) => {
   console.log(`USER connected: ${socket.id}`);
 
@@ -56,44 +83,10 @@ io.on('connection', (socket) => {
   });
 });
 
-//TOKEN
-app.register(jwt, { secret: process.env.JWT_SECRET! });
-
-// ROUTES
-app.register(register, { prefix: '/api/user' });
-app.register(auth, { prefix: '/api/user' });
-app.register(profil, { prefix: '/api/user' });
-app.register(friendList, { prefix: '/api/user' });
-app.register(updateProfile, { prefix: '/api/user' });
-app.register(deleteProfile, { prefix: '/api/user' });
-app.register(friendAdd, { prefix: '/api/user' });
-app.register(friendDelete, { prefix: '/api/user' });
-app.register(friendSendMsg, { prefix: '/api/user' });
-
-//HOOK REQUEST NEED AUTH
-app.addHook('onRequest', async (request, reply) => {
-  const url = request.raw.url || '';
-  const publicRoutes = ['/api/user/login', '/api/user/register'];
-
-  if (publicRoutes.some(route => url.startsWith(route))) {
-    return; // Allow public route
+// Start Fastify server
+app.listen({ port: Number(PORT), host: '0.0.0.0' }, (err,) => {
+  if (err) {
+    console.error(err);
   }
-
-  try {
-    if (request.headers.authorization) {
-      await request.jwtVerify();
-    } else {
-      return reply.code(401).send({ error: 'Unauthorized: No token provided' });
-    }
-  } catch (err) {
-    return reply.code(401).send({ error: 'Unauthorized: Invalid token' });
-  }
-});
-
-server.listen(3004, '0.0.0.0', () => {
-  console.log(`Chat service runing on port 3004`);
-});
-
-app.listen(Number(PORT), '0.0.0.0', () => {
   console.log(`User service running on port ${PORT}`);
 });

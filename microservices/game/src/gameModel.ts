@@ -1,31 +1,32 @@
 import db from './dbSqlite/db.js';
 
-export interface Game {
-    playerOne: number;
-    playerTwo?: number;         // Optional at first
-    lobbyName: string;
-    finalScore?: string;        // Will be set after game ends
-    status?: 'waiting' | 'playing' | 'finished';
-    startTime?: string;
-    endTime?: string;
-    gameDate?: string;
+export interface GameRecord {
+  playerOne: number;
+  playerTwo?: number;
+  lobbyName: string;
+  finalScore?: string;
+  status?: 'waiting' | 'playing' | 'finished';
+  startTime?: string;
+  endTime?: string;
+  gameDate?: string;
 }
 
-export function createGameLobby(game: Game) {
+export function createGameLobby(g: GameRecord) {
   const stmt = db.prepare(`
-    INSERT INTO games (player_one_id, player_two_id, lobby_name, game_score, status, start_time, end_time, date)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+    INSERT INTO games (
+      player_one_id, player_two_id, lobby_name, game_score,
+      status, start_time, end_time, date
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
   `);
-
   const result = stmt.run(
-    game.playerOne,
-    game.playerTwo ?? null,
-    game.lobbyName,
-    game.finalScore ?? '0-0',
-    game.status ?? 'waiting',
-    game.startTime ?? null,
-    game.endTime ?? null,
-    game.gameDate ?? new Date().toISOString()
+    g.playerOne,
+    g.playerTwo ?? null,
+    g.lobbyName,
+    g.finalScore ?? '0-0',
+    g.status ?? 'waiting',
+    g.startTime ?? null,
+    g.endTime ?? null,
+    g.gameDate ?? new Date().toISOString(),
   );
-  return result.lastInsertRowid;
+  return result.lastInsertRowid as number;
 }

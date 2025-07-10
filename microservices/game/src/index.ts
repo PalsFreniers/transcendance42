@@ -4,27 +4,22 @@ import jwt from '@fastify/jwt';
 import {
   createRoom,
   inGame,
-  awaitforOpponent,
+  awaitForOpponent,
   joinLobby,
   historyGame,
-  postGame
+  postGame,
+  handleInput
 } from './gameRoutes.js';
+import { GameManager } from './gameManager.js';
 
 //START FOR GAME SERVICES
 const app = Fastify();
+const manager = new GameManager();
 dotenv.config();
 const PORT = process.env.GAME_PORT;
 
 // TOKEN 
 app.register(jwt , {secret: process.env.JWT_SECRET!});
-
-//ROUTES
-app.register(createRoom, { prefix: 'api/game' });
-app.register(inGame, { prefix: 'api/game' });
-app.register(awaitforOpponent, {prefix: 'api/game' });
-app.register(joinLobby, {prefix: 'api/game' })
-app.register(historyGame, {prefix: 'api/game' });
-app.register(postGame, { prefix: 'api/game' });
 
 // HOOK
 app.addHook('onRequest', async (request, reply) => {
@@ -38,6 +33,15 @@ app.addHook('onRequest', async (request, reply) => {
     return reply.status(401).send({ error: 'Unauthorized: Invalid token' });
   }
 });
+
+//ROUTES
+app.register(createRoom, manager);
+app.register(inGame, manager);
+app.register(awaitForOpponent);
+app.register(joinLobby)
+app.register(historyGame);
+app.register(postGame);
+app.register(handleInput, manager);
 
 app.listen({ port: Number(PORT), host: '0.0.0.0' }, err => {
   if (err) throw err;

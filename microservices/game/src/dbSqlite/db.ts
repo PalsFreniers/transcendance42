@@ -1,19 +1,10 @@
 import Database from 'better-sqlite3';
 import fs from 'fs';
 
-const dbPath = '/data/db.sqlite'; // .ENV
+const dataDir = '/data';
+if (!fs.existsSync(dataDir)) fs.mkdirSync(dataDir, { recursive: true });
 
-// Ensure directory exists (safe to skip in Docker, but optional)
-const dbDir = '/data';
-
-if (!fs.existsSync(dbDir)) {
-  fs.mkdirSync(dbDir, { recursive: true });
-}
-
-// Create and connect to the database
-const db = new Database(dbPath);
-
-// Ensure table exists
+const db = new Database(`${dataDir}/db.sqlite`);
 db.exec(`
   CREATE TABLE IF NOT EXISTS games (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -22,10 +13,9 @@ db.exec(`
     player_two_id INTEGER,
     game_score TEXT NOT NULL,
     status TEXT DEFAULT 'waiting',
-    start_time TIMESTAMP DEFAULT NULL,
-    end_time TIMESTAMP DEFAULT NULL,
+    start_time TIMESTAMP,
+    end_time TIMESTAMP,
     date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-  );
+  )
 `);
-
 export default db;

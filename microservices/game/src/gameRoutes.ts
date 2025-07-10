@@ -1,96 +1,83 @@
 import { FastifyInstance } from 'fastify';
-import { createGameLobby, Game } from './gameModel.js';
+import { GameManager } from './gameManager.js';
 import db from './dbSqlite/db.js';
+import { createGameLobby } from './gameModel.js';
 
-export async function createRoom(app: FastifyInstance) {
-  app.post('/create-game', async (request, reply) => {
-    const user = request.user as { id: number };
-    const { lobbyName, opponentId } = request.body as {
-      lobbyName: string;
-      opponentId: number;
-    };
-    // Prepare game object according to your interface
-    const newGame: Game = {
+export async function createRoom(app: FastifyInstance, manager: GameManager) {
+  app.post('/api/game/create-game', async (req, reply) => {
+    const user = req.user as { id: number };
+    const { lobbyName, opponentId } = req.body as { lobbyName: string; opponentId: number };
+    const gameId = createGameLobby({
       playerOne: user.id,
       playerTwo: opponentId,
       lobbyName,
       finalScore: '0-0',
       status: 'waiting',
       gameDate: new Date().toISOString(),
-    };
-    // Use createGameLobby to insert and get the ID
-    const gameId = createGameLobby(newGame);
-    return {
-      success: true,
-      gameId,
-    };
+    });
+    const ok = manager.registerGame(user.id.toString(), opponentId.toString());
+    if (!ok) {
+      return reply.status(409).send({ success: false, message: 'Players already in a game' });
+    }
+    return { success: true, gameId };
   });
 }
 
-export async function awaitforOpponent(app:FastifyInstance) {
-    app.post('/find-lobbies', async (request, reply) => {
-    const stmt = db.prepare(`
-      SELECT * FROM games WHERE player_two_id IS NULL
-    `);
-    const openLobbies = stmt.all();
-    return {
-      success: true,
-      lobbies: openLobbies,
-    };
+export async function awaitForOpponent(app: FastifyInstance) {
+  app.post('/api/game/find-lobbies', async () => {
+    const lobbies = db.prepare(`SELECT * FROM games WHERE player_two_id IS NULL`).all();
+    return { success: true, lobbies };
   });
 }
 
-export async function joinLobby(app:FastifyInstance) {
-    app.post('/join-lobby', async (request, reply) => {
-    const { gameId } = request.body as { gameId: number };
-    const user = request.user as { id: number };
-    const update = db.prepare(`
-      UPDATE games SET player_two_id = ? WHERE id = ?
-    `);
-    update.run(user.id, gameId);
-    return {
-      success: true,
-      message: 'Successfully joined lobby',
-    };
+export async function joinLobby(app: FastifyInstance) {
+  app.post('/api/game/join-lobby', async (req, reply) => {
+    const user = req.user as { id: number };
+    const { gameId } = req.body as { gameId: number };
+    db.prepare(`UPDATE games SET player_two_id = ? WHERE id = ?`).run(user.id, gameId);
+    return { success: true, message: 'Joined lobby' };
   });
 }
 
-export async function inGame(app:FastifyInstance) {
-  app.post('/in-game', async (request, reply) => {
-  const { gameId } = request.body as { gameId: number };
-  const update = db.prepare(`
-    UPDATE games SET status = 'playing', start_time = CURRENT_TIMESTAMP WHERE id = ?
-  `);
-  update.run(gameId);
-  return { success: true };
-});
+export async function inGame(app: FastifyInstance, manager: GameManager) {
+  app.post('/api/game/in-game', async (req, reply) => {
+    const { gameId, playerOneId, playerTwoId } = req.body as { gameId: number; playerOneId: number; playerTwoId: number };
+    db.prepare(`UPDATE games SET status = 'playing', start_time = CURRENT_TIMESTAMP WHERE id = ?`).run(gameId);
+    const finalScore = await manager.startGame(playerOneId.toString(), playerTwoId.toString());
+    return { success: true, finalScore };
+  });
 }
 
-export async function historyGame(app:FastifyInstance) {
-    app.post('/history', async (request, reply) => {
-    const user = request.user as { id: number };
-    const stmt = db.prepare(`
+export async function historyGame(app: FastifyInstance) {
+  app.post('/api/game/history', async (req) => {
+    const user = req.user as { id: number };
+    const history = db.prepare(`
       SELECT * FROM games
       WHERE player_one_id = ? OR player_two_id = ?
       ORDER BY date DESC
-    `);
-    const history = stmt.all(user.id, user.id);
-    return {
-      success: true,
-      history,
-    };
+    `).all(user.id, user.id);
+    return { success: true, history };
   });
 }
 
-export async function postGame(app:FastifyInstance) {
-  app.post('/end-game', async (request, reply) => {
-  const { gameId, finalScore } = request.body as { gameId: number; finalScore: string };
-  const update = db.prepare(`
-    UPDATE games
-    SET game_score = ?, status = 'finished', end_time = CURRENT_TIMESTAMP
-    WHERE id = ?
-  `);
-  update.run(finalScore, gameId);
-  return { success: true };
-});
+export async function postGame(app: FastifyInstance) {
+  app.post('/api/game/end-game', async (req) => {
+    const { gameId, finalScore } = req.body as { gameId: number; finalScore: string };
+    db.prepare(`
+      UPDATE games
+      SET game_score = ?, status = 'finished', end_time = CURRENT_TIMESTAMP
+      WHERE id = ?
+    `).run(finalScore, gameId);
+    return { success: true };
+  });
+}
+
+export async function handleInput(app: FastifyInstance, manager: GameManager) {
+  app.post('/api/game/input', async (req, reply) => {
+    const { socketId, key, action } = req.body as { socketId: string; key: string; action: 'keydown' | 'keyup' };
+    const game = manager.getGameInfo(socketId);
+    if (!game) return reply.status(404).send({ success: false, message: 'Not in a game' });
+    game.handleClientInput(socketId, key, action);
+    return reply.send({ success: true });
+  });
 }
