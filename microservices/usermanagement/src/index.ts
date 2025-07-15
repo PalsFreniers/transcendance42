@@ -6,7 +6,7 @@ import jwt from '@fastify/jwt';
 import db from './dbSqlite/db.js';
 import {
   auth,
-  register,
+  register
 } from './authService.js';
 import {
   friendList,

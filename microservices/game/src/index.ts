@@ -14,6 +14,7 @@ import { GameManager } from './gameManager.js';
 
 //START FOR GAME SERVICES
 const app = Fastify();
+//SETUP FOR PONG GAME
 const manager = new GameManager();
 dotenv.config();
 const PORT = process.env.GAME_PORT;
