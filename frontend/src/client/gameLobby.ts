@@ -1,25 +1,27 @@
-export function getUsernameFromToken(): string | null {
-  const token = localStorage.getItem('token');
-  if (!token) return null;
-
-  try {
-    const payloadBase64 = token.split('.')[1];
-    const payloadJson = atob(payloadBase64);
-    const payload = JSON.parse(payloadJson);
-    return payload.username || null;
-  } catch (err) {
-    console.error('Failed to decode token:', err);
-    return null;
-  }
-}
+import { getUsernameFromToken } from "./loginClient";
 
 export function init(){
-    const gameButton = document.getElementById('gameButton') as HTMLButtonElement | null;
-    if (gameButton)
-    gameButton.addEventListener('click', async (e) => {
+  const createGameButton = document.getElementById('game-button') as HTMLButtonElement | null;
+  const lobbyName = document.getElementById('lobby-name') as HTMLInputElement;
+  if (createGameButton)
+    createGameButton.addEventListener('click', async (e) => {
       e.preventDefault();
       const username = getUsernameFromToken();
       if (username)
         console.log('Welcome', username);
-    })
+      try {
+        const res = await fetch('http://localhost:3002/api/game/create-game', {
+          method: "POST",
+          headers: {'Content-Type': 'application/json',
+              'Authorization': `Bearer ${localStorage.getItem('token')}`
+          },
+          body: JSON.stringify({lobbyName: lobbyName.value, oppenentId: null})
+        });
+        if (res.ok)
+            console.log()
+      }
+      catch (err){
+        console.error('create game error', err);
+      }
+    });
 };

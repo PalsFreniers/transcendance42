@@ -5,17 +5,17 @@ import { createGameLobby } from './gameModel.js';
 
 export async function createRoom(app: FastifyInstance, manager: GameManager) {
   app.post('/api/game/create-game', async (req, reply) => {
-    const user = req.user as { id: number };
+    const user = req.user as { userId: number };
     const { lobbyName, opponentId } = req.body as { lobbyName: string; opponentId: number };
     const gameId = createGameLobby({
-      playerOne: user.id,
+      playerOne: user.userId,
       playerTwo: opponentId,
-      lobbyName,
+      lobbyName: lobbyName,
       finalScore: '0-0',
       status: 'waiting',
       gameDate: new Date().toISOString(),
     });
-    const ok = manager.registerGame(user.id.toString(), opponentId.toString());
+    const ok = manager.registerGame(user.userId.toString(), opponentId.toString());
     if (!ok) {
       return reply.status(409).send({ success: false, message: 'Players already in a game' });
     }
@@ -32,9 +32,9 @@ export async function awaitForOpponent(app: FastifyInstance) {
 
 export async function joinLobby(app: FastifyInstance) {
   app.post('/api/game/join-lobby', async (req, reply) => {
-    const user = req.user as { id: number };
+    const user = req.user as { userId: number };
     const { gameId } = req.body as { gameId: number };
-    db.prepare(`UPDATE games SET player_two_id = ? WHERE id = ?`).run(user.id, gameId);
+    db.prepare(`UPDATE games SET player_two_id = ? WHERE id = ?`).run(user.userId, gameId);
     return { success: true, message: 'Joined lobby' };
   });
 }
@@ -50,12 +50,12 @@ export async function inGame(app: FastifyInstance, manager: GameManager) {
 
 export async function historyGame(app: FastifyInstance) {
   app.post('/api/game/history', async (req) => {
-    const user = req.user as { id: number };
+    const user = req.user as { userId: number };
     const history = db.prepare(`
       SELECT * FROM games
       WHERE player_one_id = ? OR player_two_id = ?
       ORDER BY date DESC
-    `).all(user.id, user.id);
+    `).all(user.userId, user.userId);
     return { success: true, history };
   });
 }

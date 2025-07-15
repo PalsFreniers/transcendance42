@@ -59,3 +59,4 @@ export async function auth(app: FastifyInstance) {
     return reply.send({ token });
     });
 }
+
