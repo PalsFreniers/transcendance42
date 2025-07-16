@@ -1,5 +1,6 @@
 import Fastify from 'fastify';
 import dotenv from 'dotenv';
+import cors from '@fastify/cors';
 import jwt from '@fastify/jwt';
 import {
   createRoom,
@@ -19,8 +20,14 @@ const manager = new GameManager();
 dotenv.config();
 const PORT = process.env.GAME_PORT;
 
+// REQUEST CORS
+await app.register(cors, {
+  origin: '*',
+  credentials: true,
+});
+
 // TOKEN 
-app.register(jwt , {secret: process.env.JWT_SECRET!});
+await app.register(jwt , {secret: process.env.JWT_SECRET!});
 
 // HOOK
 app.addHook('onRequest', async (request, reply) => {
@@ -36,10 +43,10 @@ app.addHook('onRequest', async (request, reply) => {
 });
 
 //ROUTES
-app.register(createRoom, manager);
+app.register(createRoom);
 app.register(inGame, manager);
 app.register(awaitForOpponent);
-app.register(joinLobby)
+app.register(joinLobby, manager)
 app.register(historyGame);
 app.register(postGame);
 app.register(handleInput, manager);

@@ -16,6 +16,8 @@ export function init() {
       });
       if (res.ok) {
         alert('Registration successful!');
+        window.location.pathname = "/login";
+
       } else {
         alert('Registration failed.');
       }

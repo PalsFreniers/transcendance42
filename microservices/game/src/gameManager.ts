@@ -10,11 +10,10 @@ export class GameManager {
 
   registerGame(p1: string, p2: string): boolean {
     const key = this.gameKey(p1, p2);
-    if (this.games.has(key)) return false;
-    if ([...this.games.keys()].some(k =>
-      k.includes(p1) || k.includes(p2)
-    )) return false;
-
+    if (this.games.has(key)) 
+      return false;
+    if ([...this.games.keys()].some(k => k.includes(p1) || k.includes(p2))) 
+      return false;
     this.games.set(key,
       new Game()
         .joinTeam(new Paddle(p1), 'left')

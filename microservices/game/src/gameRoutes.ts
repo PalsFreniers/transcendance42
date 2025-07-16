@@ -3,41 +3,60 @@ import { GameManager } from './gameManager.js';
 import db from './dbSqlite/db.js';
 import { createGameLobby } from './gameModel.js';
 
-export async function createRoom(app: FastifyInstance, manager: GameManager) {
+export async function createRoom(app: FastifyInstance) {
   app.post('/api/game/create-game', async (req, reply) => {
+  try {
     const user = req.user as { userId: number };
-    const { lobbyName, opponentId } = req.body as { lobbyName: string; opponentId: number };
+    if (!user || typeof user.userId !== 'number') {
+      console.error("Missing or invalid user in request");
+      return reply.status(401).send({ error: 'Unauthorized' });
+    }
+    const { lobbyName} = req.body as {
+      lobbyName: string;
+      opponentId: number | null;
+    };
+    if (!lobbyName)
+      return reply.status(400).send({ error: 'lobbyName is required' });
     const gameId = createGameLobby({
       playerOne: user.userId,
-      playerTwo: opponentId,
+      playerTwo: null,
       lobbyName: lobbyName,
       finalScore: '0-0',
       status: 'waiting',
       gameDate: new Date().toISOString(),
     });
-    const ok = manager.registerGame(user.userId.toString(), opponentId.toString());
-    if (!ok) {
-      return reply.status(409).send({ success: false, message: 'Players already in a game' });
+    return reply.send({ success: true, gameId, lobbyName });
+    }  catch (err) {
+      console.error("create-game error:", err);
+      return reply.status(500).send({ error: 'Internal server error' });
     }
-    return { success: true, gameId };
   });
 }
 
 export async function awaitForOpponent(app: FastifyInstance) {
-  app.post('/api/game/find-lobbies', async () => {
+  app.post('/api/game/find-lobbies', async (_req, reply) => {
     const lobbies = db.prepare(`SELECT * FROM games WHERE player_two_id IS NULL`).all();
-    return { success: true, lobbies };
+    return reply.send({ success: true, lobbies });
   });
 }
 
-export async function joinLobby(app: FastifyInstance) {
+export async function joinLobby(app: FastifyInstance, manager: GameManager) {
   app.post('/api/game/join-lobby', async (req, reply) => {
     const user = req.user as { userId: number };
     const { gameId } = req.body as { gameId: number };
+    const lobby = db.prepare(`SELECT player_one_id FROM games WHERE id = ?`).get(gameId) as { player_one_id: number};
+    if (!lobby)
+      return reply.status(404).send({ error: 'Lobby not found' });
+    const playerOneId = lobby.player_one_id;
+    // Update DB with player_two_id
     db.prepare(`UPDATE games SET player_two_id = ? WHERE id = ?`).run(user.userId, gameId);
-    return { success: true, message: 'Joined lobby' };
+    const ok = manager.registerGame(playerOneId.toString(), user.userId.toString());
+    if (!ok)
+      return reply.status(409).send({ success: false, message: 'Players already in a game' });
+    return reply.send({ success: true, message: 'Joined and game registered' });
   });
 }
+
 
 export async function inGame(app: FastifyInstance, manager: GameManager) {
   app.post('/api/game/in-game', async (req, reply) => {

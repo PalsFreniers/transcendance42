@@ -23,11 +23,15 @@ dotenv.config();
 const app = Fastify();
 const PORT = process.env.USER_MANA_PORT;
 
+
+//REQUEST CORS
 await app.register(cors, {
   origin: '*',
   credentials: true,
 });
 
+
+//TOKEN
 await app.register(jwt, { secret: process.env.JWT_SECRET! });
 
 // Register routes

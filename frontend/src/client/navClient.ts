@@ -60,12 +60,15 @@ function handleRoute() {
       app.innerHTML = `<h2>Game Area</h2>
       <a href="/profil" data-link>Profil</a>
       <input type"text" id="lobby-name" placeholder="Room name" required />
-      <button id="game-button">create Game</button>`;
+      <button id="game-button">create Game</button>
+      <button id="join-button">Join Game</button>`;
       import('./gameLobby.js').then((mod) => mod.init?.());
       break;
     case '/profil':
       app.innerHTML = `<h2>Your Profil</h2>
-      <a href="/game" data-link>Game</a>`;
+      <a href="/game" data-link>Game</a>
+      <button id="edit-profil">Edit Profil</button>
+      <form id="form-profil"></form>`;
       import('./userProfil.js').then((mod) => mod.init?.());
       break;
     default:

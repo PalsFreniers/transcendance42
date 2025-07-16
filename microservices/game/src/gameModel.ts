@@ -2,7 +2,7 @@ import db from './dbSqlite/db.js';
 
 export interface GameRecord {
   playerOne: number;
-  playerTwo?: number;
+  playerTwo: null;
   lobbyName: string;
   finalScore?: string;
   status?: 'waiting' | 'playing' | 'finished';

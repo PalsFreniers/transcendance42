@@ -18,7 +18,7 @@ export async function profil(app: FastifyInstance) {
 export async function friendAdd(app: FastifyInstance) {
   app.post('/add-friend', async (request, reply) => {
     try {
-      const user = request.user as { userId: number };
+    const user = request.user as { userId: number };
       const { friendUsername } = request.body as { friendUsername: string };
       const friend = db.prepare('SELECT id FROM users WHERE username = ?').get(friendUsername) as { id: number };
       if (!friend)
