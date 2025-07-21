@@ -19,6 +19,34 @@ export async function init() {
        <input id="img-profil" type="file" accept="image/*" required />
       <button type="submit">Save</button>`
     })
+    const nameFriend = document.getElementById('friend-username') as HTMLInputElement;
+    const addFriend = document.getElementById('add-friend-button') as HTMLButtonElement;
+    addFriend.addEventListener('click', async (e) => {
+      e.preventDefault();
+      const friendUsername = nameFriend.value;
+      if (!friendUsername) {
+        console.error('Friend username is empty');
+        return ;
+      }
+      try {
+        const res = await fetch('http://localhost:3001/api/user/add-friend', {
+          method: 'POST',
+          headers: {
+            'Content-Type':'application/json', 
+            'Authorization' : `Bearer ${token}`
+          },
+          body: JSON.stringify({ friendUsername })
+        });
+        const data = await res.json();
+        if (res.ok)
+          console.log('friend added:', data.message)
+        else
+          console.log('Failed to add friend', data.error);
+      }
+      catch (err){
+        console.error('Error:', err);
+      }
+    });
   } catch (err) {
     console.error('Error:', err);
   }

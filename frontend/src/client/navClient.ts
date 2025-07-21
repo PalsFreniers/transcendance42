@@ -18,7 +18,8 @@ function handleRoute() {
   const path = window.location.pathname;
   const token = localStorage.getItem('token');
   const app = document.getElementById('app');
-  if (!app) 
+  const chat = document.getElementById('chat');
+  if (!app || !chat) 
     return;
   switch (path) {
     case '/':
@@ -68,11 +69,30 @@ function handleRoute() {
       app.innerHTML = `<h2>Your Profil</h2>
       <a href="/game" data-link>Game</a>
       <button id="edit-profil">Edit Profil</button>
-      <form id="form-profil"></form>`;
+      <form id="form-profil"></form>
+      <input id="friend-username" type="text" placeholder="Enter friend username" />
+      <button id="add-friend-button">Add Friend</button>`;
       import('./userProfil.js').then((mod) => mod.init?.());
       break;
     default:
       app.innerHTML = `<h2>404 - Page not found</h2>`;
+  }
+  if (token)
+  {
+    chat.innerHTML = `<div id="chat-container">
+      <div id="chat-header">Mon Chat</div>
+      <div id="chat-messages">
+        <div class="message">
+          <span class="username">Name</span>
+          <p class="message-text">old !</p>
+        </div>
+      </div>
+      <form id="chat-input">
+        <input type="text" id="message" required placeholder="Tape ton message..." />
+        <button type="send-msg">Envoyer</button>
+      </form>
+    </div>`;
+    import('./chatClient.js').then((mode) => mode.init?.());
   }
 }
 

@@ -2,6 +2,7 @@ export function init(){
   const createGameButton = document.getElementById('game-button') as HTMLButtonElement;
   const joinGameButton = document.getElementById('join-button') as HTMLButtonElement;
   const lobbyName = document.getElementById('lobby-name') as HTMLInputElement;
+  const token = localStorage.getItem('token');
   if (createGameButton)
     createGameButton.addEventListener('click', async (e) => {
       e.preventDefault();
@@ -9,7 +10,7 @@ export function init(){
         const res = await fetch('http://localhost:3002/api/game/create-game', {
           method: "POST",
           headers: {'Content-Type': 'application/json',
-              'Authorization': `Bearer ${localStorage.getItem('token')}`
+              'Authorization': `Bearer ${token}`
           },
           body: JSON.stringify({ lobbyName: lobbyName.value, oppenentId: null })
         });
@@ -30,7 +31,7 @@ export function init(){
         method: "POST",
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+          'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify({})
       });
@@ -44,7 +45,7 @@ export function init(){
         method: "POST",
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+          'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify({ gameId: lobby.id })
       });

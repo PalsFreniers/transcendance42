@@ -36,6 +36,9 @@ build:
 clean:
 	$(COMPOSE) -f $(COMPOSE_FILE) down -v --rmi all --remove-orphans
 
+cleanFront:
+	$(COMPOSE) -f $(COMPOSE_FILE) down -v --rmi frontend --remove-orphans
+
 user:
 	docker-compose up -d usermanagement
 
