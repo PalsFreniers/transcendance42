@@ -1,4 +1,344 @@
 //TEST IMPLEMENTATION SASS
-h1{
-    color: aqua;
+*{
+	padding: 0;
+	margin: 0;
+}
+
+body
+{
+	background-color: #252525;
+	#img{
+		position: absolute
+	}
+	overflow-x: hidden;
+	overflow-y: hidden;
+}
+
+h2{
+    color: rgb(255, 0, 0);
+}
+
+
+#moncercle{
+	background-color:#000000;
+	border-radius:50%;
+	width:300px;
+	height:300px;
+	filter: drop-shadow(0 0 0 white) drop-shadow(0 0 5px white);
+	top: 50%;
+	left: 50%;
+	position: absolute;
+	transform: translate(-50%, -50%);
+	animation: pulse 2s infinite ease-in-out;
+	transition: transform 0.2s;
+	transition:
+		top 0.6s ease-in-out,
+		left 0.6s ease-in-out,
+		width 0.6s ease-in-out,
+		height 0.6s ease-in-out,
+		border-radius 0.6s ease-in-out,
+		filter 0.6s ease-in-out,
+		background-color 0.6s ease-in-out;
+	&.expand {
+		width: 100vw;
+		height: 100vh;
+		top: 50%;
+		left: 50%;
+		filter:none;
+		transform: translate(-50%, -50%);
+		border-radius: 0;
+		background-color: #252525;
+	}
+	cursor: pointer;
+	#img {
+		width:200px;
+		height:200px;
+		top: 51%;
+		left: 49%;
+		transform: translate(-50%, -50%);
+		transition:
+			opacity 0.3s ease-in-out;
+		filter: drop-shadow(0 0 0 white) drop-shadow(0 0 5px white);
+	}
+
+	&.expand #img {
+		opacity: 0;
+	}
+}
+
+@keyframes pulse {
+	0%   { transform: translate(-50%, -50%) scale(1); }
+	50%  { transform: translate(-50%, -50%) scale(1.1); }
+	100% { transform: translate(-50%, -50%) scale(1); }
+}
+
+#loginForm {
+	background: rgb(92, 113, 138);
+	padding: 2rem 3rem;
+	border-radius: 8px;
+	box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+	display: flex;
+	flex-direction: column;
+	width: 300px;
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+}
+
+#registerForm{
+	background: rgb(92, 113, 138);
+	padding: 2rem 3rem;
+	border-radius: 8px;
+	box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+	display: flex;
+	flex-direction: column;
+	width: 300px;
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+}
+
+h2 {
+	margin-bottom: 1.5rem;
+	text-align: center;
+	color: #333;
+}
+
+input[type="text"], input[type="password"], input[type="email"] {
+	padding: 0.6rem 0.8rem;
+	margin-bottom: 1rem;
+	border: 1px solid #ccc;
+	border-radius: 5px;
+	font-size: 1rem;
+	box-sizing: border-box;
+	transition: border-color 0.3s ease;
+}
+
+input[type="text"]:focus, input[type="password"]:focus, input[type="email"]:focus {
+	border-color: #007bff;
+	outline: none;
+}
+
+button {
+	padding: 0.75rem;
+	background-color: #007bff;
+	border: none;
+	border-radius: 5px;
+	color: white;
+	font-weight: bold;
+	cursor: pointer;
+	transition: background-color 0.3s ease;
+}
+
+button:hover {
+	background-color: #0056b3;
+}
+
+#lobby {
+	width: 100%;
+	height: 100%;
+	background-color: rgb(0, 0, 0);
+	#rectangle {
+		top: 0%;
+		left: 0%;
+		position: absolute;
+		width: 0px;
+		height: 0px;
+		border-style: solid;
+		border-width: 10px 50vw 10px 50vw;
+		border-color: #000000 #000000 #000000 #000000;
+		z-index: 2;
+	}
+	#barres {
+		top: 200px;
+		left: 50%;
+		display: flex;
+		align-items: center;
+		position: absolute;
+		transform: translateX(-50%);
+		width: 0px;
+		height: 0px;
+		border-style: solid;
+		border-width: 50vh 20px 50vh 20px;
+		border-color: #000000 #000000 #000000 #000000;
+		z-index: 4;
+	}
+	#border {
+		position: relative;
+		top: 1px;
+		width: 0px;
+		height: 0px;
+		border-style: solid;
+		border-width: 200px 50vw 0 50vw;
+		border-color: #000000 transparent transparent transparent;
+		z-index: 2;
+	}
+	.topgame1{
+		position: absolute;
+		fill: #2e2e2e;
+		left: 0;
+		top: 19px;
+		width: calc(50vw - 20px);
+		height: 201px;
+		transition: 
+			fill 0.3s ease,
+			top 0.3s ease,
+			width 0.3s ease,
+			height 0.3s ease;
+		z-index: 5;
+		cursor: default;
+	}
+
+	.topgame1.active {
+		width: calc(50vw);
+		top: 0px;
+		height: 222px;
+	}
+	.topgame2{
+		position: absolute;
+		fill: #2e2e2e;
+		left: calc(50vw + 20px);
+		top: 19px;
+		width: calc(50vw - 20px);
+		height: 201px;
+		transition: 
+			fill 0.3s ease,
+			top 0.3s ease,
+			left 0.3s ease,
+			width 0.3s ease,
+			height 0.3s ease;
+		z-index: 5;
+		cursor: default;
+	}
+	
+	.topgame2.active {
+		top: 0px;
+		left: 50vw;
+		width: calc(50vw);
+		height: 222px;
+	}
+
+	.triangle1{
+		transition:
+			transform 0.3s ease,
+			fill 0.3s ease;
+		fill: #2e2e2e;
+		transform-origin: bottom left;
+	}
+	
+	.triangle1.active {
+		fill: #292525;
+		transform: scaleX(1.08);
+	}
+	
+	.triangle2 {
+		transition:
+			transform 0.3s ease,
+			fill 0.3s ease;
+		fill: #444;
+		transform-origin: bottom right;
+	}
+	.triangle2.active {
+		fill: #3d3737;
+		transform: scaleX(1.08);
+	}
+
+	#profils {
+		position: absolute;
+		top: 0%;
+		left: 0%;
+		width: 0px;
+		height: 0px;
+		border-style: solid;
+		border-width: 200px 50vw 0 50vw;
+		border-color: #ee5e0b transparent transparent transparent;
+		z-index: 4;
+	}
+	
+	#centent{
+		position: absolute;
+		top: 220px;
+		left: 0;
+		right: 0;
+		bottom: 0;
+		display: flex;
+		z-index: 6;
+	}
+	
+	.game1 {
+		position: absolute;
+		//padding: 20px;
+		//top: 220px;
+		background-color: #2e2e2e;
+		box-sizing: border-box;
+		width: calc(50vw - 20px);
+		height: 100vh;
+		transition:
+			background-color 0.3s ease,
+			width 0.3s ease,
+			color 0.3s ease;
+		h2{
+			left: 25%;
+			top: 50%;
+			font-size: 42px;
+			color: #000000;
+			z-index: 10;
+		}
+		z-index: 7;
+	}
+	.game1:hover{
+		width: 50vw;
+		background-color: #292525;
+		h2{
+			color: #ccc;
+		}
+	}
+	.game1.active {
+		width: 50vw;
+		background-color: #292525;
+		h2{
+			color: #ccc;
+		}
+	}
+	.game2 {
+		position: absolute;
+		//padding: 20px;
+		//top: 220px;
+		background-color: #444;
+		width: 50vw;
+		height: 100vh;
+		left: calc(50% + 20px);
+		box-sizing: border-box;
+		transition:
+			left 0.3s ease,
+			background-color 0.3s ease,
+			width 0.3s ease,
+			color 0.3s ease;
+		h2{
+			left: 75%;
+			top: 50%;
+			font-size: 42px;
+			color: #000000;
+			z-index: 10;
+		}
+		z-index: 7;
+	}
+	.game2:hover{
+		left: 50%;
+		width: 50vw;
+		background-color: #3d3737;
+		h2{
+			color: #ccc;
+		}
+	}
+	.game2.active {
+		left: 50%;
+		width: 50vw;
+		background-color: #3d3737;
+		h2{
+			color: #ccc;
+		}
+	}
 }

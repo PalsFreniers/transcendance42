@@ -30,7 +30,7 @@ export function init() {
       const data = await res.json();
       if (res.ok && data.token) {
         localStorage.setItem('token', data.token);
-        window.location.pathname = "/";
+        window.location.pathname = "/lobby";
       } else {
         alert('Login failed.');
       }
