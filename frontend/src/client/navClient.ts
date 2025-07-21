@@ -99,6 +99,8 @@ function handleRoute() {
       <a href="/game" data-link>Game</a>
       <button id="edit-profil">Edit Profil</button>
       <form id="form-profil"></form>
+      <h3>List of friends</h3>
+      <ul id="friend-list"></ul>
       <input id="friend-username" type="text" placeholder="Enter friend username" />
       <button id="add-friend-button">Add Friend</button>`;
       import('./userProfil.js').then((mod) => mod.init?.());
