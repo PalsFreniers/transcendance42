@@ -12,6 +12,5 @@ COPY . .
 RUN npx tsc
 
 EXPOSE 3001
-EXPOSE 3004
 
 CMD ["node", "dist/index.js"]

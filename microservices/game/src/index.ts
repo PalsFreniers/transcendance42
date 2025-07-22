@@ -2,6 +2,7 @@ import Fastify from 'fastify';
 import dotenv from 'dotenv';
 import cors from '@fastify/cors';
 import jwt from '@fastify/jwt';
+import { Server } from "socket.io";
 import {
   createRoom,
   inGame,
@@ -13,11 +14,11 @@ import {
 } from './gameRoutes.js';
 import { GameManager } from './gameManager.js';
 
+dotenv.config();
+
 //START FOR GAME SERVICES
 const app = Fastify();
-//SETUP FOR PONG GAME
-const manager = new GameManager();
-dotenv.config();
+
 const PORT = process.env.GAME_PORT;
 
 // REQUEST CORS
@@ -25,6 +26,45 @@ await app.register(cors, {
   origin: '*',
   credentials: true,
 });
+
+export const io = new Server(app.server, {
+  cors: {
+    origin: "*",
+  },
+});
+
+//SETUP FOR PONG GAME
+const manager = new GameManager();
+
+// SOCKET LOGIC GAME
+io.on('connection', (socket) => {
+  console.log(`Socket connected: ${socket.id}`);
+
+  socket.on('register-socket', (userId: number) => {
+    console.log(`User ${userId} registered with socket ${socket.id}`);
+    manager.registerSocket(userId, socket.id);
+  });
+
+  socket.on('join-room', (roomId: string) => {
+    socket.join(roomId);
+    console.log(`Socket ${socket.id} joined room ${roomId}`);
+  });
+
+  socket.on('input', ({ gameId, playerId, key, action }) => {
+    const game = manager.getGameInfo(playerId);
+    if (game) {
+      game.handleClientInput(playerId, key, action);
+    } else {
+      console.warn(`No active game found for player ${playerId}`);
+    }
+  });
+
+  socket.on('disconnect', () => {
+    console.log(`Socket disconnected: ${socket.id}`);
+    manager.unregisterSocket(socket.id);
+  });
+});
+
 
 // TOKEN 
 await app.register(jwt , {secret: process.env.JWT_SECRET!});
@@ -43,7 +83,7 @@ app.addHook('onRequest', async (request, reply) => {
 });
 
 //ROUTES
-app.register(createRoom);
+app.register(createRoom, manager);
 app.register(inGame, manager);
 app.register(awaitForOpponent);
 app.register(joinLobby, manager)

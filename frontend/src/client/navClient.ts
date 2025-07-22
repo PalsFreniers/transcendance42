@@ -35,8 +35,6 @@ function expandCercle() {
 		handleRoute();
 	}, 600);
   }
-
-  
 }
 
 function handleRoute() {
@@ -88,7 +86,8 @@ function handleRoute() {
       <a href="/profil" data-link>Profil</a>
       <input type="text" id="lobby-name" placeholder="Room name" required />
       <button id="game-button">create Game</button>
-      <button id="join-button">Join Game</button>`;
+      <button id="join-button">Join Game</button>
+	  <div id="game-salon"></div>`;
       import('./gameLobby.js').then((mod) => mod.init?.());
       break;
 	case '/2game':

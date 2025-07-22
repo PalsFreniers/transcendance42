@@ -1,21 +1,23 @@
 import { Game } from './game.js';
 import { Paddle } from './gameObjects/Paddle.js';
 
-export class GameManager {
+export class  GameManager {
   private games = new Map<string, Game>();
+  private userSockets = new Map<number, string>();
+  private socketToUser = new Map<string, number>();
 
   private gameKey(a: string, b: string) {
     return [a, b].sort().join('-');
   }
 
-  registerGame(p1: string, p2: string): boolean {
+  registerGame(p1: string, p2: string, gameId: number): boolean {
     const key = this.gameKey(p1, p2);
     if (this.games.has(key)) 
       return false;
     if ([...this.games.keys()].some(k => k.includes(p1) || k.includes(p2))) 
       return false;
     this.games.set(key,
-      new Game()
+      new Game(gameId)
         .joinTeam(new Paddle(p1), 'left')
         .joinTeam(new Paddle(p2), 'right')
     );
@@ -48,5 +50,30 @@ export class GameManager {
     if (!game) return false;
     game.handleClientInput(playerId, key, action);
     return true;
+  }
+
+  registerSocket(userId: number, socketId: string): boolean {
+    this.userSockets.set(userId, socketId);
+    this.socketToUser.set(socketId, userId);
+    return true;
+  }
+
+  unregisterSocket(socketId: string): boolean {
+    const userId = this.socketToUser.get(socketId);
+    if (userId !== undefined) {
+      this.userSockets.delete(userId);
+      this.socketToUser.delete(socketId);
+      console.log(`Cleaned up socket for user ${userId}`);
+      return true;
+    }
+    return false;
+  }
+
+  getSocketId(userId: number): string | undefined {
+    return this.userSockets.get(userId);
+  }
+
+  getUserId(socketId: string): number | undefined {
+    return this.socketToUser.get(socketId);
   }
 }

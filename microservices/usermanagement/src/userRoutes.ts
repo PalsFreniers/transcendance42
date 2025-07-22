@@ -81,7 +81,6 @@ export async function friendSendMsg(app: FastifyInstance) {
           text: message,
           timestamp: Date.now().toString() // a garder ?
         };
-
         console.log(`target = ${target.socket}`);
         // ajouter une save des X dernier messages
         if (!isOnline.is_online)

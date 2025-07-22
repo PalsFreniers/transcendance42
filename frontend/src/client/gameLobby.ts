@@ -1,8 +1,10 @@
+import { getUsernameFromToken } from "./loginClient.js";
+
 export function init(){
   const createGameButton = document.getElementById('game-button') as HTMLButtonElement;
   const joinGameButton = document.getElementById('join-button') as HTMLButtonElement;
   const lobbyName = document.getElementById('lobby-name') as HTMLInputElement;
-  const token = localStorage.getItem('token');
+  const token = localStorage.getItem('token') as string;
   if (createGameButton)
     createGameButton.addEventListener('click', async (e) => {
       e.preventDefault();
@@ -17,6 +19,12 @@ export function init(){
         if (res.ok){
             const data = await res.json();
             console.log("Game created:", data);
+            const lobbyGame = document.getElementById('game-salon') as HTMLDivElement;
+            lobbyGame.innerHTML = `
+            <p><strong>Lobby name:</strong> ${data.lobbyName}</p>
+            <p><strong>Player 1:</strong> ${data.playerOne}</p>
+            <p><strong>Player 2:</strong> ${data.playerTwo}</p>
+            <p><strong>Status:</strong> ${data.status}</p>`;
         }
       }
       catch (err){
