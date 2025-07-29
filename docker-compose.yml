@@ -67,19 +67,19 @@ services:
   #    - app-network
   
   # ELK Stack - Logging
-  elasticsearch:
-    build: ./log/elasticsearch
-    env_file:
-      - .env
-    container_name: elasticsearch
-    environment:
-      - discovery.type=single-node
-    volumes:
-      - esdata:/usr/share/elasticsearch/data
-    ports:
-      - "${ELASTICSEARCH_PORT}:${ELASTICSEARCH_PORT}"
-    networks:
-      - observability
+#  elasticsearch:
+#    build: ./log/elasticsearch
+#    env_file:
+#      - .env
+#    container_name: elasticsearch
+#    environment:
+#      - discovery.type=single-node
+#    volumes:
+#      - esdata:/usr/share/elasticsearch/data
+#    ports:
+#      - "${ELASTICSEARCH_PORT}:${ELASTICSEARCH_PORT}"
+#    networks:
+#      - observability
 
   # Prometheus & Grafana
   prometheus:
@@ -106,35 +106,35 @@ services:
     depends_on:
       - prometheus
 
-  kibana:
-    build: ./log/kibana
-    env_file:
-      - .env
-    container_name: kibana
-    environment:
-      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
-    ports:
-      - "${KIBANA_PORT}:${KIBANA_PORT}"
-    depends_on:
-      - elasticsearch
-    networks:
-      - observability
-  
-  logstash:
-    build: ./log/logstash
-    env_file:
-      - .env
-    container_name: logstash
-    volumes:
-      - ./log/logstash/pipeline:/usr/share/logstash/pipeline
-    ports:
-      - "${LOGSTASH_PORT}:${LOGSTASH_PORT}"
-    environment:
-      - LOGSTASH_PIPELINE_YAML_LOCATION=/usr/share/logstash/pipeline/logstash.yml
-    depends_on:
-      - elasticsearch
-    networks:
-      - observability
+#  kibana:
+#    build: ./log/kibana
+#    env_file:
+#      - .env
+#    container_name: kibana
+#    environment:
+#      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+#    ports:
+#      - "${KIBANA_PORT}:${KIBANA_PORT}"
+#    depends_on:
+#      - elasticsearch
+#    networks:
+#      - observability
+#  
+#  logstash:
+#    build: ./log/logstash
+#    env_file:
+#      - .env
+#    container_name: logstash
+#    volumes:
+#      - ./log/logstash/pipeline:/usr/share/logstash/pipeline
+#    ports:
+#      - "${LOGSTASH_PORT}:${LOGSTASH_PORT}"
+#    environment:
+#      - LOGSTASH_PIPELINE_YAML_LOCATION=/usr/share/logstash/pipeline/logstash.yml
+#    depends_on:
+#      - elasticsearch
+#    networks:
+#      - observability
 
 
 # Volumes

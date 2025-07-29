@@ -23,9 +23,9 @@ export async function createRoom(app: FastifyInstance, manager: GameManager) {
       const game = db.prepare('SELECT * FROM games WHERE id = ?').get(gameId) as GameRecord;
       const socketId = manager.getSocketId(user.userId);
       const socket = socketId ? io.sockets.sockets.get(socketId) : null;
-      if (socket) {
+      if (socket && socketId) {
         socket.join(`game-${gameId}`);
-        io.to(socketId).socketsJoin(gameId);
+        io.to(socketId).socketsJoin(`game-${gameId}`);
         console.log(`User ${user.userId} joined game room game-${gameId}`);
       } else {
         console.warn(`No socket found for user ${user.userId}`);

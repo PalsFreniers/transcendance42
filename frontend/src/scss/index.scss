@@ -175,75 +175,6 @@ button:hover {
 		border-color: #000000 transparent transparent transparent;
 		z-index: 2;
 	}
-	.topgame1{
-		position: absolute;
-		fill: #2e2e2e;
-		left: 0;
-		top: 19px;
-		width: calc(50vw - 20px);
-		height: 201px;
-		transition: 
-			fill 0.3s ease,
-			top 0.3s ease,
-			width 0.3s ease,
-			height 0.3s ease;
-		z-index: 5;
-		cursor: default;
-	}
-
-	.topgame1.active {
-		width: calc(50vw);
-		top: 0px;
-		height: 222px;
-	}
-	.topgame2{
-		position: absolute;
-		fill: #2e2e2e;
-		left: calc(50vw + 20px);
-		top: 19px;
-		width: calc(50vw - 20px);
-		height: 201px;
-		transition: 
-			fill 0.3s ease,
-			top 0.3s ease,
-			left 0.3s ease,
-			width 0.3s ease,
-			height 0.3s ease;
-		z-index: 5;
-		cursor: default;
-	}
-	
-	.topgame2.active {
-		top: 0px;
-		left: 50vw;
-		width: calc(50vw);
-		height: 222px;
-	}
-
-	.triangle1{
-		transition:
-			transform 0.3s ease,
-			fill 0.3s ease;
-		fill: #2e2e2e;
-		transform-origin: bottom left;
-	}
-	
-	.triangle1.active {
-		fill: #292525;
-		transform: scaleX(1.08);
-	}
-	
-	.triangle2 {
-		transition:
-			transform 0.3s ease,
-			fill 0.3s ease;
-		fill: #444;
-		transform-origin: bottom right;
-	}
-	.triangle2.active {
-		fill: #3d3737;
-		transform: scaleX(1.08);
-	}
 
 	#profils {
 		position: absolute;
@@ -256,89 +187,162 @@ button:hover {
 		border-color: #ee5e0b transparent transparent transparent;
 		z-index: 4;
 	}
-	
-	#centent{
+
+	#selection1 {
 		position: absolute;
-		top: 220px;
 		left: 0;
-		right: 0;
-		bottom: 0;
-		display: flex;
-		z-index: 6;
-	}
-	
-	.game1 {
-		position: absolute;
-		//padding: 20px;
-		//top: 220px;
-		background-color: #2e2e2e;
-		box-sizing: border-box;
+		top: 19px;
 		width: calc(50vw - 20px);
 		height: 100vh;
-		transition:
-			background-color 0.3s ease,
-			width 0.3s ease,
-			color 0.3s ease;
-		h2{
-			left: 25%;
-			top: 50%;
-			font-size: 42px;
-			color: #000000;
-			z-index: 10;
+		background-image: url("https://img.freepik.com/photos-gratuite/vaisseau-spatial-brillant-orbite-autour-planete-dans-galaxie-etoilee-generee-par-ia_188544-9655.jpg?t=st=1753794048~exp=1753797648~hmac=fe305c37f43ac01c59fb83924bbf212cfdb9610230e69db1e6892f967c4846f8&w=1380");
+		background-repeat: no-repeat;
+		background-size: cover;
+		.topgame1, .game1 {
+			//background: none;
 		}
-		z-index: 7;
-	}
-	.game1:hover{
-		width: 50vw;
-		background-color: #292525;
-		h2{
-			color: #ccc;
+
+		.topgame1{
+			//background-color: #2e2e2e;
+			clip-path: polygon(0% 100%, 100% 100%, 100% 97%, 0% 0%);
+			position: absolute;
+			left: 0;
+			top: 19px;
+			width: calc(50vw - 20px);
+			height: 201px;
+			transition:
+				background-size 0.3s ease,
+				top 0.3s ease,
+				clip-path 0.3s ease,
+				width 0.3s ease,
+				height 0.3s ease;
+			z-index: 5;
+			cursor: default;
+		}
+
+		.topgame1:hover, .topgame1.active{
+			//background-color: #292525;
+			background-size: 100%;
+			clip-path: polygon(0% 100%, 100% 100%, 100% 90%, 0% 0%);
+			width: calc(50vw);
+			top: 0px;
+			height: 222px;
+		}
+
+		.game1 {
+			position: absolute;
+			//padding: 20px;
+			top: 220px;
+			left: 0;
+			right: 0;
+			bottom: 0;
+			//background-color: #2e2e2e;
+			box-sizing: border-box;
+			width: calc(50vw - 20px);
+			height: 100vh;
+			transition:
+				background-size 0.3s ease,
+				width 0.3s ease,
+				color 0.3s ease;
+			h2{
+				left: 25%;
+				top: 50%;
+				font-size: 42px;
+				color: #000000;
+				z-index: 10;
+			}
+			z-index: 7;
+		}
+		.game1:hover, .game1.active{
+			width: 50vw;
+			background-size: cover;
+			//background-color: #292525;
+			h2{
+				color: #ccc;
+			}
 		}
 	}
-	.game1.active {
-		width: 50vw;
-		background-color: #292525;
-		h2{
-			color: #ccc;
+	
+	#selection2 {
+		background-image: url("https://img.freepik.com/photos-gratuite/vaisseau-spatial-brillant-orbite-autour-planete-dans-galaxie-etoilee-generee-par-ia_188544-9655.jpg?t=st=1753794048~exp=1753797648~hmac=fe305c37f43ac01c59fb83924bbf212cfdb9610230e69db1e6892f967c4846f8&w=1380");
+		background-repeat: no-repeat;
+		background-size: cover;
+		.topgame2, .game2 {
+			background: none;
 		}
-	}
-	.game2 {
-		position: absolute;
-		//padding: 20px;
-		//top: 220px;
-		background-color: #444;
-		width: 50vw;
-		height: 100vh;
-		left: calc(50% + 20px);
-		box-sizing: border-box;
-		transition:
-			left 0.3s ease,
-			background-color 0.3s ease,
-			width 0.3s ease,
-			color 0.3s ease;
-		h2{
-			left: 75%;
-			top: 50%;
-			font-size: 42px;
-			color: #000000;
-			z-index: 10;
+		.topgame2{
+			background-color: #444;
+			clip-path: polygon(0% 100%, 100% 100%, 100% 0%, 0% 97%);
+			position: absolute;
+			left: calc(50vw + 20px);
+			top: 19px;
+			width: calc(50vw - 20px);
+			height: 201px;
+			transition: 
+				background-color 0.3s ease,
+				top 0.3s ease,
+				left 0.3s ease,
+				clip-path 0.3s ease,
+				width 0.3s ease,
+				height 0.3s ease;
+			z-index: 5;
+			background-position: top;
+			cursor: default;
 		}
-		z-index: 7;
-	}
-	.game2:hover{
-		left: 50%;
-		width: 50vw;
-		background-color: #3d3737;
-		h2{
-			color: #ccc;
+		
+		.topgame2.active, .topgame2:hover{
+			clip-path: polygon(0% 100%, 100% 100%, 100% 0%, 0% 90%);
+			background-color: #3d3737;
+			top: 0px;
+			left: 50vw;
+			width: calc(50vw);
+			height: 222px;
 		}
-	}
-	.game2.active {
-		left: 50%;
-		width: 50vw;
-		background-color: #3d3737;
-		h2{
-			color: #ccc;
+
+		
+		
+		
+		.game2 {
+			position: absolute;
+			//padding: 20px;
+			top: 220px;
+			left: 0;
+			right: 0;
+			bottom: 0;
+			background-color: #444;
+			width: 50vw;
+			height: 100vh;
+			left: calc(50% + 20px);
+			box-sizing: border-box;
+			transition:
+				left 0.3s ease,
+				background-color 0.3s ease,
+				width 0.3s ease,
+				color 0.3s ease;
+			h2{
+				left: 75%;
+				top: 50%;
+				font-size: 42px;
+				color: #000000;
+				z-index: 10;
+			}
+			background-position: bottom;
+			z-index: 7;
+		}
+		.game2:hover{
+			left: 50%;
+			width: 50vw;
+			background-color: #3d3737;
+			h2{
+				color: #ccc;
+			}
+		}
+		.game2.active {
+			left: 50%;
+			width: 50vw;
+			background-color: #3d3737;
+			h2{
+				color: #ccc;
+			}
 		}
 	}
 }
