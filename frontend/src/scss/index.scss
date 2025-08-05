@@ -1,4 +1,3 @@
-//TEST IMPLEMENTATION SASS
 *{
 	padding: 0;
 	margin: 0;
@@ -14,17 +13,23 @@ body
 	overflow-y: hidden;
 }
 
-h2{
-    color: rgb(255, 0, 0);
+a:visited {
+	color: #fff;
 }
 
+#back {
+	background-image: url("https://mir-s3-cdn-cf.behance.net/project_modules/fs/9bc27292880429.5e569ff84e4d0.gif");
+	background-size: contain;
+	height: 100vh;
+	width: 100vw;
+}
 
 #moncercle{
 	background-color:#000000;
 	border-radius:50%;
 	width:300px;
 	height:300px;
-	filter: drop-shadow(0 0 0 white) drop-shadow(0 0 5px white);
+	filter: drop-shadow(0 0 0 rgb(99, 218, 198)) drop-shadow(0 0 5px rgb(99, 218, 198));
 	top: 50%;
 	left: 50%;
 	position: absolute;
@@ -47,7 +52,7 @@ h2{
 		filter:none;
 		transform: translate(-50%, -50%);
 		border-radius: 0;
-		background-color: #252525;
+		background-color: #000000;
 	}
 	cursor: pointer;
 	#img {
@@ -58,7 +63,7 @@ h2{
 		transform: translate(-50%, -50%);
 		transition:
 			opacity 0.3s ease-in-out;
-		filter: drop-shadow(0 0 0 white) drop-shadow(0 0 5px white);
+		filter: drop-shadow(0 0 0 rgb(99, 218, 198)) drop-shadow(0 0 5px rgb(99, 218, 198));
 	}
 
 	&.expand #img {
@@ -72,71 +77,136 @@ h2{
 	100% { transform: translate(-50%, -50%) scale(1); }
 }
 
-#loginForm {
-	background: rgb(92, 113, 138);
-	padding: 2rem 3rem;
-	border-radius: 8px;
-	box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-	display: flex;
-	flex-direction: column;
-	width: 300px;
-	position: absolute;
-	top: 50%;
-	left: 50%;
-	transform: translate(-50%, -50%);
-}
-
-#registerForm{
-	background: rgb(92, 113, 138);
-	padding: 2rem 3rem;
-	border-radius: 8px;
-	box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-	display: flex;
-	flex-direction: column;
-	width: 300px;
-	position: absolute;
-	top: 50%;
-	left: 50%;
-	transform: translate(-50%, -50%);
-}
-
-h2 {
-	margin-bottom: 1.5rem;
-	text-align: center;
-	color: #333;
-}
-
-input[type="text"], input[type="password"], input[type="email"] {
-	padding: 0.6rem 0.8rem;
-	margin-bottom: 1rem;
-	border: 1px solid #ccc;
-	border-radius: 5px;
-	font-size: 1rem;
+#back_login{
+	margin: 0;
 	box-sizing: border-box;
-	transition: border-color 0.3s ease;
+	font-family: "Open Sans", sans-serif;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	min-height: 100vh;
+	width: 100%;
+	padding: 0 10px;
 }
 
-input[type="text"]:focus, input[type="password"]:focus, input[type="email"]:focus {
-	border-color: #007bff;
-	outline: none;
+#back_login::before {
+  content: "";
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background: url("https://mir-s3-cdn-cf.behance.net/project_modules/fs/9bc27292880429.5e569ff84e4d0.gif"), #000;
+  background-position: center;
+  background-size: cover;
 }
 
-button {
-	padding: 0.75rem;
-	background-color: #007bff;
+.wrapper {
+	box-sizing: border-box;
+	font-family: "Open Sans", sans-serif;
+	width: 400px;
+	border-radius: 8px;
+	padding: 30px;
+	text-align: center;
+	border: 1px solid rgba(255, 255, 255, 0.5);
+	backdrop-filter: blur(8px);
+	-webkit-backdrop-filter: blur(8px);
+}
+form {
+	display: flex;
+	flex-direction: column;
+}
+h2 {
+	font-size: 2rem;
+	margin-bottom: 20px;
+	color: #fff;
+}
+.input-field {
+	position: relative;
+	border-bottom: 2px solid #ccc;
+	margin: 15px 0;
+}
+.input-field label {
+	position: absolute;
+	top: 50%;
+	left: 0;
+	transform: translateY(-50%);
+	color: #fff;
+	font-size: 16px;
+	pointer-events: none;
+	transition: 0.15s ease;
+}
+.input-field input {
+	width: 100%;
+	height: 40px;
+	background: transparent;
 	border: none;
-	border-radius: 5px;
-	color: white;
-	font-weight: bold;
+	outline: none;
+	font-size: 16px;
+	color: #fff;
+}
+.input-field input:focus~label,
+.input-field input:not(:placeholder-shown)~label {
+	font-size: 0.8rem;
+	top: 10px;
+	transform: translateY(-120%);
+}
+.forget {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	margin: 25px 0 35px 0;
+	color: #fff;
+}
+#remember {
+	accent-color: #fff;
+}
+.forget label {
+	display: flex;
+	align-items: center;
+}
+.forget label p {
+	margin-left: 8px;
+}
+.wrapper a {
+	color: #efefef;
+	text-decoration: none;
+}
+.wrapper a:hover {
+	text-decoration: underline;
+}
+button {
+	background: #fff;
+	color: #000;
+	font-weight: 600;
+	border: none;
+	padding: 12px 20px;
 	cursor: pointer;
-	transition: background-color 0.3s ease;
+	border-radius: 3px;
+	font-size: 16px;
+	border: 2px solid transparent;
+	transition: 0.3s ease;
+}
+button:hover {
+	color: #fff;
+	border-color: #fff;
+	background: rgba(255, 255, 255, 0.15);
+}
+.register, .login {
+	text-align: center;
+	margin-top: 30px;
+	color: #fff;
+}
+input:-webkit-autofill {
+    -webkit-box-shadow: 0 0 0 1000px transparent inset;
+    -webkit-text-fill-color: white;
+    caret-color: white;
+    background-color: transparent;
+    //transition: background-color 9999s ease-out, color 9999s ease-out;
 }
 
-button:hover {
-	background-color: #0056b3;
-}
 
 #lobby {
+	margin: 0;
+	padding: 0;
 	width: 100%;
 	height: 100%;
 	background-color: rgb(0, 0, 0);
@@ -149,7 +219,7 @@ button:hover {
 		border-style: solid;
 		border-width: 10px 50vw 10px 50vw;
 		border-color: #000000 #000000 #000000 #000000;
-		z-index: 2;
+		z-index: 4;
 	}
 	#barres {
 		top: 200px;
@@ -163,46 +233,47 @@ button:hover {
 		border-style: solid;
 		border-width: 50vh 20px 50vh 20px;
 		border-color: #000000 #000000 #000000 #000000;
-		z-index: 4;
+		z-index: 2;
 	}
 	#border {
-		position: relative;
-		top: 1px;
+		position: absolute;
+		top: 19px;
 		width: 0px;
 		height: 0px;
 		border-style: solid;
 		border-width: 200px 50vw 0 50vw;
 		border-color: #000000 transparent transparent transparent;
-		z-index: 2;
-	}
-
-	#profils {
-		position: absolute;
-		top: 0%;
-		left: 0%;
-		width: 0px;
-		height: 0px;
-		border-style: solid;
-		border-width: 200px 50vw 0 50vw;
-		border-color: #ee5e0b transparent transparent transparent;
 		z-index: 4;
 	}
 
 	#selection1 {
 		position: absolute;
 		left: 0;
-		top: 19px;
-		width: calc(50vw - 20px);
-		height: 100vh;
-		background-image: url("https://img.freepik.com/photos-gratuite/vaisseau-spatial-brillant-orbite-autour-planete-dans-galaxie-etoilee-generee-par-ia_188544-9655.jpg?t=st=1753794048~exp=1753797648~hmac=fe305c37f43ac01c59fb83924bbf212cfdb9610230e69db1e6892f967c4846f8&w=1380");
+		top: 0px;
+		/*background-image: url("https://img.freepik.com/photos-gratuite/vaisseau-spatial-brillant-orbite-autour-planete-dans-galaxie-etoilee-generee-par-ia_188544-9655.jpg?t=st=1753794048~exp=1753797648~hmac=fe305c37f43ac01c59fb83924bbf212cfdb9610230e69db1e6892f967c4846f8&w=1380");
 		background-repeat: no-repeat;
 		background-size: cover;
+		background-clip: padding-box;*/
+		//background-origin: border-box;
+		width: calc(50vw - 20px);
+		height: 100vh;
+		transition:
+				top 0.3s ease,
+				background-size 0.3s ease,
+				width 0.3s ease,
+				height 0.3s ease;
+		//z-index: 2;
 		.topgame1, .game1 {
-			//background: none;
+			background: none;
 		}
 
 		.topgame1{
 			//background-color: #2e2e2e;
+			background-image: url("https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D");
+			background-repeat: no-repeat;
+			background-size: cover;
+			background-position-y: 0px;
+			z-index: 7;
 			clip-path: polygon(0% 100%, 100% 100%, 100% 97%, 0% 0%);
 			position: absolute;
 			left: 0;
@@ -215,13 +286,12 @@ button:hover {
 				clip-path 0.3s ease,
 				width 0.3s ease,
 				height 0.3s ease;
-			z-index: 5;
 			cursor: default;
 		}
 
 		.topgame1:hover, .topgame1.active{
 			//background-color: #292525;
-			background-size: 100%;
+			//background-size: 100%;
 			clip-path: polygon(0% 100%, 100% 100%, 100% 90%, 0% 0%);
 			width: calc(50vw);
 			top: 0px;
@@ -230,17 +300,22 @@ button:hover {
 
 		.game1 {
 			position: absolute;
-			//padding: 20px;
-			top: 220px;
+			top: 0px;
 			left: 0;
 			right: 0;
 			bottom: 0;
+			background-image: url("https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D");
+			background-size: cover;
+			background-repeat: no-repeat;
+			background-clip: border-box;
+			background-position-y: bottom;
 			//background-color: #2e2e2e;
 			box-sizing: border-box;
 			width: calc(50vw - 20px);
 			height: 100vh;
 			transition:
-				background-size 0.3s ease,
+				//background-size 0.3s ease,
+				top 0.3s ease,
 				width 0.3s ease,
 				color 0.3s ease;
 			h2{
@@ -250,20 +325,26 @@ button:hover {
 				color: #000000;
 				z-index: 10;
 			}
-			z-index: 7;
+			z-index: 3;
 		}
 		.game1:hover, .game1.active{
 			width: 50vw;
-			background-size: cover;
+			top: 0px;
+			//background-size: cover;
 			//background-color: #292525;
 			h2{
 				color: #ccc;
 			}
 		}
 	}
-	
+	#selection1.active{
+		//z-index: 5;
+		height: 100%;
+		width: 50vw;
+	}
+
 	#selection2 {
-		background-image: url("https://img.freepik.com/photos-gratuite/vaisseau-spatial-brillant-orbite-autour-planete-dans-galaxie-etoilee-generee-par-ia_188544-9655.jpg?t=st=1753794048~exp=1753797648~hmac=fe305c37f43ac01c59fb83924bbf212cfdb9610230e69db1e6892f967c4846f8&w=1380");
+		//background-image: url("https://img.freepik.com/photos-gratuite/vaisseau-spatial-brillant-orbite-autour-planete-dans-galaxie-etoilee-generee-par-ia_188544-9655.jpg?t=st=1753794048~exp=1753797648~hmac=fe305c37f43ac01c59fb83924bbf212cfdb9610230e69db1e6892f967c4846f8&w=1380");
 		background-repeat: no-repeat;
 		background-size: cover;
 		.topgame2, .game2 {
@@ -284,7 +365,7 @@ button:hover {
 				clip-path 0.3s ease,
 				width 0.3s ease,
 				height 0.3s ease;
-			z-index: 5;
+			z-index: 7;
 			background-position: top;
 			cursor: default;
 		}
@@ -298,9 +379,6 @@ button:hover {
 			height: 222px;
 		}
 
-		
-		
-		
 		.game2 {
 			position: absolute;
 			//padding: 20px;
@@ -345,4 +423,43 @@ button:hover {
 			}
 		}
 	}
+	#profils {
+		background-image: url("https://mir-s3-cdn-cf.behance.net/project_modules/fs/9bc27292880429.5e569ff84e4d0.gif");
+		background-size: contain;
+		position: absolute;
+		clip-path: polygon(50% 100%, 0% 0%, 100% 0%);
+		top: 0%;
+		left: 0%;
+		width: 100%;
+		height: 200px;
+		/*border-style: solid;
+		border-width: 200px 50vw 0 50vw;
+		border-color: #ee5e0b transparent transparent transparent;*/
+		z-index: 6;
+		#parametre {
+			//display: flex;
+			//padding: 10px;
+			img {
+				width: 40px;
+				height: 40px;
+				cursor: pointer;
+				transition: transform 0.2s ease;
+				&:hover {
+					transform: scale(1.1);
+				}
+			}
+		}
+		#friends {
+			
+		}
+		#perso {
+			
+		}
+	}
+}
+
+#chat-container {
+	position: absolute;
+	top: 87%;
+	left: 10px;
 }

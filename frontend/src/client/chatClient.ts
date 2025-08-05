@@ -5,7 +5,6 @@ export function init() {
     if (!chat) 
         return;
     console.log
-    chat.style.backgroundColor = 'rgba(196, 196, 196, 0.66)';
     const Send = document.getElementById('chat-input') as HTMLFormElement;
     Send.addEventListener('submit', async (e) => {
         e.preventDefault();
