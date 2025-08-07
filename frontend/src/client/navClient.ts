@@ -142,7 +142,28 @@ function handleRoute() {
 			import('./gameLobby.js').then((mod) => mod.init?.());
 		break;
 		case '/2game':
-			app.innerHTML = `<h2>Game Area</h2>`;
+			app.innerHTML = `
+			<div id="back_shifumi">
+				<h2>Shifumi</h2>
+				<div id="container-button">
+					<button id="solo-button">Join Solo</button>
+					<button id="match-button">Join Matchmaking</button>
+					<button id="tournois-button">Tournois</button>
+					<button id="game-button">create Room</button>
+					<button id="join-button">Join Room</button>
+					<button id="spec-button">Spectateur</button>
+					<button id="custom-button">Customisation</button>
+				</div>
+				<div class="pong-scene">
+					<div class="pong-court">
+						<div class="paddle left"></div>
+						<div class="paddle right"></div>
+						<div class="ball"></div>
+					</div>
+				</div>
+			</div>
+			`;
+			import('./game2Lobby.js').then((mod) => mod.init?.());
 			break;
 		case '/profil':
 			app.innerHTML = `<h2>Your Profil</h2>
@@ -219,108 +240,46 @@ function handleRoute() {
 	}
 
 	const zone = document.querySelector('.game1');
-	const topgame = document.querySelector('.topgame1');
 	const selection = document.querySelector('#selection1');
 
 	if (zone){
 		zone.addEventListener('mouseenter', () => {
-			if (topgame)
-				topgame.classList.add('active')
 			if (selection)
 				selection.classList.add('active')
 		});
 	}
 	if (zone){
 		zone.addEventListener('mouseleave', () => {
-			if (topgame)
-				topgame.classList.remove('active')
 			if (selection)
 				selection.classList.remove('active')
 		});
 	}
-	if (topgame){
-		topgame.addEventListener('mouseenter', () => {
-			topgame.classList.add('active')
-			if (zone)
-				zone.classList.add('active')
-			/*if (selection)
-				selection.classList.add('active')*/
-		});
-	}
-	if (topgame){
-		topgame.addEventListener('mouseleave', () => {
-			topgame.classList.remove('active')
-			if (zone)
-				zone.classList.remove('active')
-			/*if (selection)
-				selection.classList.remove('active')*/
+	if (zone) {
+		zone.addEventListener('click', () => {
+			history.pushState(null, '', '/game');
+			handleRoute();
 		});
 	}
 
 	const zone2 = document.querySelector('.game2');
-	const topgame2 = document.querySelector('.topgame2');
 	const selection2 = document.querySelector('#selection2');
 
 	if (zone2){
 		zone2.addEventListener('mouseenter', () => {
-			if (topgame2)
-				topgame2.classList.add('active')
+			zone2.classList.add('active')
 			if (selection2)
 				selection2.classList.add('active')
 		});
 	}
 	if (zone2){
 		zone2.addEventListener('mouseleave', () => {
-			if (topgame2)
-				topgame2.classList.remove('active')
+			zone2.classList.remove('active')
 			if (selection2)
 				selection2.classList.remove('active')
 		});
 	}
-	if (topgame2){
-		topgame2.addEventListener('mouseenter', () => {
-			//topgame2.classList.add('active')
-			if (zone2)
-				zone2.classList.add('active')
-			if (selection2)
-				selection2.classList.add('active')
-		});
-	}
-	if (topgame2){
-		topgame2.addEventListener('mouseleave', () => {
-			//topgame2.classList.remove('active')
-			if (zone2)
-				zone2.classList.remove('active')
-			if (selection2)
-				selection2.classList.remove('active')
-		});
-	}
-
-	const game1 = document.querySelector('.game1');
-	const game1triangle = document.querySelector('.topgame1');
-	if (game1) {
-		game1.addEventListener('click', () => {
-			history.pushState(null, '', '/game');
-			handleRoute();
-		});
-	}
-	if (game1triangle) {
-		game1triangle.addEventListener('click', () => {
-			history.pushState(null, '', '/game');
-			handleRoute();
-		});
-	}
-
-	const game2 = document.querySelector('.game2');
-	const game2triangle = document.querySelector('.topgame2');
-	if (game2) {
-		game2.addEventListener('click', () => {
-			history.pushState(null, '', '/2game');
-			handleRoute();
-		});
-	}
-	if (game2triangle) {
-		game2triangle.addEventListener('click', () => {
+	if (zone2) {
+		zone2.addEventListener('click', () => {
 			history.pushState(null, '', '/2game');
 			handleRoute();
 		});

@@ -5,7 +5,7 @@
 
 body
 {
-	background-color: #252525;
+	background-color: rgb(3, 1, 8);
 	#img{
 		position: absolute
 	}
@@ -17,9 +17,14 @@ a:visited {
 	color: #fff;
 }
 
+p{
+	color: #fff;
+}
+
 #back {
 	background-image: url("https://mir-s3-cdn-cf.behance.net/project_modules/fs/9bc27292880429.5e569ff84e4d0.gif");
-	background-size: contain;
+	background-position: center;
+  	background-size: cover;
 	height: 100vh;
 	width: 100vw;
 }
@@ -37,22 +42,26 @@ a:visited {
 	animation: pulse 2s infinite ease-in-out;
 	transition: transform 0.2s;
 	transition:
-		top 0.6s ease-in-out,
-		left 0.6s ease-in-out,
-		width 0.6s ease-in-out,
+		transform 0.6s ease-in-out,
 		height 0.6s ease-in-out,
+		width 0.6s ease-in-out,
+		padding 0.6s ease-in-out,
+		box-sizing 0.6s ease-in-out,
 		border-radius 0.6s ease-in-out,
-		filter 0.6s ease-in-out,
-		background-color 0.6s ease-in-out;
+		border 0.6s ease-in-out,
+		filter 0.6s ease-in-out;
 	&.expand {
-		width: 100vw;
-		height: 100vh;
-		top: 50%;
-		left: 50%;
+		background: transparent;
+		height: 400px;
+		width: 360px;
+		border-radius: 8px;
+		padding: 30px;
 		filter:none;
 		transform: translate(-50%, -50%);
-		border-radius: 0;
-		background-color: #000000;
+		border: 1px solid rgba(255, 255, 255, 0.5);
+		box-sizing: border-box;
+		backdrop-filter: blur(8px);
+    	-webkit-backdrop-filter: blur(8px);
 	}
 	cursor: pointer;
 	#img {
@@ -200,61 +209,21 @@ input:-webkit-autofill {
     -webkit-text-fill-color: white;
     caret-color: white;
     background-color: transparent;
-    //transition: background-color 9999s ease-out, color 9999s ease-out;
+    transition: background-color 9999s ease-out, color 9999s ease-out;
 }
 
 
 #lobby {
+	background: none;
 	margin: 0;
 	padding: 0;
 	width: 100%;
 	height: 100%;
-	background-color: rgb(0, 0, 0);
-	#rectangle {
-		top: 0%;
-		left: 0%;
-		position: absolute;
-		width: 0px;
-		height: 0px;
-		border-style: solid;
-		border-width: 10px 50vw 10px 50vw;
-		border-color: #000000 #000000 #000000 #000000;
-		z-index: 4;
-	}
-	#barres {
-		top: 200px;
-		left: 50%;
-		display: flex;
-		align-items: center;
-		position: absolute;
-		transform: translateX(-50%);
-		width: 0px;
-		height: 0px;
-		border-style: solid;
-		border-width: 50vh 20px 50vh 20px;
-		border-color: #000000 #000000 #000000 #000000;
-		z-index: 2;
-	}
-	#border {
-		position: absolute;
-		top: 19px;
-		width: 0px;
-		height: 0px;
-		border-style: solid;
-		border-width: 200px 50vw 0 50vw;
-		border-color: #000000 transparent transparent transparent;
-		z-index: 4;
-	}
-
+	//background-color: rgb(7, 7, 7);
 	#selection1 {
 		position: absolute;
 		left: 0;
 		top: 0px;
-		/*background-image: url("https://img.freepik.com/photos-gratuite/vaisseau-spatial-brillant-orbite-autour-planete-dans-galaxie-etoilee-generee-par-ia_188544-9655.jpg?t=st=1753794048~exp=1753797648~hmac=fe305c37f43ac01c59fb83924bbf212cfdb9610230e69db1e6892f967c4846f8&w=1380");
-		background-repeat: no-repeat;
-		background-size: cover;
-		background-clip: padding-box;*/
-		//background-origin: border-box;
 		width: calc(50vw - 20px);
 		height: 100vh;
 		transition:
@@ -262,166 +231,104 @@ input:-webkit-autofill {
 				background-size 0.3s ease,
 				width 0.3s ease,
 				height 0.3s ease;
-		//z-index: 2;
-		.topgame1, .game1 {
-			background: none;
-		}
-
-		.topgame1{
-			//background-color: #2e2e2e;
-			background-image: url("https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D");
+		.game1 {
+			position: absolute;
+			background-image: url("https://img.freepik.com/photos-gratuite/vaisseau-spatial-brillant-orbite-autour-planete-dans-galaxie-etoilee-generee-par-ia_188544-9655.jpg?t=st=1753794048~exp=1753797648~hmac=fe305c37f43ac01c59fb83924bbf212cfdb9610230e69db1e6892f967c4846f8&w=1380");
 			background-repeat: no-repeat;
 			background-size: cover;
-			background-position-y: 0px;
-			z-index: 7;
-			clip-path: polygon(0% 100%, 100% 100%, 100% 97%, 0% 0%);
-			position: absolute;
+			background-position: top left;
+			top: 20px;
 			left: 0;
-			top: 19px;
+			right: 0;
+			bottom: 0;
 			width: calc(50vw - 20px);
-			height: 201px;
+			height: 100vh;
+			z-index: 7;
+			box-sizing: border-box;
+			clip-path: polygon(0% 100%, 100% 100%, 100% 23%, 0% 0%);
+			cursor: default;
 			transition:
 				background-size 0.3s ease,
 				top 0.3s ease,
 				clip-path 0.3s ease,
 				width 0.3s ease,
 				height 0.3s ease;
-			cursor: default;
-		}
-
-		.topgame1:hover, .topgame1.active{
-			//background-color: #292525;
-			//background-size: 100%;
-			clip-path: polygon(0% 100%, 100% 100%, 100% 90%, 0% 0%);
-			width: calc(50vw);
-			top: 0px;
-			height: 222px;
-		}
-
-		.game1 {
-			position: absolute;
-			top: 0px;
-			left: 0;
-			right: 0;
-			bottom: 0;
-			background-image: url("https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?q=80&w=1170&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D");
-			background-size: cover;
-			background-repeat: no-repeat;
-			background-clip: border-box;
-			background-position-y: bottom;
-			//background-color: #2e2e2e;
-			box-sizing: border-box;
-			width: calc(50vw - 20px);
-			height: 100vh;
-			transition:
-				//background-size 0.3s ease,
-				top 0.3s ease,
-				width 0.3s ease,
-				color 0.3s ease;
-			h2{
+			h2 {
+				position: absolute;
 				left: 25%;
 				top: 50%;
+				transform: translate(-25%, -50%);
 				font-size: 42px;
 				color: #000000;
 				z-index: 10;
 			}
-			z-index: 3;
 		}
-		.game1:hover, .game1.active{
+		.game1:hover{
 			width: 50vw;
-			top: 0px;
-			//background-size: cover;
-			//background-color: #292525;
+			top: 0;
 			h2{
 				color: #ccc;
 			}
 		}
 	}
 	#selection1.active{
-		//z-index: 5;
 		height: 100%;
 		width: 50vw;
 	}
 
 	#selection2 {
-		//background-image: url("https://img.freepik.com/photos-gratuite/vaisseau-spatial-brillant-orbite-autour-planete-dans-galaxie-etoilee-generee-par-ia_188544-9655.jpg?t=st=1753794048~exp=1753797648~hmac=fe305c37f43ac01c59fb83924bbf212cfdb9610230e69db1e6892f967c4846f8&w=1380");
-		background-repeat: no-repeat;
-		background-size: cover;
-		.topgame2, .game2 {
+		position: absolute;
+		left: calc(50vw + 20px);
+		top: 0px;
+		width: calc(50vw - 20px);
+		height: 100vh;
+		transition:
+				all 0.3s ease;
+		.game2 {
 			background: none;
 		}
-		.topgame2{
-			background-color: #444;
-			clip-path: polygon(0% 100%, 100% 100%, 100% 0%, 0% 97%);
-			position: absolute;
-			left: calc(50vw + 20px);
-			top: 19px;
-			width: calc(50vw - 20px);
-			height: 201px;
-			transition: 
-				background-color 0.3s ease,
-				top 0.3s ease,
-				left 0.3s ease,
-				clip-path 0.3s ease,
-				width 0.3s ease,
-				height 0.3s ease;
-			z-index: 7;
-			background-position: top;
-			cursor: default;
-		}
-		
-		.topgame2.active, .topgame2:hover{
-			clip-path: polygon(0% 100%, 100% 100%, 100% 0%, 0% 90%);
-			background-color: #3d3737;
-			top: 0px;
-			left: 50vw;
-			width: calc(50vw);
-			height: 222px;
-		}
-
 		.game2 {
 			position: absolute;
-			//padding: 20px;
-			top: 220px;
-			left: 0;
+			background-image: url("https://img.freepik.com/photos-gratuite/vaisseau-spatial-brillant-orbite-autour-planete-dans-galaxie-etoilee-generee-par-ia_188544-9655.jpg?t=st=1753794048~exp=1753797648~hmac=fe305c37f43ac01c59fb83924bbf212cfdb9610230e69db1e6892f967c4846f8&w=1380");
+			background-repeat: no-repeat;
+			background-size: cover;
+			background-position:  right top;
+			top: 20px;
+			left: 0px;
 			right: 0;
 			bottom: 0;
-			background-color: #444;
-			width: 50vw;
+			width: calc(50vw - 20px);
 			height: 100vh;
-			left: calc(50% + 20px);
+			z-index: 7;
 			box-sizing: border-box;
+			clip-path: polygon(0% 100%, 100% 100%, 100% 0%, 0% 23%);
+			cursor: default;
 			transition:
-				left 0.3s ease,
-				background-color 0.3s ease,
-				width 0.3s ease,
-				color 0.3s ease;
-			h2{
-				left: 75%;
+				all 0.3s ease;
+			h2 {
+				position: absolute;
+				left: 25%;
 				top: 50%;
+				transform: translate(-25%, -50%);
 				font-size: 42px;
 				color: #000000;
 				z-index: 10;
 			}
-			background-position: bottom;
-			z-index: 7;
 		}
 		.game2:hover{
-			left: 50%;
-			width: 50vw;
-			background-color: #3d3737;
+			top: 0;
+			//left: 50vw;
+			height: 100%;
+			width: calc(50vw);
 			h2{
 				color: #ccc;
 			}
 		}
-		.game2.active {
-			left: 50%;
-			width: 50vw;
-			background-color: #3d3737;
-			h2{
-				color: #ccc;
-			}
-		}
+	}
+	#selection2.active{
+		left: 50vw;
+		height: 100%;
+		width: 50vw;
 	}
 	#profils {
 		background-image: url("https://mir-s3-cdn-cf.behance.net/project_modules/fs/9bc27292880429.5e569ff84e4d0.gif");
@@ -431,14 +338,9 @@ input:-webkit-autofill {
 		top: 0%;
 		left: 0%;
 		width: 100%;
-		height: 200px;
-		/*border-style: solid;
-		border-width: 200px 50vw 0 50vw;
-		border-color: #ee5e0b transparent transparent transparent;*/
+		height: 23vh;
 		z-index: 6;
 		#parametre {
-			//display: flex;
-			//padding: 10px;
 			img {
 				width: 40px;
 				height: 40px;
@@ -462,4 +364,113 @@ input:-webkit-autofill {
 	position: absolute;
 	top: 87%;
 	left: 10px;
+}
+
+$pong-white: #ffffff;
+$pong-bg: transparent; // pas besoin de fond si c'est sur fond noir
+
+#back_shifumi {
+  padding: 0;
+  margin: 0;
+  display: flex;
+  gap: 10px;
+  margin-top: 20px;
+  min-height: 300px; // important pour que le pong ait la place
+
+  #container-button {
+    display: flex;
+    left: 15vw;
+    flex-direction: column;
+    gap: 4vh;
+    align-items: flex-start;
+  }
+
+  .pong-scene {
+    perspective: 1000px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+    width: 50%; // ou une taille fixe selon ton layout
+
+    .pong-court {
+      width: 400px;
+      height: 600px;
+      border: 2px solid $pong-white;
+      transform: rotateX(60deg) rotateZ(45deg);
+      position: relative;
+      transform-style: preserve-3d;
+      box-sizing: border-box;
+
+      .paddle {
+        width: 60px;
+        height: 4px;
+        background: $pong-white;
+        position: absolute;
+
+        &.left {
+          top: 10px;
+          left: 5%;
+			animation: paddleMoveLeft 2s ease-in-out infinite alternate;
+        }
+
+        &.right {
+          bottom: 10px;
+          right: 5%;
+		  animation: paddleMoveRight 2s ease-in-out infinite alternate;
+        }
+      }
+
+      .ball {
+        width: 8px;
+        height: 8px;
+        background: $pong-white;
+        border-radius: 50%;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+		animation: ballMove 4s linear infinite alternate;
+      }
+    }
+  }
+  
+}
+
+@keyframes paddleMoveLeft {
+  0%   { left: 80%; }
+  100% { left: 5%; }
+}
+
+@keyframes paddleMoveRight {
+  0%   { right: 5%; }
+  100% { right: 80%; }
+}
+
+@keyframes ballMove {
+	0% {
+		top: 3%;
+		left: 80%;
+		transform: translate(-50%, -50%);
+	}
+	25% {
+		top: 50%;
+		left: 3%;
+		transform: translate(-50%, -50%);
+	}
+	50% {
+		top: 98%;
+		left: 10%;
+		transform: translate(-50%, -50%);
+	}
+	75% {
+		top: 50%;
+		left: 98%;
+		transform: translate(-50%, -50%);
+	}
+	100% {
+		top: 2%;
+		left: 80%;
+		transform: translate(-50%, -50%);
+	}
 }
