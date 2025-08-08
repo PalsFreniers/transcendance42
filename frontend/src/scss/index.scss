@@ -5,6 +5,7 @@
 
 body
 {
+	user-select: none;
 	background-color: rgb(3, 1, 8);
 	#img{
 		position: absolute
@@ -54,6 +55,19 @@ p{
 		background: transparent;
 		height: 400px;
 		width: 360px;
+		border-radius: 8px;
+		padding: 30px;
+		filter:none;
+		transform: translate(-50%, -50%);
+		border: 1px solid rgba(255, 255, 255, 0.5);
+		box-sizing: border-box;
+		backdrop-filter: blur(8px);
+    	-webkit-backdrop-filter: blur(8px);
+	}
+	&.expandlobby {
+		background: transparent;
+		height: 100%;
+		width: 100%;
 		border-radius: 8px;
 		padding: 30px;
 		filter:none;
@@ -227,16 +241,13 @@ input:-webkit-autofill {
 		width: calc(50vw - 20px);
 		height: 100vh;
 		transition:
-				top 0.3s ease,
-				background-size 0.3s ease,
-				width 0.3s ease,
-				height 0.3s ease;
+				all 0.3s ease;
 		.game1 {
 			position: absolute;
-			background-image: url("https://img.freepik.com/photos-gratuite/vaisseau-spatial-brillant-orbite-autour-planete-dans-galaxie-etoilee-generee-par-ia_188544-9655.jpg?t=st=1753794048~exp=1753797648~hmac=fe305c37f43ac01c59fb83924bbf212cfdb9610230e69db1e6892f967c4846f8&w=1380");
+			background-image: url("https://sdmntprukwest.oaiusercontent.com/files/00000000-db24-6243-95e8-5e2eeef08827/raw?se=2025-08-08T15%3A29%3A56Z&sp=r&sv=2024-08-04&sr=b&scid=34d866a2-2b91-52b4-b1e2-13fe0d4ac65f&skoid=82a3371f-2f6c-4f81-8a78-2701b362559b&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2025-08-08T08%3A01%3A58Z&ske=2025-08-09T08%3A01%3A58Z&sks=b&skv=2024-08-04&sig=QBAuuHADff54ewZ4jQOhZCWXnFoZ87VxZvAu2lOpfJc%3D");
 			background-repeat: no-repeat;
-			background-size: cover;
-			background-position: top left;
+			background-size: 50%;
+			background-position: center;
 			top: 20px;
 			left: 0;
 			right: 0;
@@ -248,11 +259,7 @@ input:-webkit-autofill {
 			clip-path: polygon(0% 100%, 100% 100%, 100% 23%, 0% 0%);
 			cursor: default;
 			transition:
-				background-size 0.3s ease,
-				top 0.3s ease,
-				clip-path 0.3s ease,
-				width 0.3s ease,
-				height 0.3s ease;
+				all 0.3s ease;
 			h2 {
 				position: absolute;
 				left: 25%;
@@ -292,7 +299,7 @@ input:-webkit-autofill {
 			background-image: url("https://img.freepik.com/photos-gratuite/vaisseau-spatial-brillant-orbite-autour-planete-dans-galaxie-etoilee-generee-par-ia_188544-9655.jpg?t=st=1753794048~exp=1753797648~hmac=fe305c37f43ac01c59fb83924bbf212cfdb9610230e69db1e6892f967c4846f8&w=1380");
 			background-repeat: no-repeat;
 			background-size: cover;
-			background-position:  right top;
+			background-position:  bottom right;
 			top: 20px;
 			left: 0px;
 			right: 0;
@@ -317,7 +324,6 @@ input:-webkit-autofill {
 		}
 		.game2:hover{
 			top: 0;
-			//left: 50vw;
 			height: 100%;
 			width: calc(50vw);
 			h2{
@@ -341,22 +347,65 @@ input:-webkit-autofill {
 		height: 23vh;
 		z-index: 6;
 		#parametre {
-			img {
-				width: 40px;
-				height: 40px;
-				cursor: pointer;
-				transition: transform 0.2s ease;
-				&:hover {
-					transform: scale(1.1);
-				}
-			}
+			position: relative;
+			top: 5%;
+			left: 60%;
+			width: 5%;
+			height: 5%;
+			z-index: 7;
+			filter: drop-shadow(4px 4px 10px crimson);
+		}
+		#parametre:hover {
+			scale: (1.1);
+		}
+		#return {
+			position: relative;
+			top: 3%;
+			left: 65%;
+			width: 5%;
+			height: 5%;
+			z-index: 7;
+			filter: drop-shadow(4px 4px 10px crimson);
+		}
+		#return:hover {
+			scale: (1.1);
 		}
 		#friends {
-			
+			visibility: visible;
+			position: relative;
+			top: 3%;
+			left: 35%;
+			width: 5%;
+			height: 5%;
+			z-index: 7;
+			filter: drop-shadow(4px 4px 10px crimson);
+		}
+		#friends:hover {
+			scale: (1.1);
+		}
+		#friends2 {
+			visibility: hidden;
+			position: relative;
+			top: calc(3% - 10px);
+			left: 35%;
+			width: 5%;
+			height: 5%;
+			z-index: 7;
+			filter: drop-shadow(4px 4px 10px crimson);
+		}
+		#friends2:hover {
+			scale: (1.1);
 		}
 		#perso {
 			
 		}
+		/*svg{
+			box-sizing: border-box;
+			border: 2px solid transparent;
+			background-color: transparent;
+			backdrop-filter: blur(0.2rem);
+			border-radius:50%;
+		}*/
 	}
 }
 
@@ -370,22 +419,22 @@ $pong-white: #ffffff;
 $pong-bg: transparent; // pas besoin de fond si c'est sur fond noir
 
 #back_shifumi {
-  padding: 0;
-  margin: 0;
-  display: flex;
-  gap: 10px;
-  margin-top: 20px;
-  min-height: 300px; // important pour que le pong ait la place
+	padding: 0;
+	margin: 0;
+	display: flex;
+	gap: 10px;
+	margin-top: 20px;
+	min-height: 300px; // important pour que le pong ait la place
 
-  #container-button {
-    display: flex;
-    left: 15vw;
-    flex-direction: column;
-    gap: 4vh;
-    align-items: flex-start;
-  }
+	#container-button {
+		display: flex;
+		left: 15vw;
+		flex-direction: column;
+		gap: 4vh;
+		align-items: flex-start;
+	}
 
-  .pong-scene {
+ /* .pong-scene {
     perspective: 1000px;
     display: flex;
     justify-content: center;
@@ -433,10 +482,10 @@ $pong-bg: transparent; // pas besoin de fond si c'est sur fond noir
 		animation: ballMove 4s linear infinite alternate;
       }
     }
-  }
+  }*/
   
 }
-
+/*
 @keyframes paddleMoveLeft {
   0%   { left: 80%; }
   100% { left: 5%; }
@@ -474,3 +523,4 @@ $pong-bg: transparent; // pas besoin de fond si c'est sur fond noir
 		transform: translate(-50%, -50%);
 	}
 }
+*/
