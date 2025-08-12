@@ -1,50 +1,9 @@
-import io from 'socket.io-client';
-
-export function getUserIdFromToken(): number {
-	const token = localStorage.getItem('token');
-	if (!token) return 0;
-	try {
-		const payloadBase64 = token.split('.')[1];
-		const payloadJson = atob(payloadBase64);
-		const payload = JSON.parse(payloadJson);
-		return payload.userId || 0;
-	} catch (err) {
-		console.error('Failed to decode token:', err);
-		return 0;
-	}
-}
-
-function createUserSocket() {
-	const token = localStorage.getItem('token');
-	const userId = getUserIdFromToken();
-	const socket = io('http://localhost:3001', {
-		path: "/chatSocket/",
-		auth: { token : token },
-		withCredentials: true,
-		transports: ['websocket'],
-	});
-	socket.on('connect', () => {
-		localStorage.debug = 'socket.io-client:socket';
-		socket.emit('register-socket', userId);
-		console.log(`Socket (${socket.id}) connected!`);
-	});
-	socket.on('connect_error', (err) => {
-		console.error('Connection error:', err.message);
-	});
-	socket.on('disconnect', (reason) => {
-		console.warn('Socket disconnected:', reason);
-	});
-}
-
 export function init() {
 	const token = localStorage.getItem('token');
 	if (!token) {
 		window.location.href = '/login';
 		return;
 	}
-	console.log('pass')
-	// Connect socket
-	createUserSocket();
 	const createGameButton = document.getElementById('game-button') as HTMLButtonElement;
 	const joinGameButton = document.getElementById('join-button') as HTMLButtonElement;
 	const lobbyName = document.getElementById('lobby-name') as HTMLInputElement;

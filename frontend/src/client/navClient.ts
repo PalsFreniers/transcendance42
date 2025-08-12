@@ -1,4 +1,10 @@
+import { getSocket } from './home.js';
+
 window.addEventListener('DOMContentLoaded', () => {
+	const token = localStorage.getItem('token');
+  	if (token) {
+    	getSocket();  // Connect the socket once on page load if logged in
+  	}
 	document.body.addEventListener('click', (e) => {
 		const target = e.target as HTMLElement;
 		if (target.matches('a[data-link]')) {
@@ -216,7 +222,6 @@ function handleRoute() {
 				</div>
 			</div>
 			`;
-			import('./gameLobby.js').then((mod) => mod.init?.());
 		break;
 	default:
 		app.innerHTML = `<h2>404 - Page not found</h2>`;
