@@ -5,21 +5,23 @@
   "description": "Fastify-based frontend service",
   "main": "src/index.ts",
   "scripts": {
-  "dev": "ts-node-dev --respawn src/index.ts",
+  "dev": "vite --respawn src/index.ts",
   "build": "tsc -p tsconfig.json",
-  "build-client": "tsc -p tsconfig.client.json && sass src/scss:public/css",
+  "build-client": "sass src/scss:public/css && vite build --config /app/public/scripts/vite.config.js",
   "build-all": "npm run build && npm run build-client",
-  "start": "node dist/index.js"
+  "start": "node public/scripts/index.js"
 },
   "dependencies": {
     "fastify": "^4.22.2",
     "@fastify/static": "^6.12.0",
     "dotenv": "^16.4.5",
+    "socket.io-client": "^4.8.1",
     "node-fetch": "^3.3.2"
   },
   "devDependencies": {
     "typescript": "^5.4.5",
     "ts-node-dev": "^2.0.0",
-    "sass": "^1.89.2"
+    "sass": "^1.89.2",
+    "vite": "^7.1.1"
   }
 }

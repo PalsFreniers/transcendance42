@@ -1,3 +1,18 @@
+export function getUserIdFromToken(): number {
+	const token = localStorage.getItem('token');
+	if (!token) return 0;
+
+	try {
+		const payloadBase64 = token.split('.')[1];
+		const payloadJson = atob(payloadBase64);
+		const payload = JSON.parse(payloadJson);
+		return payload.userId || 0;
+	} catch (err) {
+		console.error('Failed to decode token:', err);
+		return 0;
+	}
+}
+
 export function getUsernameFromToken(): string | null {
 	const token = localStorage.getItem('token');
 	if (!token) return null;

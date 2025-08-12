@@ -20,4 +20,4 @@ RUN npm run build-all
 EXPOSE 5173
 
 # Run the compiled JS
-CMD ["node", "dist/index.js"]
+CMD ["node", "public/scripts/index.js"]

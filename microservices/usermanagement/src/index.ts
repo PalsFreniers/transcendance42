@@ -28,17 +28,37 @@ const PORT = process.env.USER_MANA_PORT;
 
 //REQUEST CORS
 await app.register(cors, {
-  origin: '*',
+  origin: 'http://localhost:5173',
   credentials: true,
+  methods: ['GET', 'POST'],
 });
 
 export const io = new Server(app.server, {
+  path: '/chatSocket/',
   cors: {
-    origin: '*', // ALL ORIGIN REQUEST ALLOWED
+    origin: 'http://localhost:5173', // ALL ORIGIN REQUEST ALLOWED
+    credentials: true,
   },
 });
 
+
+//TOKEN
+await app.register(jwt, { secret: process.env.JWT_SECRET! });
+
 // Socket.io logic
+io.use(async (socket, next) => {
+  try {
+    const tmp = await app.jwt.verify(socket.handshake.auth.token);
+    // socket.decoded = tmp;
+    console.log('verif passed !');
+    next();
+  }
+  catch {
+    console.log(`socket ${socket.id} can't connect !`);
+    next(new Error('Authentication error'));
+  }
+});
+
 io.on('connection', (socket) => {
   console.log(`USER connected: ${socket.id}`);
 
@@ -73,9 +93,6 @@ io.on('connection', (socket) => {
     console.log(`Socket ${socket.id} disconnected`);
   });
 });
-
-//TOKEN
-await app.register(jwt, { secret: process.env.JWT_SECRET! });
 
 // JWT auth hook
 app.addHook('onRequest', async (request, reply) => {

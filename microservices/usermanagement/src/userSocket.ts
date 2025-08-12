@@ -1,8 +1,4 @@
-import dotenv from 'dotenv'
-import io from 'socket.io-client'
 import { createMessage, Message } from './chatModel.js'
-
-dotenv.config();
 
 export interface ChatMessage {
     from: string;
@@ -11,21 +7,6 @@ export interface ChatMessage {
     for: string;
     text: string;
     timestamp: string;
-}
-
-export function creatUserSocket(userId : number) {
-    const socket = io(process.env.URL_CHAT, {});
-    socket.on("connect", () => {
-    socket.emit("register-socket", userId);
-    console.log("socket registed !");
-    });
-    socket.on("message", (msg: ChatMessage) => {
-    console.log(msg.text);
-    console.log('New message !');
-    });
-    socket.on("disconnect", () => {
-    console.log("disconnected !");
-    });
 }
 
 export async function saveMessage(msg: ChatMessage) {

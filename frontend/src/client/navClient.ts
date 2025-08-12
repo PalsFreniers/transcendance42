@@ -216,7 +216,8 @@ function handleRoute() {
 				</div>
 			</div>
 			`;
-			break;
+			import('./gameLobby.js').then((mod) => mod.init?.());
+		break;
 	default:
 		app.innerHTML = `<h2>404 - Page not found</h2>`;
 	}
