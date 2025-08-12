@@ -1,9 +1,9 @@
-import { getSocket } from './home.js';
+import { getSockets } from './socketClient.js';
 
 window.addEventListener('DOMContentLoaded', () => {
 	const token = localStorage.getItem('token');
   	if (token) {
-    	getSocket();  // Connect the socket once on page load if logged in
+    	getSockets();  // Connect the socket once on page load if logged in
   	}
 	document.body.addEventListener('click', (e) => {
 		const target = e.target as HTMLElement;

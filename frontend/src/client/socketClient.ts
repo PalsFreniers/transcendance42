@@ -1,6 +1,8 @@
 import io, { Socket } from 'socket.io-client';
 
-let socketInstance: Socket | null = null;
+let socketChat: Socket | null = null;
+let socketPong: Socket | null = null;
+let socketShifumi: Socket | null = null;
 
 function getUserIdFromToken(): number {
   const token = localStorage.getItem('token');
@@ -15,33 +17,72 @@ function getUserIdFromToken(): number {
   }
 }
 
-export function getSocket(): Socket {
-  if (!socketInstance) {
+export function getSockets(): [Socket, Socket, Socket] {
+  if (!socketChat && !socketPong) {
     const token = localStorage.getItem('token');
     const userId = getUserIdFromToken();
-
-    socketInstance = io('http://localhost:3001', {
-      path: "/chatSocket/",
+    // SOCKET CHAT
+    socketChat = io('http://localhost:3001', {
+      path: '/chatSocket/',
       auth: { token },
       withCredentials: true,
       transports: ['websocket'],
       // autoConnect is true by default, reconnects automatically on disconnect
     });
-
-    socketInstance.on('connect', () => {
-      console.log(`Socket (${socketInstance!.id}) connected!`);
+    socketChat.on('connect', () => {
+      console.log(`Socket (${socketChat!.id}) connected!`);
       // On first connect and reconnects, emit register
-      socketInstance!.emit('register-socket', userId);
+      socketChat!.emit('register-socket', userId);
     });
 
-    socketInstance.on('disconnect', (reason) => {
+    socketChat.on('disconnect', (reason) => {
       console.warn('Socket disconnected:', reason);
     });
 
-    socketInstance.on('connect_error', (err) => {
+    socketChat.on('connect_error', (err) => {
+      console.error('Connection error:', err.message);
+    });
+    // SOCKET PONG
+    socketPong = io('http://localhost:3002', {
+      path: '/pongSocket/',
+      auth: { token },
+      withCredentials: true,
+      transports: ['websocket'],
+    });
+    socketPong.on('connect', () => {
+      console.log(`Socket (${socketPong!.id}) connected!`);
+      // On first connect and reconnects, emit register
+      socketPong!.emit('register-socket', userId);
+    });
+
+    socketPong.on('disconnect', (reason) => {
+      console.warn('Socket disconnected:', reason);
+    });
+
+    socketPong.on('connect_error', (err) => {
+      console.error('Connection error:', err.message);
+    });
+    //SOCKET SHIFUMI
+    socketShifumi = io('http://localhost:3003', {
+      path: '/shifumiSocket/',
+      auth: { token },
+      withCredentials: true,
+      transports: ['websocket'],
+    });
+    socketShifumi.on('connect', () => {
+      console.log(`Socket (${socketShifumi!.id}) connected!`);
+      // On first connect and reconnects, emit register
+      socketShifumi!.emit('register-socket', userId);
+    });
+
+    socketShifumi.on('disconnect', (reason) => {
+      console.warn('Socket disconnected:', reason);
+    });
+
+    socketShifumi.on('connect_error', (err) => {
       console.error('Connection error:', err.message);
     });
   }
 
-  return socketInstance;
+  return [socketChat!, socketPong!, socketShifumi!];
 }

@@ -10,6 +10,7 @@ services:
     depends_on:
       - user
       - game
+      - game2
     networks:
       - app-network
     volumes:
@@ -54,6 +55,18 @@ services:
       - game_db_data:/data
     ports:
       - "${GAME_PORT}:${GAME_PORT}"
+    networks:
+      - app-network
+
+  game2:
+    build: ./microservices/game2
+    env_file:
+      - .env
+    container_name: game2-service
+    volumes:
+      - game2_db_data:/data
+    ports:
+      - "${GAME2_PORT}:${GAME2_PORT}"
     networks:
       - app-network
 
@@ -142,6 +155,7 @@ volumes:
   frontend_db_data:
   user_db_data:
   game_db_data:
+  game2_db_data:
   esdata:
   prometheus_data:
   grafana_data:

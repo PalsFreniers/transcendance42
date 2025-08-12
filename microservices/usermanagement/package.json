@@ -17,7 +17,6 @@
   "bcrypt": "^5.1.1",
   "socket.io": "^4.7.5",
   "@fastify/cors": "^8.2.1",
-  "socket.io-client": "^4.8.1",
   "zod": "^4.0.5"
 },
   "devDependencies": {

@@ -60,12 +60,12 @@ io.use(async (socket, next) => {
 });
 
 io.on('connection', (socket) => {
-  console.log(`USER connected: ${socket.id}`);
+  console.log(`USER connected: ${socket.id} on Chat socket`);
 
   socket.on('register-socket', (userID: number) => {
     const stmt = db.prepare('UPDATE users SET socket = ?, is_online = 1 WHERE id = ?');
     stmt.run(socket.id, userID);
-    console.log(`Socket ${socket.id} registered to user ${userID}`);
+    console.log(`User ${userID} registered with Chat socket ${socket.id}`);
     const msg = db.prepare('SELECT * FROM conversation WHERE targetId = ?').all(userID) as Message[];
     if (msg) {
       msg.forEach(msg => {
