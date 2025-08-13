@@ -20,6 +20,20 @@ export function init() {
                 socket.emit('message', msg, getUserIdFromToken(), 'toma');
             else
                 console.error(`error 404 : sokcet not found !`);
+            // console.log('Start sended message !');
+            // const res = await fetch('http://localhost:3001/api/user/priv-msg/toma', {
+            // method: 'POST',
+            // headers: {
+            //     'Content-Type': 'application/json',
+            //     'Authorization': `Bearer ${token}`
+            // },
+            // body: JSON.stringify({msg}),
+            // });
+            // const data = await res.json();
+            // if (res)
+            //     console.log('message send !');
+            // else
+            //     console.log('failed to send message !');
         } 
         catch (error) {
             alert('failed to send message !');

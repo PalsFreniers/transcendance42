@@ -82,7 +82,9 @@ export function getSockets(): [Socket, Socket, Socket] {
     socketPong.on('connect_error', (err) => {
       console.error('Connection error:', err.message);
     });
+
     //SOCKET SHIFUMI
+
     socketShifumi = io('http://localhost:3003', {
       path: '/shifumiSocket/',
       auth: { token },
@@ -93,6 +95,20 @@ export function getSockets(): [Socket, Socket, Socket] {
       console.log(`Socket (${socketShifumi!.id}) connected!`);
       // On first connect and reconnects, emit register
       socketShifumi!.emit('register-socket', userId);
+    });
+
+    socketShifumi.on('roomJoined', (roomId: number) => {
+      alert(`you join room ${roomId}`);
+      console.log(`you join room ${roomId}`)
+    });
+
+    socketShifumi.on('roomInfo', (info: string) => {
+      alert(info);
+    });
+
+    socketShifumi.on('error', (error: string) => {
+      alert(error);
+      console.log(error);
     });
 
     socketShifumi.on('disconnect', (reason) => {
@@ -117,3 +133,4 @@ export function getSocket(id:number)
     default: return null;
   }
 }
+

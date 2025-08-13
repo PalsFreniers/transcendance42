@@ -2,7 +2,7 @@ import Fastify from 'fastify';
 import dotenv from 'dotenv';
 import cors from '@fastify/cors';
 import jwt from '@fastify/jwt';
-import { Server } from "socket.io";
+import { Server, Socket } from "socket.io";
 import {
   createRoom,
   inGame,
@@ -13,6 +13,8 @@ import {
 } from './gameRoutes.js';
 
 dotenv.config();
+
+let nextGameId: number = 1;
 
 //START FOR GAME SERVICES
 const app = Fastify();
@@ -35,6 +37,24 @@ export const io = new Server(app.server, {
   },
 });
 
+// a metre dans un autre fichier ?
+function authMiddleware(
+  eventHandler: (socket: Socket, ...args: any[]) => void) {
+  return (socket: Socket) => {
+    return async (...args: any[]) => {
+      console.log('hello there !');
+      try {
+        await app.jwt.verify(socket.handshake.auth.token);
+        eventHandler(socket, ...args);
+      } catch (err) {
+        console.log('Token expired or invalid');
+        io.to(socket.id).emit("error", "Token expired or invalid");
+      }
+    };
+  };
+}
+
+
 // TOKEN 
 app.register(jwt , {secret: process.env.JWT_SECRET!});
 
@@ -51,9 +71,9 @@ io.use(async (socket, next) => {
     }
   });
 
-io.on('connection', (socket) => {
+io.on('connection', (socket: Socket) => {
     console.log(`USER connected: ${socket.id} on Shifumi socket`);
-  
+
     socket.on('register-socket', (userId: number) => {
       console.log(`User ${userId} registered with Shifumi socket ${socket.id}`);
     });
@@ -63,6 +83,24 @@ io.on('connection', (socket) => {
       console.log(`Socket ${socket.id} joined room ${roomId}`);
     });
   
+    socket.on('create-room', () => {
+      try {
+        const tmp = app.jwt.verify(socket.handshake.auth.token);
+        console.log(`token is always valide`);
+      }
+      catch {
+        io.to(socket.id).emit("error", "Token expired or invalid");
+        console.log(`socket ${socket.id} can't connect !`);
+        return ;
+      }
+      const roomId: number = nextGameId++;
+
+      socket.join(roomId.toString());
+      // ajouter la fonction pour cree la game avec le roomId
+      io.to(socket.id).emit('roomJoined', roomId);
+
+    });
+
     socket.on('disconnect', () => {
       console.log(`Socket Shifumi disconnected: ${socket.id}`);
     });
