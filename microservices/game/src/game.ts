@@ -46,7 +46,8 @@ export class Game {
     const loop = () => {
       const start = Date.now();
       this.update();
-      if (this.state === 'ended') return;
+      if (this.state === 'ended') 
+        return;
       io.to(`game-${this.gameId}`).emit('game-update', {
         ball: {
           x: this.ball.pos.x,

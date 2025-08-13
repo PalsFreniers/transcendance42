@@ -1,5 +1,7 @@
 import { Game } from './game.js';
+import { Socket } from 'socket.io';
 import { Paddle } from './gameObjects/Paddle.js';
+import { io } from './index.js'
 
 export class  GameManager {
   private games = new Map<string, Game>();
@@ -76,4 +78,11 @@ export class  GameManager {
   getUserId(socketId: string): number | undefined {
     return this.socketToUser.get(socketId);
   }
+
+  getSocket(userId: number): Socket | undefined {
+  const socketId = this.userSockets.get(userId);
+  if (!socketId) 
+    return undefined;
+  return io.sockets.sockets.get(socketId);
+}
 }

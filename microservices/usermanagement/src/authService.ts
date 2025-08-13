@@ -55,11 +55,7 @@ export async function auth(app: FastifyInstance) {
         return reply.code(401).send({ error: 'Invalid username or password' });
     //SIGN TOKEN FOR THAT SESSION ANOTHER IS GENERATE AT EACH CONNECTION
     const token = app.jwt.sign({ userId: user.id, username: user.username});
-    /*const socket = io('http://localhost:3001', {
-      path: '/chatSocket/',
-    });*/
     await new Promise(resolve => setTimeout(resolve, 100));
-    //console.log(`socket.id on authService = ${socket.id}`);
     // RETURN IT FOR OTHERS SERVICES CAN BE USED IT!
     return reply.send({ token });
     });

@@ -1,8 +1,9 @@
 // gameRoutes.ts
 import { FastifyInstance } from 'fastify';
 import { GameManager } from './gameManager.js';
+import { createRoomLogic } from './gameService.js';
+import { joinLobbyLogic } from './gameService.js';
 import db from './dbSqlite/db.js';
-import { createGameLobby, GameRecord } from './gameModel.js';
 import { io } from './index.js';
 
 export async function createRoom(app: FastifyInstance, manager: GameManager) {
@@ -10,37 +11,20 @@ export async function createRoom(app: FastifyInstance, manager: GameManager) {
     try {
       const user = req.user as { userId: number, username: string };
       const { lobbyName } = req.body as { lobbyName: string };
-      if (!lobbyName)
-        return reply.status(400).send({ error: 'lobbyName is required' });
-      const gameId = createGameLobby({
-        playerOne: user.userId,
-        playerTwo: null,
-        lobbyName: lobbyName,
-        finalScore: '0-0',
-        status: 'waiting',
-        gameDate: new Date().toISOString(),
-      });
-      const game = db.prepare('SELECT * FROM games WHERE id = ?').get(gameId) as GameRecord;
+
+      const gameData = createRoomLogic(manager, user.userId, user.username, lobbyName);
+
+      // Notify only player 1
       const socketId = manager.getSocketId(user.userId);
-      const socket = socketId ? io.sockets.sockets.get(socketId) : null;
-      if (socket && socketId) {
-        socket.join(`game-${gameId}`);
-        io.to(socketId).socketsJoin(`game-${gameId}`);
-        console.log(`User ${user.userId} joined game room game-${gameId}`);
-      } else {
-        console.warn(`No socket found for user ${user.userId}`);
-      }
-      return reply.send({
-        success: true,
-        gameId,
-        lobbyName,
-        playerOne: user.username,
-        playerTwo: null,
-        status: game.status
-      });
+      const socket = manager.getSocket(user.userId);
+      if (socket)
+        socket.join(`game-${gameData.gameId}`);
+      if (socketId)
+        io.to(socketId).emit('room-created', gameData);
+      return reply.send({ success: true, ...gameData });
     } catch (err) {
       console.error("create-game error:", err);
-      return reply.status(500).send({ error: 'Internal server error' });
+      return reply.status(500).send({ error: err });
     }
   });
 }
@@ -54,28 +38,23 @@ export async function awaitForOpponent(app: FastifyInstance) {
 
 export async function joinLobby(app: FastifyInstance, manager: GameManager) {
   app.post('/api/game/join-lobby', async (req, reply) => {
-    const user = req.user as { userId: number };
-    const { gameId } = req.body as { gameId: number };
-    const lobby = db.prepare(`SELECT player_one_id, lobby_name FROM games WHERE id = ?`).get(gameId) as {
-      player_one_id: number;
-      lobby_name: string;
-    };
-    if (!lobby)
-      return reply.status(404).send({ error: 'Lobby not found' });
-    const playerOneId = lobby.player_one_id;
-    db.prepare(`UPDATE games SET player_two_id = ? WHERE id = ?`).run(user.userId, gameId);
-    const ok = manager.registerGame(playerOneId.toString(), user.userId.toString(), gameId);
-    if (!ok)
-      return reply.status(409).send({ success: false, message: 'Players already in a game' });
-    // Emit socket event to backend-managed sockets
-    io.to(`game-${gameId}`).emit('player-joined', {
-      roomId: `game-${gameId}`,
-      lobbyName: lobby.lobby_name,
-      playerOne: playerOneId,
-      playerTwo: user.userId,
-      status: 'ready'
-    });
-    return reply.send({ success: true, message: 'Joined and game registered', gameId });
+    try {
+      const user = req.user as { userId: number, username: string };
+      const { gameId, playerOneName } = req.body as { gameId: number, playerOneName: string };
+
+      const gameData = joinLobbyLogic(manager, user.userId, user.username, playerOneName, gameId);
+
+      const socket = manager.getSocket(user.userId);
+      if (socket) {
+        socket.join(`game-${gameId}`);
+      }
+      // Emit to all sockets in the game room
+      io.to(`game-${gameId}`).emit('player-joined', gameData);
+      return reply.send({ success: true, ...gameData });
+    } catch (err) {
+      console.error('join-lobby error:', err);
+      return reply.status(400).send({ error: err });
+    }
   });
 }
 
@@ -123,7 +102,10 @@ export async function handleInput(app: FastifyInstance, manager: GameManager) {
       key: string;
       action: 'keydown' | 'keyup';
     };
-    const game = manager.getGameInfo(socketId);
+    const userId = manager.getUserId(socketId);
+    if (!userId) 
+      return reply.status(404).send({ success: false, message: 'User not found' });
+    const game = manager.getGameInfo(userId.toString());
     if (!game)
       return reply.status(404).send({ success: false, message: 'Not in a game' });
     game.handleClientInput(socketId, key, action);

@@ -1,6 +1,6 @@
 import db from './dbSqlite/db.js';
 
-export interface GameRecord {
+interface GameRecord {
   playerOne: number;
   playerTwo: null;
   lobbyName: string;

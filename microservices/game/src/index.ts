@@ -13,6 +13,8 @@ import {
   handleInput
 } from './gameRoutes.js';
 import { GameManager } from './gameManager.js';
+import { createRoomLogic } from './gameService.js';
+import { joinLobbyLogic } from './gameService.js';
 
 dotenv.config();
 
@@ -64,9 +66,31 @@ io.on('connection', (socket) => {
     manager.registerSocket(userId, socket.id);
   });
 
-  socket.on('join-room', (roomId: string) => {
-    socket.join(roomId);
-    console.log(`Socket ${socket.id} joined room ${roomId}`);
+  socket.on('create-room', ({ userId, username, lobbyName }) => {
+    try {
+      const gameData = createRoomLogic(manager, userId, username, lobbyName);
+
+      socket.join(`game-${gameData.gameId}`);
+      socket.emit('room-created', gameData);
+      console.log(`User ${userId} created and joined game-${gameData.gameId}`);
+    } catch (err) {
+      console.error('create-room error:', err);
+      socket.emit('error', err);
+    }
+  });
+
+  socket.on('join-room', ({ userId, username, hostUsername, gameId }) => {
+    try {
+      const gameData = joinLobbyLogic(manager, userId, username, hostUsername, gameId);
+
+      socket.join(`game-${gameId}`);
+      io.to(`game-${gameId}`).emit('player-joined', gameData);
+
+      console.log(`User ${userId} joined room ${gameId}`);
+    } catch (err) {
+      console.error('join-room error:', err);
+      socket.emit('error', err);
+    }
   });
 
   socket.on('input', ({ gameId, playerId, key, action }) => {

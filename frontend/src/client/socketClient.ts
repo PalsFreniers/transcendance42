@@ -69,11 +69,32 @@ export function getSockets(): [Socket, Socket, Socket] {
       withCredentials: true,
       transports: ['websocket'],
     });
-    socketPong.on('connect', () => {
-      console.log(`Socket (${socketPong!.id}) connected!`);
-      // On first connect and reconnects, emit register
-      socketPong!.emit('register-socket', userId);
+      socketPong.on("connect", () => {
+      console.log("Connected to game socket:", socketPong!.id);
+      // Register this socket with backend so manager knows your userId
+      socketPong!.emit("register-socket", userId);
     });
+
+      socketPong.on("room-created", (data) => {
+      console.log("Room created event:", data);
+      const lobbyGame = document.getElementById("game-salon") as HTMLDivElement;
+      lobbyGame.innerHTML = `
+        <p><strong>Lobby name:</strong> ${data.lobbyName}</p>
+        <p><strong>Player 1:</strong> ${data.playerOne}</p>
+        <p><strong>Player 2:</strong> ${data.playerTwo ?? "-"}</p>
+        <p><strong>Status:</strong> ${data.status}</p>`;
+      });
+
+      socketPong.on("player-joined", (data) => {
+      console.log("Player joined event:", data);
+      // Update UI with both players
+      const lobbyGame = document.getElementById("game-salon") as HTMLDivElement;
+      lobbyGame.innerHTML = `
+        <p><strong>Lobby name:</strong> ${data.lobbyName}</p>
+        <p><strong>Player 1:</strong> ${data.playerOne}</p>
+        <p><strong>Player 2:</strong> ${data.playerTwo}</p>
+        <p><strong>Status:</strong> ${data.status}</p>`;
+      });
 
     socketPong.on('disconnect', (reason) => {
       console.warn('Socket disconnected:', reason);
