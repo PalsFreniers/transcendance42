@@ -59,42 +59,42 @@ export async function friendDelete(app: FastifyInstance) {
   });
 }
 
-export async function friendSendMsg(app: FastifyInstance) {
-    app.post('/priv-msg/:username', async (request, reply) => {
-    console.log('message load !');
-    try {
-        const user = request.user as { username: string, userId: number };
-        const { message } = request.body as { message: string };
-        const { username: targetUsername } = request.params as { username: string };
-        const target = db.prepare('SELECT socket FROM users WHERE username = ?').get(targetUsername) as { socket: string};
-        const targetId = db.prepare('SELECT id FROM users WHERE username = ?').get(targetUsername) as { id: number};
-        const isOnline = db.prepare('SELECT is_online FROM users WHERE username = ?').get(targetUsername) as { is_online: number};
-        // ajouter un verification de target.onLine;
-        if (!target) 
-            return reply.code(404).send({ error: 'User not found' });
-        console.log('userId = ', user, ' target = ', target.socket);
-        const msg: ChatMessage = {
-          from: user.username,
-          userId: user.userId,
-          target: targetId.id,
-          for: target.socket,
-          text: message,
-          timestamp: Date.now().toString() // a garder ?
-        };
-        console.log(`target = ${target.socket}`);
-        // ajouter une save des X dernier messages
-        if (!isOnline.is_online)
-          saveMessage(msg);
-        else
-          io.to(target.socket).emit('message', msg); // envoie du message au client 
-        console.log('message emit !');
+// export async function friendSendMsg(app: FastifyInstance) {
+//     app.post('/priv-msg/:username', async (request, reply) => {
+//     console.log('message load !');
+//     try {
+//         const user = request.user as { username: string, userId: number };
+//         const { message } = request.body as { message: string };
+//         const { username: targetUsername } = request.params as { username: string };
+//         const target = db.prepare('SELECT socket FROM users WHERE username = ?').get(targetUsername) as { socket: string};
+//         const targetId = db.prepare('SELECT id FROM users WHERE username = ?').get(targetUsername) as { id: number};
+//         const isOnline = db.prepare('SELECT is_online FROM users WHERE username = ?').get(targetUsername) as { is_online: number};
+//         // ajouter un verification de target.onLine;
+//         if (!target) 
+//             return reply.code(404).send({ error: 'User not found' });
+//         console.log('userId = ', user, ' target = ', target.socket);
+//         const msg: ChatMessage = {
+//           from: user.username,
+//           userId: user.userId,
+//           target: targetId.id,
+//           for: target.socket,
+//           text: message,
+//           timestamp: Date.now().toString() // a garder ?
+//         };
+//         console.log(`target = ${target.socket}`);
+//         // ajouter une save des X dernier messages
+//         if (!isOnline.is_online)
+//           saveMessage(msg);
+//         else
+//           io.to(target.socket).emit('message', msg); // envoie du message au client 
+//         console.log('message emit !');
 
-        return { success: true, from: user.userId, to: targetId.id, message };
-    } catch (err) {
-        return reply.code(500).send({ error: 'Failed to send message' });
-    }
-  });
-}
+//         return { success: true, from: user.userId, to: targetId.id, message };
+//     } catch (err) {
+//         return reply.code(500).send({ error: 'Failed to send message' });
+//     }
+//   });
+// }
 
 export async function friendList(app: FastifyInstance) {
     app.get('/friend-list', async (request, reply) => {

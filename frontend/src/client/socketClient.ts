@@ -1,5 +1,15 @@
 import io, { Socket } from 'socket.io-client';
 
+interface ChatMessage {
+    from: string;
+    userId: number;
+    target: number;
+    for: string;
+    text: string;
+    timestamp: string;
+}
+
+
 let socketChat: Socket | null = null;
 let socketPong: Socket | null = null;
 let socketShifumi: Socket | null = null;
@@ -35,6 +45,14 @@ export function getSockets(): [Socket, Socket, Socket] {
       socketChat!.emit('register-socket', userId);
     });
 
+    socketChat.on('message', (msg: ChatMessage) => {
+      console.log(`${msg.from} (${msg.timestamp}) : ${msg.text}`);
+    });
+
+    socketChat.on('error', (text: string) => {
+      console.error(`${text}`);
+    })
+
     socketChat.on('disconnect', (reason) => {
       console.warn('Socket disconnected:', reason);
     });
@@ -42,6 +60,8 @@ export function getSockets(): [Socket, Socket, Socket] {
     socketChat.on('connect_error', (err) => {
       console.error('Connection error:', err.message);
     });
+
+
     // SOCKET PONG
     socketPong = io('http://localhost:3002', {
       path: '/pongSocket/',
@@ -85,4 +105,15 @@ export function getSockets(): [Socket, Socket, Socket] {
   }
 
   return [socketChat!, socketPong!, socketShifumi!];
+}
+
+export function getSocket(id:number)
+{
+  switch (id)
+  {
+    case 0: return socketChat;
+    case 1: return socketPong;
+    case 2: return socketShifumi;
+    default: return null;
+  }
 }
