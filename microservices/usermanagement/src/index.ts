@@ -5,7 +5,6 @@ import dotenv from 'dotenv';
 import jwt from '@fastify/jwt';
 import db from './dbSqlite/db.js';
 import { Message } from './chatModel.js'
-import { ChatMessage } from './userSocket.js';
 import {
   auth,
   register
@@ -17,8 +16,9 @@ import {
   deleteProfile,
   friendAdd,
   friendDelete,
-  friendSendMsg
+  // friendSendMsg
 } from './userRoutes.js';
+import { ChatMessage, saveMessage } from './userSocket.js';
 
 dotenv.config();
 
@@ -81,9 +81,30 @@ io.on('connection', (socket) => {
         io.to(socket.id).emit('message', tmp);
       });
     }
-    socket.on('message', (msg) => {
-      console.log('message received');
-      io.to(msg.for).emit('message', msg);
+
+    socket.on('message', (txt, userId, targetUsername) => {
+      const username = db.prepare('SELECT username FROM users WHERE id = ?').get(userId) as {username: string};
+      const targetId = db.prepare('SELECT id FROM users WHERE username = ?').get(targetUsername) as {id: number};
+      const targetSocket = db.prepare('SELECT socket FROM users WHERE username = ?').get(targetUsername) as {socket: string};
+      const targetIsOnline = db.prepare('SELECT is_online FROM users WHERE username = ?').get(targetUsername) as {is_online: number};
+      
+      if (!targetSocket)
+        io.to(socket.id).emit('error', 'error 404 : target not found !');
+
+      const msg: ChatMessage = {
+        from: username.username,
+        userId: userId,
+        target: targetId.id,
+        for: targetSocket.socket,
+        text: txt,
+        timestamp:  Date.now().toString()
+      }
+
+      if (!targetIsOnline.is_online)
+        saveMessage(msg);
+      else
+        io.to(msg.for).emit('message', msg);
+
     });
   });
 
@@ -121,7 +142,7 @@ app.register(updateProfile, { prefix: '/api/user' });
 app.register(deleteProfile, { prefix: '/api/user' });
 app.register(friendAdd, { prefix: '/api/user' });
 app.register(friendDelete, { prefix: '/api/user' });
-app.register(friendSendMsg, { prefix: '/api/user' });
+// app.register(friendSendMsg, { prefix: '/api/user' });
 
 // Start Fastify server
 app.listen({ port: Number(PORT), host: '0.0.0.0' }, (err,) => {
