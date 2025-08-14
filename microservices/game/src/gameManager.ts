@@ -1,88 +1,117 @@
-import { Game } from './game.js';
-import { Socket } from 'socket.io';
-import { Paddle } from './gameObjects/Paddle.js';
-import { io } from './index.js'
+import {Game} from './game.ts'
+import {Paddle} from "./gameObjects/Paddle.ts";
+import * as Vec2D from "vector2d";
 
-export class  GameManager {
-  private games = new Map<string, Game>();
-  private userSockets = new Map<number, string>();
-  private socketToUser = new Map<string, number>();
+export class GameManager {
 
-  private gameKey(a: string, b: string) {
-    return [a, b].sort().join('-');
-  }
+// Attributes
 
-  registerGame(p1: string, p2: string, gameId: number): boolean {
-    const key = this.gameKey(p1, p2);
-    if (this.games.has(key)) 
-      return false;
-    if ([...this.games.keys()].some(k => k.includes(p1) || k.includes(p2))) 
-      return false;
-    this.games.set(key,
-      new Game(gameId)
-        .joinTeam(new Paddle(p1), 'left')
-        .joinTeam(new Paddle(p2), 'right')
-    );
-    return true;
-  }
+    private _games = new Map<[string], [Game, [string, string]]>();
 
-  async startGame(p1: string, p2: string): Promise<number[]> {
-    const key = this.gameKey(p1, p2);
-    const game = this.games.get(key);
-    if (!game) return [];
-    game.start();
-    while (game.state !== 'ended') {
-      await new Promise(res => setTimeout(res, 100));
+// Accessors
+
+    // This find the game based on something we know on the game: either on of the playerID or one of the lobby's name
+    findGame(key: string): Game | null {
+        if (key === undefined)
+            return null;
+        for (const [name, [game, [p1, p2]]] of this._games.entries())
+            if (name === key || p1 == key || p2 == key)
+                return game;
+        return null;
     }
-    const score = game.score;
-    this.games.delete(key);
-    return score;
-  }
 
-  getGameInfo(playerId: string): Game | undefined {
-    return [...this.games.values()]
-      .find(g =>
-        g.leftTeam.concat(g.rightTeam)
-          .some(p => p.playerID === playerId)
-      );
-  }
-
-  receiveInput(playerId: string, key: string, action: 'keydown' | 'keyup'): boolean {
-    const game = this.getGameInfo(playerId);
-    if (!game) return false;
-    game.handleClientInput(playerId, key, action);
-    return true;
-  }
-
-  registerSocket(userId: number, socketId: string): boolean {
-    this.userSockets.set(userId, socketId);
-    this.socketToUser.set(socketId, userId);
-    return true;
-  }
-
-  unregisterSocket(socketId: string): boolean {
-    const userId = this.socketToUser.get(socketId);
-    if (userId !== undefined) {
-      this.userSockets.delete(userId);
-      this.socketToUser.delete(socketId);
-      console.log(`Cleaned up socket for user ${userId}`);
-      return true;
+    createLobby(lobbyName: string): number {
+        if (this._games.has(lobbyName))
+            return 1;
+        this._games.set(lobbyName, [new Game(), [null, null]]);
+        return 0;
     }
-    return false;
-  }
 
-  getSocketId(userId: number): string | undefined {
-    return this.userSockets.get(userId);
-  }
+    joinLobby(lobbyName: string, playerID: string): number {
+        if (!this._games.has(lobbyName))
+            return 1;
+        if (this.findGame(playerID) != null)
+            return 2;
+        const [game, [p1, p2]] = this._games.get(lobbyName);
+        if (p1 === null)
+            this._games.set(lobbyName, [game.joinTeam(new Paddle(playerID, new Vec2D.Vector(-9, 0)), "left"), [playerID, null]]);
+        else if (p2 === null)
+            this._games.set(lobbyName, [game.joinTeam(new Paddle(playerID, new Vec2D.Vector(9, 0)), "right"), [p1, playerID]]);
+        else
+            return 3;
+        return 0;
+    }
 
-  getUserId(socketId: string): number | undefined {
-    return this.socketToUser.get(socketId);
-  }
+    startGame(lobbyName: string): number {
+        // Check if game exists
+        if (!this._games.has(lobbyName))
+            return 1;
+        // Starts the game
+        const [game, [p1, p2]] = this._games.get(lobbyName);
+        if (p1 === null || p2 === null)
+            return 2;
+        currGame.start();
+        return 0;
+    }
 
-  getSocket(userId: number): Socket | undefined {
-  const socketId = this.userSockets.get(userId);
-  if (!socketId) 
-    return undefined;
-  return io.sockets.sockets.get(socketId);
-}
+    forfeit(lobbyName: string, playerID: string): number {
+        // Check if game exists
+        if (!this._games.has(lobbyName))
+            return 1;
+        const [game, [p1, p2]] = this._games.get(lobbyName);
+        if (playerID != p1 && playerID != p2)
+            return 2
+        game.state = "ended";
+        if (p1 === playerID)
+            game.score = [0, 11];
+        else
+            game.score = [11, 0];
+        return 0;
+    }
+
+    stopGame(lobbyName: string): number {
+        // Check if game exists
+        if (!this._games.has(lobbyName))
+            return 1;
+        // Stops the game
+        const [game, [_, _]] = this._games.get(lobbyName);
+        game.state = "ended";
+        return 0;
+    }
+
+    getScore(lobbyName: string) : [number, number] | null {
+        // Check if game exists
+        if (!this._games.has(lobbyName))
+            return null;
+        const [game, [_, _]] = this._games.get(lobbyName);
+        if (game.state !== "ended")
+            return null;
+        return game.score;
+    }
+
+    deleteGame(lobbyName: string): number {
+        // Check if game exists
+        if (!this._games.has(lobbyName))
+            return 1;
+        const [game, [_, _]] = this._games.get(lobbyName);
+        if (game.state !== "ended")
+            return 2;
+        this._games.delete(lobbyName);
+        return 0;
+    }
+
+    getGameInfo(lobbyName: string) {
+        const game : Game | undefined = this._games.get(lobbyName);
+        if (game === undefined)
+            return null;
+        return {
+            ballPos: { x: game.ball.pos.x, y: game.ball.pos.y },
+            ballDir: { x: game.ball.dir.x, y: game.ball.dir.y },
+            leftPaddles: game.leftTeam,
+            rightPaddles: game.rightTeam,
+            leftScore: game.score[0],
+            rightScore: game.score[1]
+        };
+    }
+
 }
