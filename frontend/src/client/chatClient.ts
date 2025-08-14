@@ -19,7 +19,7 @@ export function init() {
             if (socket)
                 socket.emit('message', msg, getUserIdFromToken(), 'toma');
             else
-                console.error(`error 404 : sokcet not found !`);
+                console.error(`error 404 : socket not found !`);
             // console.log('Start sended message !');
             // const res = await fetch('http://localhost:3001/api/user/priv-msg/toma', {
             // method: 'POST',

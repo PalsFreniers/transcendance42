@@ -1,5 +1,5 @@
 import { FastifyInstance } from 'fastify';
-import { createGameLobby, Game } from './gameModel.js';
+import { createGameLobby, GameData } from './gameModel.js';
 import db from './dbSqlite/db.js';
 
 export async function createRoom(app: FastifyInstance) {
@@ -10,7 +10,7 @@ export async function createRoom(app: FastifyInstance) {
       opponentId: number;
     };
     // Prepare game object according to your interface
-    const newGame: Game = {
+    const newGame: GameData = {
       playerOne: user.id,
       playerTwo: opponentId,
       lobbyName,

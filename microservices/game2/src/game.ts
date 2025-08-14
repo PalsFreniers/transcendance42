@@ -1,21 +1,28 @@
-import { GameBoard } from "./gameObjects/gameBoard";
-
+import { GameBoard } from "./gameObjects/gameBoard.js";
+import { io } from "./index.js"
 // le start du jeu, les actions, les point(, la fin et le lobby d'attente de joueur ?) 
 
 export class game
 {
+    private gameId: number;
     private playerOneId :number;
     private playerTwoId :number;
     private gameBoard :GameBoard = new GameBoard();
     private playerOnePoint: number = 0;
     private playerTwoPoint: number = 0;
 
-    constructor(playerOne :number, playerTwo :number) {
+    constructor(playerOne :number, playerTwo :number, gameId: number) {
         this.playerOneId = playerOne;
         this.playerTwoId = playerTwo;
-
+        this.gameId = gameId;
     }
 
+    public start()
+    {
+        console.log('game started');
+        io.to(`${this.gameId}.1`).to(`${this.gameId}.2`).emit('started-game');
+
+    }
     public playedCards(idOne :number, numberOne :number, idTwo :number, numberTwo :number)
     {
         if (idOne == idTwo)

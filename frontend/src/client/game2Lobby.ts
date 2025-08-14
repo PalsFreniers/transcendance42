@@ -1,11 +1,14 @@
 
 import { getSocket } from './socketClient.js';
-import { getUserIdFromToken } from './loginClient.js'
+import {getUserIdFromToken, getUsernameFromToken} from './loginClient.js'
 
 
 export function init(){
 	const token = localStorage.getItem('token');
-
+	if (!token) {
+		window.location.href = '/login';
+		return;
+	}
 	const app = document.getElementById('app');
 	const solo_button  = document.getElementById("solo-button");
 	const match_button  = document.getElementById("match-button");
@@ -23,8 +26,21 @@ export function init(){
 			if (!sock)
 				return console.error('error 404 : socket not found !');
 			else
-				sock.emit('create-room');
+				sock.emit('create-room', getUserIdFromToken());
 			console.log('game button pressed !');
+		})
+	}
+
+	if (join_button)
+	{
+		join_button.addEventListener('click', async (e) => {
+			e.preventDefault();
+			var sock = getSocket(2);
+			if (!sock)
+				return console.error('error 404 : socket not found !');
+			else
+				sock.emit('join-room', getUserIdFromToken(), 1, getUsernameFromToken());
+			console.log('join button pressed !');
 		})
 	}
 }

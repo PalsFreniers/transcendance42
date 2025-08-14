@@ -1,8 +1,8 @@
 import db from './dbSqlite/db.js';
 
-export interface Game {
+export interface GameData {
     playerOne: number;
-    playerTwo?: number;         // Optional at first
+    playerTwo?: number | null;         // Optional at first
     lobbyName: string;
     finalScore?: string;        // Will be set after game ends
     status?: 'waiting' | 'playing' | 'finished';
@@ -11,9 +11,9 @@ export interface Game {
     gameDate?: string;
 }
 
-export function createGameLobby(game: Game) {
+export function createGameLobby(game: GameData) {
   const stmt = db.prepare(`
-    INSERT INTO games (player_one_id, player_two_id, lobby_name, game_score, status, start_time, end_time, date)
+    INSERT INTO games2 (player_one_id, player_two_id, lobby_name, game_score, status, start_time, end_time, date)
     VALUES (?, ?, ?, ?, ?, ?, ?, ?)
   `);
 

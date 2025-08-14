@@ -3,14 +3,18 @@ import dotenv from 'dotenv';
 import cors from '@fastify/cors';
 import jwt from '@fastify/jwt';
 import { Server, Socket } from "socket.io";
+import db from './dbSqlite/db.js';
+
 import {
-  createRoom,
   inGame,
   awaitforOpponent,
-  joinLobby,
+  // joinLobby,
   historyGame,
   postGame
 } from './gameRoutes.js';
+import { createRoom, joinRoom } from './Game2Socket.js';
+import { GameData } from './gameModel.js';
+import { game } from './game.js';
 
 dotenv.config();
 
@@ -37,26 +41,19 @@ export const io = new Server(app.server, {
   },
 });
 
-// a metre dans un autre fichier ?
-function authMiddleware(
-  eventHandler: (socket: Socket, ...args: any[]) => void) {
-  return (socket: Socket) => {
-    return async (...args: any[]) => {
-      console.log('hello there !');
-      try {
-        await app.jwt.verify(socket.handshake.auth.token);
-        eventHandler(socket, ...args);
-      } catch (err) {
-        console.log('Token expired or invalid');
-        io.to(socket.id).emit("error", "Token expired or invalid");
-      }
-    };
-  };
-}
-
-
 // TOKEN 
 app.register(jwt , {secret: process.env.JWT_SECRET!});
+
+function verifTokenSocket(socket: Socket)
+{
+    try {
+        const tmp = app.jwt.verify(socket.handshake.auth.token);
+        return true ;
+    } catch {
+        // io.to(socket.id).emit("error", "Token expired or invalid");
+        return false;
+    }
+}
 
 io.use(async (socket, next) => {
     try {
@@ -77,28 +74,45 @@ io.on('connection', (socket: Socket) => {
     socket.on('register-socket', (userId: number) => {
       console.log(`User ${userId} registered with Shifumi socket ${socket.id}`);
     });
-  
-    socket.on('join-room', (roomId: string) => {
-      socket.join(roomId);
-      console.log(`Socket ${socket.id} joined room ${roomId}`);
+
+    socket.on('start-game', (playerId: number) => {
+        console.log('here !');
+        const lobby = db.prepare(`SELECT * FROM games2 WHERE player_one_id = ? AND status = 'waiting'`).get(playerId) as GameData;
+        db.prepare(`UPDATE games2 SET status = ? WHERE lobby_name = ?`).run('playing', lobby.lobbyName);
+        if (lobby.playerTwo) {
+            var shifumi: game = new game(lobby.playerOne, lobby.playerTwo, 1); // modifier le 1 par le roomId
+            shifumi.start();
+        }
+    });
+
+    socket.on('join-room', (userId : number, roomId: number, username: string) => {
+        if (!verifTokenSocket(socket))
+            return io.to(socket.id).emit('error', 'error : your token isn\'t valid !');
+        if (!userId)
+            return io.to(socket.id).emit('error', 'error : your user id isn\'t valid !');
+        if (!roomId || roomId > nextGameId)
+            return io.to(socket.id).emit('error', 'error : a part cannot be found with this id !');
+
+        if (joinRoom(userId.toString(), roomId.toString())) {
+            socket.join(`${roomId.toString()}.2`);
+            io.to(socket.id).emit('roomJoined', roomId);
+            io.to(`${roomId.toString()}.1`).emit('opponent-found', username);
+        }
     });
   
-    socket.on('create-room', () => {
-      try {
-        const tmp = app.jwt.verify(socket.handshake.auth.token);
-        console.log(`token is always valide`);
-      }
-      catch {
-        io.to(socket.id).emit("error", "Token expired or invalid");
-        console.log(`socket ${socket.id} can't connect !`);
-        return ;
-      }
-      const roomId: number = nextGameId++;
+    socket.on('create-room', (userId: number) => {
+      if (!verifTokenSocket(socket))
+          return io.to(socket.id).emit('error', 'your token is not valid !');
 
-      socket.join(roomId.toString());
+      if (!userId)
+          return io.to(socket.id).emit('error', 'error : your user id isn\'t valid !');
+
+      const roomId: number = nextGameId++;
+      if (createRoom(userId, `game-${roomId.toString()}`))
+         socket.join(`${roomId.toString()}.1`);
+
       // ajouter la fonction pour cree la game avec le roomId
       io.to(socket.id).emit('roomJoined', roomId);
-
     });
 
     socket.on('disconnect', () => {
@@ -107,10 +121,10 @@ io.on('connection', (socket: Socket) => {
   });
 
 //ROUTES
-app.register(createRoom);
+// app.register(createRoom);
 app.register(inGame);
 app.register(awaitforOpponent);
-app.register(joinLobby)
+// app.register(joinLobby)
 app.register(historyGame);
 app.register(postGame);
 

@@ -1,4 +1,5 @@
 import io, { Socket } from 'socket.io-client';
+import { handleRoute} from "./navClient.js";
 
 interface ChatMessage {
     from: string;
@@ -98,8 +99,42 @@ export function getSockets(): [Socket, Socket, Socket] {
     });
 
     socketShifumi.on('roomJoined', (roomId: number) => {
+      history.pushState(null, '', '/shifumi');
+      handleRoute();
       alert(`you join room ${roomId}`);
       console.log(`you join room ${roomId}`)
+    });
+
+    socketShifumi.on('opponent-found', (username: string) => {
+      console.log('opponent found !');
+      const button = document.getElementById('start-button');
+      const opponent = document.getElementById('opponent-name');
+      if (button) {
+        button.hidden = false;
+        button.addEventListener('click', async (e) => {
+          e.preventDefault();
+          socketShifumi.emit('start-game', getUserIdFromToken());
+        });
+      }
+      if (opponent)
+        opponent.textContent = `your opponent is ${username}`;
+    });
+
+    socketShifumi.on('game-started', () => {
+      console.log('game started');
+      const start = document.getElementById('start-button');
+      const card1 = document.getElementById('card1-button');
+      const card2 = document.getElementById('card2-button');
+      const card3 = document.getElementById('card3-button');
+      if (start) {
+        start.hidden = true;
+        if (card1)
+          card1.hidden = false;
+        if (card2)
+          card2.hidden = false;
+        if (card3)
+          card3.hidden = false;
+      }
     });
 
     socketShifumi.on('roomInfo', (info: string) => {
