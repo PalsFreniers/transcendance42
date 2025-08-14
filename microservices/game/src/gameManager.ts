@@ -6,91 +6,111 @@ export class GameManager {
 
 // Attributes
 
-    private _games = new Map<[string, string], Game>();
+    private _games = new Map<[string], [Game, [string, string]]>();
 
 // Accessors
 
-    public get games() {
-        return this._games;
-    }
-
-    public getGames() {
-        return this._games;
-    }
-
-    private createPair(firstPlayer: string, secondPlayer: string): [string, string] {
-        if (firstPlayer > secondPlayer)
-            return [firstPlayer, secondPlayer];
-        return [secondPlayer, firstPlayer];
-    }
-
-    findGame(player: string): Game | null {
-        for (const [[player1, player2], game] of this._games.entries()) {
-            if (player1 === player || player2 === player)
+    // This find the game based on something we know on the game: either on of the playerID or one of the lobby's name
+    findGame(key: string): Game | null {
+        if (key === undefined)
+            return null;
+        for (const [name, [game, [p1, p2]]] of this._games.entries())
+            if (name === key || p1 == key || p2 == key)
                 return game;
-        }
         return null;
     }
 
-    registerGame(firstPlayer: string, secondPlayer: string): boolean {
-        const pair = this.createPair(firstPlayer, secondPlayer);
-        // Check if game already exists
-        if (this._games.has(pair)) {
-            return false;
-        }
-        // Checks if players are already in a game
-        for (const [[player1, player2], _] of this._games.entries()) {
-            if (player1 === firstPlayer || player1 === secondPlayer
-                || player2 === firstPlayer || player2 === secondPlayer) {
-                return false;
-            }
-        }
-        // Add players to a game
-        let leftPaddle = new Paddle(pair[0], new Vec2D.Vector(9, 0));
-        let rightPaddle = new Paddle(pair[1], new Vec2D.Vector(-9, 0));
-        this._games.set(pair, new Game().joinTeam(leftPaddle, "left").joinTeam(rightPaddle, "right"));
-        return true;
+    createLobby(lobbyName: string): number {
+        if (this._games.has(lobbyName))
+            return 1;
+        this._games.set(lobbyName, [new Game(), [null, null]]);
+        return 0;
     }
 
-    stopGame(firstPlayer: string, secondPlayer: string): boolean {
-        const pair = this.createPair(firstPlayer, secondPlayer);
-        // Check if game exists
-        if (!this._games.has(pair))
-            return false;
-        // Stops the game
-        this._games.get(pair)!.state = "ended";
-        this._games.delete(pair);
-        return true;
+    joinLobby(lobbyName: string, playerID: string): number {
+        if (!this._games.has(lobbyName))
+            return 1;
+        if (this.findGame(playerID) != null)
+            return 2;
+        const [game, [p1, p2]] = this._games.get(lobbyName);
+        if (p1 === null)
+            this._games.set(lobbyName, [game.joinTeam(new Paddle(playerID, new Vec2D.Vector(-9, 0)), "left"), [playerID, null]]);
+        else if (p2 === null)
+            this._games.set(lobbyName, [game.joinTeam(new Paddle(playerID, new Vec2D.Vector(9, 0)), "right"), [p1, playerID]]);
+        else
+            return 3;
+        return 0;
     }
 
-    startGame(firstPlayer: string, secondPlayer: string): Boolean {
-        const pair = this.createPair(firstPlayer, secondPlayer);
+    startGame(lobbyName: string): number {
         // Check if game exists
-        if (!this._games.has(pair)) {
-            return false;
-        }
+        if (!this._games.has(lobbyName))
+            return 1;
         // Starts the game
-        const currGame = this._games.get(pair)!;
+        const [game, [p1, p2]] = this._games.get(lobbyName);
+        if (p1 === null || p2 === null)
+            return 2;
         currGame.start();
-        return true;
+        return 0;
     }
 
-    receiveInput(playerID: string, info: [boolean, boolean]): boolean {
-        for (const [[player1, player2], game] of this._games.entries())
-            if (player1 === playerID || player2 === playerID)
-                return game.handleClientInput(playerID, info);
-        return false;
+    forfeit(lobbyName: string, playerID: string): number {
+        // Check if game exists
+        if (!this._games.has(lobbyName))
+            return 1;
+        const [game, [p1, p2]] = this._games.get(lobbyName);
+        if (playerID != p1 && playerID != p2)
+            return 2
+        game.state = "ended";
+        if (p1 === playerID)
+            game.score = [0, 11];
+        else
+            game.score = [11, 0];
+        return 0;
     }
 
-    getGameInfo(firstPlayer: string, secondPlayer: string) {
-        const game : Game | undefined = this._games.get(this.createPair(firstPlayer, secondPlayer));
+    stopGame(lobbyName: string): number {
+        // Check if game exists
+        if (!this._games.has(lobbyName))
+            return 1;
+        // Stops the game
+        const [game, [_, _]] = this._games.get(lobbyName);
+        game.state = "ended";
+        return 0;
+    }
+
+    getScore(lobbyName: string) : [number, number] | null {
+        // Check if game exists
+        if (!this._games.has(lobbyName))
+            return null;
+        const [game, [_, _]] = this._games.get(lobbyName);
+        if (game.state !== "ended")
+            return null;
+        return game.score;
+    }
+
+    deleteGame(lobbyName: string): number {
+        // Check if game exists
+        if (!this._games.has(lobbyName))
+            return 1;
+        const [game, [_, _]] = this._games.get(lobbyName);
+        if (game.state !== "ended")
+            return 2;
+        this._games.delete(lobbyName);
+        return 0;
+    }
+
+    getGameInfo(lobbyName: string) {
+        const game : Game | undefined = this._games.get(lobbyName);
         if (game === undefined)
             return null;
         return {
             ballPos: { x: game.ball.pos.x, y: game.ball.pos.y },
             ballDir: { x: game.ball.dir.x, y: game.ball.dir.y },
             leftPaddles: game.leftTeam,
-            rightPaddles: game.rightTeam
+            rightPaddles: game.rightTeam,
+            leftScore: game.score[0],
+            rightScore: game.score[1]
         };
     }
 

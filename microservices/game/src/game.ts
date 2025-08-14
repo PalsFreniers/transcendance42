@@ -19,7 +19,7 @@ export class Game {
     private _leftTeam: Paddle[] = [];
     private _rightTeam: Paddle[] = [];
     private _allTeams: Paddle[] = [];
-    private _score: number[] = [0, 0];
+    private _score: [number, number] = [0, 0];
     private _tickRate = 1000 / 60; // 60 FPS
     private _state: string = "notStarted";
 
@@ -105,16 +105,6 @@ export class Game {
             this.idlingBall();
         else if (this._state == "starting")
             this.idlingBall();
-    }
-
-    handleClientInput(playerID: string, info: boolean[]) {
-        const paddleName = `paddle.${playerID}`;
-        for (const paddle of this._allTeams) {
-            if (paddle.hitbox.name !== paddleName) continue;
-            paddle.shouldMove = info;
-            return true;
-        }
-        return false;
     }
 
     private updateBall() {
