@@ -10,10 +10,10 @@ export async function createRoom(app: FastifyInstance, manager: GameManager) {
         try {
             let errno = 0;
             const { userId, username } = req.user as { userId: number, username: string };
-            const { lobbyName } = req.body as { lobbyName: string };
+            const { lobbyName, gameID } = req.body as { lobbyName: string, gameID: number };
             if (!lobbyName)
                 return reply.status(400).send({ error: 'lobbyName is required' });
-            errno = manager.createLobby(lobbyName);
+            errno = manager.createLobby(lobbyName, gameID);
             if (errno)
                 return reply.status(400).send({ error: `lobby ${lobbyName} is already used` });
             errno = manager.joinLobby(lobbyName, String(userId))
@@ -31,7 +31,7 @@ export async function createRoom(app: FastifyInstance, manager: GameManager) {
                 gameDate: new Date().toISOString(),
             });
             const game = db.prepare('SELECT * FROM games WHERE id = ?').get(gameId) as GameRecord;
-            //const socketId = manager.getSocketId(user.userId); // ? manager doesnt handle sockets
+            const socketId = manager.getSocketId(userId);
             const socket = socketId ? io.sockets.sockets.get(socketId) : null;
             if (socket && socketId) {
                 socket.join(`game-${gameId}`);
@@ -80,9 +80,6 @@ export async function joinLobby(app: FastifyInstance, manager: GameManager) {
             return reply.status(404).send({ error: 'Lobby not found' });
         const playerOneId = lobby.player_one_id;
         db.prepare(`UPDATE games SET player_two_id = ? WHERE id = ?`).run(user.userId, gameId);
-        // const ok = manager.registerGame(playerOneId.toString(), user.userId.toString(), gameId);
-        // if (!ok)
-        //     return reply.status(409).send({ success: false, message: 'Players already in a game' });
         // Emit socket event to backend-managed sockets
         io.to(`game-${gameId}`).emit('player-joined', {
             roomId: `game-${gameId}`,
@@ -183,18 +180,6 @@ export async function historyGame(app: FastifyInstance) {
             ORDER BY date DESC
         `).all(user.userId, user.userId);
         return { success: true, history };
-    });
-}
-
-export async function postGame(app: FastifyInstance) {
-    app.post('/api/game/end-game', async (req) => {
-        const { gameId, finalScore } = req.body as { gameId: number; finalScore: string };
-        db.prepare(`
-            UPDATE games
-            SET game_score = ?, status = 'finished', end_time = CURRENT_TIMESTAMP
-            WHERE id = ?
-        `).run(finalScore, gameId);
-        return { success: true };
     });
 }
 

@@ -8,6 +8,7 @@ export class Game {
 // Constructor
 
     constructor(
+        private _gameID: number,
         private _map: Collidable[] = [
             createRectangle(new Vec2D.Vector(-10, -5), new Vec2D.Vector(20, -10), "mapUp"),
             createRectangle(new Vec2D.Vector(10, -5), new Vec2D.Vector(20, 10), "mapLeft"),
@@ -51,6 +52,10 @@ export class Game {
 
     public set state(newState: string) {
         this._state = newState;
+    }
+
+    public get gameID() {
+        return this._gameID;
     }
 
     getPaddle(playerID: number) {

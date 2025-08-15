@@ -15,7 +15,8 @@ export function createRoomLogic(manager: GameManager, userId: number, username: 
     gameDate: new Date().toISOString(),
   });
 
-  manager.registerGame(userId.toString(), '', gameId);
+  manager.createLobby(lobbyName, gameId);
+  manager.joinLobby(lobbyName, String(userId));
 
   return {
     gameId,
@@ -33,14 +34,15 @@ export function joinLobbyLogic(manager: GameManager, userId: number, username: s
     WHERE id = ?
   `).get(gameId) as { player_one_id: number; player_two_id: number | null; lobby_name: string };
 
-  if (!lobby) 
+  if (!lobby || !manager.findGame(String(gameId)))
     throw new Error('Lobby not found');
-  if (lobby.player_two_id) 
+  if (lobby.player_two_id)
     throw new Error('Lobby is full');
+
   db.prepare(`UPDATE games SET player_two_id = ? WHERE id = ?`).run(userId, gameId);
 
   // Register in GameManager
-  manager.registerGame(lobby.player_one_id.toString(), userId.toString(), gameId);
+  manager.joinLobby(lobby.lobby_name, String(userId));
 
   return {
     gameId,

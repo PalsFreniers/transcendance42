@@ -5,11 +5,10 @@ import jwt from '@fastify/jwt';
 import { Server } from "socket.io";
 import {
     createRoom,
-    inGame,
+    // inGame,
     awaitForOpponent,
     joinLobby,
     historyGame,
-    postGame,
     handleInput, startGame, forfeit, stopGame, getScore, deleteGame
 } from './gameRoutes.js';
 import { GameManager } from './gameManager.js';
@@ -28,8 +27,8 @@ await app.register(cors, {
   origin: 'http://localhost:5173',
   credentials: true,
   methods: ['GET', 'POST'],
-    origin: '*',
-    credentials: true,
+    // origin: '*',
+    // credentials: true,
 });
 
 export const io = new Server(app.server, {
@@ -37,10 +36,10 @@ export const io = new Server(app.server, {
   cors: {
     origin: 'http://localhost:5173', // ALL ORIGIN REQUEST ALLOWED
     credentials: true,
-  },
-    cors: {
-        origin: "*",
-    },
+  }//,
+    // cors: {
+    //     origin: "*",
+    // }
 });
 
 //SETUP FOR PONG GAME
@@ -103,9 +102,11 @@ io.on('connection', (socket) => {
     });
 
     socket.on('input', ({ gameId, playerId, key, action }) => {
-        const game = manager.getGameInfo(playerId);
+        const game = manager.findGame(playerId);
         if (game) {
-            game.handleClientInput(playerId, key, action);
+            const paddle = game.getPaddle(Number(playerId))!;
+            let info = paddle.getState();
+            info[key === 'up' ? 0 : 1] = (action == 'keyup')
         } else {
             console.warn(`No active game found for player ${playerId}`);
         }

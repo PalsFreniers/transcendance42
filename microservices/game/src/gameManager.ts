@@ -7,23 +7,23 @@ export class GameManager {
 // Attributes
 
     private _games = new Map<string, [Game, [string | null, string | null]]>();
-
-// Accessors
-
+    private _userSockets = new Map<number, string>();
+    private _socketToUser = new Map<string, number>();
+x
     // This find the game based on something we know on the game: either on of the playerID or one of the lobby's name
     findGame(key: string): Game | null {
         if (key === undefined)
             return null;
         for (const [name, [game, [p1, p2]]] of this._games.entries())
-            if (name === key || p1 == key || p2 == key)
+            if (name === key || p1 === key || p2 === key || String(game.gameID) === key)
                 return game;
         return null;
     }
 
-    createLobby(lobbyName: string): number {
+    createLobby(lobbyName: string, gameID: number): number {
         if (this._games.has(lobbyName))
             return 1;
-        this._games.set(lobbyName, [new Game(), [null, null]]);
+        this._games.set(lobbyName, [new Game(gameID), [null, null]]);
         return 0;
     }
 
@@ -112,6 +112,31 @@ export class GameManager {
             leftScore: game.score[0],
             rightScore: game.score[1]
         };
+    }
+
+    registerSocket(userId: number, socketId: string): boolean {
+        this._userSockets.set(userId, socketId);
+        this._socketToUser.set(socketId, userId);
+        return true;
+    }
+
+    unregisterSocket(socketId: string): boolean {
+        const userId = this._socketToUser.get(socketId);
+        if (userId !== undefined) {
+            this._userSockets.delete(userId);
+            this._socketToUser.delete(socketId);
+            console.log(`Cleaned up socket for user ${userId}`);
+            return true;
+        }
+        return false;
+    }
+
+    getSocketId(userId: number): string | undefined {
+        return this._userSockets.get(userId);
+    }
+
+    getUserId(socketId: string): number | undefined {
+        return this._socketToUser.get(socketId);
     }
 
 }
