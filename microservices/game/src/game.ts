@@ -41,6 +41,10 @@ export class Game {
         return this._score;
     }
 
+    public set score(newScore: [number, number]) {
+        this._score = newScore;
+    }
+
     public get state() {
         return this._state;
     }

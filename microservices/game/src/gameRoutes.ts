@@ -9,7 +9,7 @@ export async function createRoom(app: FastifyInstance, manager: GameManager) {
     app.post('/api/game/create-game', async (req, reply) => {
         try {
             let errno = 0;
-            const user = req.user as { userId: number, username: string };
+            const { userId, username } = req.user as { userId: number, username: string };
             const { lobbyName } = req.body as { lobbyName: string };
             if (!lobbyName)
                 return reply.status(400).send({ error: 'lobbyName is required' });
@@ -23,7 +23,7 @@ export async function createRoom(app: FastifyInstance, manager: GameManager) {
                             :(errno === 2 ? `player ${username} is already in game/not found`
                             : `lobby ${lobbyName} is full`)) });
             const gameId = createGameLobby({
-                playerOne: user.userId,
+                playerOne: userId,
                 playerTwo: null,
                 lobbyName: lobbyName,
                 finalScore: '0-0',
@@ -36,15 +36,15 @@ export async function createRoom(app: FastifyInstance, manager: GameManager) {
             if (socket && socketId) {
                 socket.join(`game-${gameId}`);
                 io.to(socketId).socketsJoin(`game-${gameId}`);
-                console.log(`User ${user.userId} joined game room game-${gameId}`);
+                console.log(`User ${userId} joined game room game-${gameId}`);
             } else {
-                console.warn(`No socket found for user ${user.userId}`);
+                console.warn(`No socket found for user ${userId}`);
             }
             return reply.send({
                 success: true,
                 gameId,
                 lobbyName,
-                playerOne: user.username,
+                playerOne: username,
                 playerTwo: null,
                 status: game.status
             });
@@ -64,13 +64,13 @@ export async function awaitForOpponent(app: FastifyInstance) {
 
 export async function joinLobby(app: FastifyInstance, manager: GameManager) {
     app.post('/api/game/join-lobby', async (req, reply) => {
-        const user = req.user as { userId: number };
+        const user = req.user as { userId: number, username: string };
         const { lobbyName, gameId } = req.body as { lobbyName: string, gameId: number };
-        let errno = manager.joinLobby(lobbyName, String(userId))
+        let errno = manager.joinLobby(lobbyName, String(user.userId))
         if (errno)
             return reply.status(400).send(
                 { error: (errno === 1 ? `lobby ${lobbyName} does not exist`
-                        :(errno === 2 ? `player ${username} is already in game/not found`
+                        :(errno === 2 ? `player ${user.username} is already in game/not found`
                             : `lobby ${lobbyName} is full`)) });
         const lobby = db.prepare(`SELECT player_one_id, lobby_name FROM games WHERE id = ?`).get(gameId) as {
             player_one_id: number;
@@ -80,9 +80,9 @@ export async function joinLobby(app: FastifyInstance, manager: GameManager) {
             return reply.status(404).send({ error: 'Lobby not found' });
         const playerOneId = lobby.player_one_id;
         db.prepare(`UPDATE games SET player_two_id = ? WHERE id = ?`).run(user.userId, gameId);
-        const ok = manager.registerGame(playerOneId.toString(), user.userId.toString(), gameId);
-        if (!ok)
-            return reply.status(409).send({ success: false, message: 'Players already in a game' });
+        // const ok = manager.registerGame(playerOneId.toString(), user.userId.toString(), gameId);
+        // if (!ok)
+        //     return reply.status(409).send({ success: false, message: 'Players already in a game' });
         // Emit socket event to backend-managed sockets
         io.to(`game-${gameId}`).emit('player-joined', {
             roomId: `game-${gameId}`,
@@ -115,7 +115,7 @@ export async function startGame(app: FastifyInstance, manager: GameManager) {
 
 export async function forfeit(app: FastifyInstance, manager: GameManager) {
     app.post('/api/game/ff', async (req, reply) => {
-        const { lobbyName, playerId } = req.body as {
+        const { lobbyName, gameID, playerID, username } = req.body as {
             lobbyName: string;
             gameID: number;
             playerID: number;
@@ -126,22 +126,21 @@ export async function forfeit(app: FastifyInstance, manager: GameManager) {
             reply.status(400).send({
                 error: (errno === 1 ? `lobby ${lobbyName} not found` : `player ${username} is not in game`)
             });
-        db.prepare(`UPDATE games SET finalScore = ?, status = 'finished', endTime = CURRENT_TIMESTAMP WHERE id = ?`).run(manager.getScore(lobbyName), gameId);
+        db.prepare(`UPDATE games SET finalScore = ?, status = 'finished', endTime = CURRENT_TIMESTAMP WHERE id = ?`).run(manager.getScore(lobbyName), gameID);
         return reply.send({ success: true });
     });
 }
 
 export async function stopGame(app: FastifyInstance, manager: GameManager) {
     app.post('/api/game/stop-game', async (req, reply) => {
-        const { lobbyName, gameID, playerId } = req.body as {
+        const { lobbyName, gameID } = req.body as {
             lobbyName: string;
             gameID: number;
-            playerID: number;
         }
-        const errno = manager.stopGame(lobbyName, String(playerID));
+        const errno = manager.stopGame(lobbyName);
         if (errno)
             reply.status(400).send({ error: `lobby ${lobbyName} not found` });
-        db.prepare(`UPDATE games SET finalScore = ?, status = 'finished', endTime = CURRENT_TIMESTAMP WHERE id = ?`).run(manager.getScore(lobbyName), gameId);
+        db.prepare(`UPDATE games SET finalScore = ?, status = 'finished', endTime = CURRENT_TIMESTAMP WHERE id = ?`).run(manager.getScore(lobbyName), gameID);
         return reply.send({ success: true });
     });
 }
@@ -156,7 +155,7 @@ export async function getScore(app: FastifyInstance, manager: GameManager) {
         const score = manager.getScore(lobbyName);
         if (score === null)
             reply.status(400).send({ error: `error while getting score` }); // sorry for poor error message, im tired af
-        db.prepare(`UPDATE games SET finalScore = ?, status = 'finished', endTime = CURRENT_TIMESTAMP WHERE id = ?`).run(manager.getScore(lobbyName), gameId);
+        db.prepare(`UPDATE games SET finalScore = ?, status = 'finished', endTime = CURRENT_TIMESTAMP WHERE id = ?`).run(manager.getScore(lobbyName), gameID);
         return reply.send({ success: true });
     });
 }
@@ -170,7 +169,7 @@ export async function deleteGame(app: FastifyInstance, manager: GameManager) {
         }
         const errno = manager.deleteGame(lobbyName);
         if (errno)
-            reply.status(400).send({ error: (errno === 1 ? `lobby ${lobbyName} not found` : `game is not finished`) }); // sorry for poor error message, im tired af
+            reply.status(400).send({ error: (errno === 1 ? `lobby ${lobbyName} not found` : `game is not finished`) });
         return reply.send({ success: true });
     });
 }
@@ -201,7 +200,7 @@ export async function postGame(app: FastifyInstance) {
 
 export async function handleInput(app: FastifyInstance, manager: GameManager) {
     app.post('/api/game/input', async (req, reply) => {
-        const { lobbyName, playerID, key, action } = req.body as {
+        const { playerID, key, action } = req.body as {
             playerID: string;
             key: 'up' | 'down';
             action: 'keydown' | 'keyup';

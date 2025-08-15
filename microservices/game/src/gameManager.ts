@@ -1,12 +1,12 @@
-import {Game} from './game.ts'
-import {Paddle} from "./gameObjects/Paddle.ts";
+import {Game} from './game.js'
+import {Paddle} from "./gameObjects/Paddle.js";
 import * as Vec2D from "vector2d";
 
 export class GameManager {
 
 // Attributes
 
-    private _games = new Map<[string], [Game, [string, string]]>();
+    private _games = new Map<string, [Game, [string | null, string | null]]>();
 
 // Accessors
 
@@ -32,7 +32,7 @@ export class GameManager {
             return 1;
         if (this.findGame(playerID) != null)
             return 2;
-        const [game, [p1, p2]] = this._games.get(lobbyName);
+        const [game, [p1, p2]] = this._games.get(lobbyName)!;
         if (p1 === null)
             this._games.set(lobbyName, [game.joinTeam(new Paddle(playerID, new Vec2D.Vector(-9, 0)), "left"), [playerID, null]]);
         else if (p2 === null)
@@ -47,10 +47,10 @@ export class GameManager {
         if (!this._games.has(lobbyName))
             return 1;
         // Starts the game
-        const [game, [p1, p2]] = this._games.get(lobbyName);
+        const [game, [p1, p2]] = this._games.get(lobbyName)!;
         if (p1 === null || p2 === null)
             return 2;
-        currGame.start();
+        game.start();
         return 0;
     }
 
@@ -58,7 +58,7 @@ export class GameManager {
         // Check if game exists
         if (!this._games.has(lobbyName))
             return 1;
-        const [game, [p1, p2]] = this._games.get(lobbyName);
+        const [game, [p1, p2]] = this._games.get(lobbyName)!;
         if (playerID != p1 && playerID != p2)
             return 2
         game.state = "ended";
@@ -74,7 +74,7 @@ export class GameManager {
         if (!this._games.has(lobbyName))
             return 1;
         // Stops the game
-        const [game, [_, _]] = this._games.get(lobbyName);
+        const [game, [_, __]] = this._games.get(lobbyName)!;
         game.state = "ended";
         return 0;
     }
@@ -83,7 +83,7 @@ export class GameManager {
         // Check if game exists
         if (!this._games.has(lobbyName))
             return null;
-        const [game, [_, _]] = this._games.get(lobbyName);
+        const [game, [_, __]] = this._games.get(lobbyName)!;
         if (game.state !== "ended")
             return null;
         return game.score;
@@ -93,7 +93,7 @@ export class GameManager {
         // Check if game exists
         if (!this._games.has(lobbyName))
             return 1;
-        const [game, [_, _]] = this._games.get(lobbyName);
+        const [game, [_, __]] = this._games.get(lobbyName)!;
         if (game.state !== "ended")
             return 2;
         this._games.delete(lobbyName);
@@ -101,14 +101,14 @@ export class GameManager {
     }
 
     getGameInfo(lobbyName: string) {
-        const game : Game | undefined = this._games.get(lobbyName);
+        const [game, [_, __]] = this._games.get(lobbyName)!;
         if (game === undefined)
             return null;
         return {
             ballPos: { x: game.ball.pos.x, y: game.ball.pos.y },
             ballDir: { x: game.ball.dir.x, y: game.ball.dir.y },
-            leftPaddles: game.leftTeam,
-            rightPaddles: game.rightTeam,
+            leftPaddle: { x: game.leftTeam[0].pos.x, y: game.leftTeam[0].pos.y },
+            rightPaddle: { x: game.rightTeam[0].pos.x, y: game.rightTeam[0].pos.y },
             leftScore: game.score[0],
             rightScore: game.score[1]
         };
