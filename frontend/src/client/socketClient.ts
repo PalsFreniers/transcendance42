@@ -14,6 +14,8 @@ interface ChatMessage {
 let socketChat: Socket | null = null;
 let socketPong: Socket | null = null;
 let socketShifumi: Socket | null = null;
+export let gameIdShifumi: number = -1;
+export let myCard: [number, number][] = [];
 
 function getUserIdFromToken(): number {
   const token = localStorage.getItem('token');
@@ -101,7 +103,7 @@ export function getSockets(): [Socket, Socket, Socket] {
     socketShifumi.on('roomJoined', (roomId: number) => {
       history.pushState(null, '', '/shifumi');
       handleRoute();
-      alert(`you join room ${roomId}`);
+      // alert(`you join room ${roomId}`);
       console.log(`you join room ${roomId}`)
     });
 
@@ -111,30 +113,26 @@ export function getSockets(): [Socket, Socket, Socket] {
       const opponent = document.getElementById('opponent-name');
       if (button) {
         button.hidden = false;
-        button.addEventListener('click', async (e) => {
-          e.preventDefault();
-          socketShifumi.emit('start-game', getUserIdFromToken());
-        });
       }
       if (opponent)
         opponent.textContent = `your opponent is ${username}`;
     });
 
-    socketShifumi.on('game-started', () => {
-      console.log('game started');
+    socketShifumi.on('started-game', (gameId: number) => {
+      gameIdShifumi = gameId;
+      console.log(`game (${gameId}) started`);
       const start = document.getElementById('start-button');
       const card1 = document.getElementById('card1-button');
       const card2 = document.getElementById('card2-button');
       const card3 = document.getElementById('card3-button');
-      if (start) {
+      if (start)
         start.hidden = true;
-        if (card1)
-          card1.hidden = false;
-        if (card2)
-          card2.hidden = false;
-        if (card3)
-          card3.hidden = false;
-      }
+      if (card1)
+        card1.hidden = false;
+      if (card2)
+        card2.hidden = false;
+      if (card3)
+        card3.hidden = false;
     });
 
     socketShifumi.on('roomInfo', (info: string) => {
@@ -142,12 +140,30 @@ export function getSockets(): [Socket, Socket, Socket] {
     });
 
     socketShifumi.on('error', (error: string) => {
-      alert(error);
+      // alert(error);
       console.log(error);
     });
 
     socketShifumi.on('disconnect', (reason) => {
       console.warn('Socket disconnected:', reason);
+    });
+
+    socketShifumi.on('game-ended', () => {
+      console.log(`game ended`);
+      gameIdShifumi = 0;
+    });
+
+    socketShifumi.on('card', (card: [number, number][]) => {
+      myCard = card;
+      const card1 = document.getElementById('card1-button');
+      if (card1)
+        card1.textContent = `[${card[0][0]}][${card[0][1]}]`;
+      const card2 = document.getElementById('card2-button');
+      if (card2)
+        card2.textContent = `[${card[1][0]}][${card[1][1]}]`;
+      const card3 = document.getElementById('card3-button');
+      if (card3)
+        card3.textContent = `[${card[2][0]}][${card[2][1]}]`;
     });
 
     socketShifumi.on('connect_error', (err) => {

@@ -4,7 +4,7 @@ import cors from '@fastify/cors';
 import jwt from '@fastify/jwt';
 import { Server, Socket } from "socket.io";
 import db from './dbSqlite/db.js';
-
+import { playedCard } from "./gameObjects/gameBoard.js";
 import {
   inGame,
   awaitforOpponent,
@@ -12,11 +12,14 @@ import {
   historyGame,
   postGame
 } from './gameRoutes.js';
-import { createRoom, joinRoom } from './Game2Socket.js';
+import { createRoom, joinRoom } from './Game2Database.js';
 import { GameData } from './gameModel.js';
 import { game } from './game.js';
+import { Manager } from './gameManager.js'
 
 dotenv.config();
+
+const manager = Manager.getInstance();
 
 let nextGameId: number = 1;
 
@@ -76,12 +79,17 @@ io.on('connection', (socket: Socket) => {
     });
 
     socket.on('start-game', (playerId: number) => {
-        console.log('here !');
-        const lobby = db.prepare(`SELECT * FROM games2 WHERE player_one_id = ? AND status = 'waiting'`).get(playerId) as GameData;
-        db.prepare(`UPDATE games2 SET status = ? WHERE lobby_name = ?`).run('playing', lobby.lobbyName);
-        if (lobby.playerTwo) {
-            var shifumi: game = new game(lobby.playerOne, lobby.playerTwo, 1); // modifier le 1 par le roomId
-            shifumi.start();
+        // const lobby = db.prepare(`SELECT * FROM games2 WHERE player_one_id = ? AND status = 'waiting'`).get(playerId) as GameData;
+        const playerTwo = db.prepare(`SELECT player_two_id FROM games2 WHERE player_one_id = ? AND status = 'waiting'`).get(playerId) as { player_two_id: number };
+        const id = db.prepare(`SELECT id FROM games2 WHERE player_one_id = ? AND status = 'waiting'`).get(playerId) as { id : number };
+        db.prepare(`UPDATE games2 SET status = ? WHERE player_one_id = ? AND status = 'waiting'`).run('playing', playerId);
+
+        if (playerTwo) {
+            manager.newGame(playerId, playerTwo.player_two_id, 1)
+            console.log(`in start-game, id = ${id.id}`);
+            var shifumi = manager.getGame(id.id);
+            if (shifumi)
+                shifumi.start();
         }
     });
 
@@ -113,6 +121,14 @@ io.on('connection', (socket: Socket) => {
 
       // ajouter la fonction pour cree la game avec le roomId
       io.to(socket.id).emit('roomJoined', roomId);
+    });
+
+    socket.on('play-card', (gameId: number, play: playedCard) =>
+    {
+        const game = manager.getGame(gameId);
+        console.log(`id player = ${play.userId}`);
+        if (game)
+            game.chooseCard(play);
     });
 
     socket.on('disconnect', () => {

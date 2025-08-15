@@ -1,4 +1,4 @@
-import {getSocket} from "./socketClient";
+import {getSocket, myCard, gameIdShifumi } from "./socketClient";
 import {getUserIdFromToken} from "./loginClient.js";
 
 export function init() {
@@ -14,12 +14,55 @@ export function init() {
     const card3 = document.getElementById('card3-button');
 
     if (start) {
+        start.addEventListener('click', async (e) => {
+            e.preventDefault();
+            const socketShifumi = getSocket(2);
+            if (socketShifumi) {
+                socketShifumi.emit('start-game', getUserIdFromToken());
+            }
+        });
         start.hidden = true;
     }
-    if (card1)
+    if (card1) {
         card1.hidden = true;
-    if (card2)
+        card1.addEventListener('click', async (e) => {
+            e.preventDefault();
+            const socketShifumi = getSocket(2);
+            if (socketShifumi)
+                socketShifumi.emit('play-card', gameIdShifumi, {
+                    userId : getUserIdFromToken(),
+                    cardId : myCard[0][0],
+                    cardNumber : myCard[0][1]
+                });
+            card1.textContent = '[][]';
+        });
+    }
+    if (card2) {
         card2.hidden = true;
-    if (card3)
+        card2.addEventListener('click', async (e) => {
+            e.preventDefault();
+            const socketShifumi = getSocket(2);
+            if (socketShifumi)
+                socketShifumi.emit('play-card', gameIdShifumi, {
+                    userId : getUserIdFromToken(),
+                    cardId : myCard[1][0],
+                    cardNumber : myCard[1][1]
+                });
+            card2.textContent = '[][]';
+        });
+    }
+    if (card3) {
         card3.hidden = true;
+        card3.addEventListener('click', async (e) => {
+            e.preventDefault();
+            const socketShifumi = getSocket(2);
+            if (socketShifumi)
+                socketShifumi.emit('play-card', gameIdShifumi, {
+                    userId : getUserIdFromToken(),
+                    cardId : myCard[2][0],
+                    cardNumber : myCard[2][1]
+                });
+            card3.textContent = '[][]';
+        });
+    }
 }

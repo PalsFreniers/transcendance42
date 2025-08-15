@@ -8,6 +8,15 @@ export function findRoom()
 
 }
 
+export function timeStart(gameId: number) {
+    const update = db.prepare(`
+        UPDATE games2 SET start_time = ? WHERE id = ?
+        `);
+    update.run(Date.now(), gameId);
+    return true;
+}
+
+
 export function joinRoom(userId, roomId)
 {
     const update = db.prepare(`
