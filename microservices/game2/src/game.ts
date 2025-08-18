@@ -3,7 +3,7 @@ import { io } from "./index.js"
 import { timeStart } from "./Game2Database.js";
 import { playedCard } from "./gameObjects/gameBoard.js";
 
-// le start du jeu, les actions, les point(, la fin et le lobby d'attente de joueur ?)
+// le start du jeu, les actions, les point( la fin et le lobby d'attente de joueur ?)
 
 export class game
 {
@@ -51,31 +51,81 @@ export class game
 
         const loop = () => {
             if (this.playerOneCardPlay && this.playerTwoCardPlay) {
-                return console.log(`all player choose card !`);
+                console.log('start check cards !');
+                this.playedCards(this.playerOneCardPlay, this.playerTwoCardPlay);
+                this.gameBoard.discardCard(this.playerOneCardPlay);
+                this.gameBoard.discardCard(this.playerTwoCardPlay);
+                this.gameBoard.drawCard(1);
+                this.gameBoard.drawCard(2);
+                io.to(`${this.gameId}.1`).emit('card', this.gameBoard.getPlayerCard(1));
+                io.to(`${this.gameId}.2`).emit('card', this.gameBoard.getPlayerCard(2));
+                console.log('end check cards !');
+                this.playerOneCardPlay = null;
+                this.playerTwoCardPlay = null;
             }
+
+            if (this.playerOnePoint == 3 || this.playerTwoPoint == 3)
+                return io.to(`${this.gameId}.1`).to(`${this.gameId}.2`).emit('game-ended');
             setTimeout(loop, this.delay);
         }
         loop();
     }
+
+    private whoWinRound(userIdWinner: number)
+    {
+        if (userIdWinner == 1) {
+            this.playerOnePoint++;
+            io.to(`${this.gameId}.1`).emit('winRound', this.playerOnePoint, this.playerTwoPoint);
+            io.to(`${this.gameId}.2`).emit('loseRound', this.playerOnePoint, this.playerTwoPoint);
+        }
+        else if (userIdWinner == 2)
+        {
+            this.playerTwoPoint++;
+            io.to(`${this.gameId}.1`).emit('loseRound', this.playerOnePoint, this.playerTwoPoint);
+            io.to(`${this.gameId}.2`).emit('winRound', this.playerTwoPoint, this.playerOnePoint);
+        }
+    }
+
     private playedCards(playerOneCard: playedCard, playerTwoCard: playedCard)
     {
-       if (playerOneCard.cardId == playerTwoCard.cardId)
+       if (playerOneCard.cardId == playerTwoCard.cardId) {
            io.to(`${this.gameId}.1`).to(`${this.gameId}.1`).emit('equal');
+            return ;
+        }
 
        if (playerOneCard.cardId == 0 || playerTwoCard.cardId == 0)
        {
-           if (playerOneCard.userId < playerTwoCard.cardId) {
-               this.playerOnePoint++;
-               io.to(`${this.gameId}.1`).to('winRound', this.playerOnePoint, this.playerTwoPoint);
-               io.to(`${this.gameId}.2`).to('loseRound', this.playerOnePoint, this.playerTwoPoint);
+           if (playerOneCard.cardId < playerTwoCard.cardId) {
+                this.whoWinRound(playerOneCard.userId);
            } else {
-               this.playerTwoPoint++;
-               io.to(`${this.gameId}.1`).to('loseRound', this.playerOnePoint, this.playerTwoPoint);
-               io.to(`${this.gameId}.2`).to('winRound', this.playerTwoPoint, this.playerOnePoint);
+                this.whoWinRound(playerTwoCard.userId);
            }
+           return ;
        }
-
-
+       switch (playerOneCard.cardId)
+       {
+            case (1): 
+                if (playerTwoCard.cardId == 2) {
+                    this.whoWinRound(playerTwoCard.userId);
+                }
+                else
+                    this.whoWinRound(playerOneCard.userId);
+                break ;
+            case (2): 
+                if (playerTwoCard.cardId == 3) {
+                    this.whoWinRound(playerTwoCard.userId);
+                }
+                else
+                    this.whoWinRound(playerOneCard.userId);
+                break ;
+            case (3): 
+                if (playerTwoCard.cardId == 1) {
+                    this.whoWinRound(playerTwoCard.userId);
+                }
+                else
+                    this.whoWinRound(playerOneCard.userId);
+                break ;
+       }
 
     }
 }

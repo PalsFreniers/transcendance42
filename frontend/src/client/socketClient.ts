@@ -144,6 +144,20 @@ export function getSockets(): [Socket, Socket, Socket] {
       console.log(error);
     });
 
+    socketShifumi.on('winRound', (myPoints: number, opponentPoints: number) => {
+      // ajouter annimation ou informer le joueur 
+      const pointsText = document.getElementById('points');
+      if (pointsText)
+        pointsText.textContent = `${myPoints} - ${opponentPoints}`;
+    });
+
+    socketShifumi.on('loseRound', (myPoints: number, opponentPoints: number) => {
+      // ajouter annimation ou informer le joueur 
+      const pointsText = document.getElementById('points');
+      if (pointsText)
+        pointsText.textContent = `${myPoints} - ${opponentPoints}`;
+    });
+
     socketShifumi.on('disconnect', (reason) => {
       console.warn('Socket disconnected:', reason);
     });
