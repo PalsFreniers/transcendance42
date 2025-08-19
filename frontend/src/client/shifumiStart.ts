@@ -1,4 +1,5 @@
-import {getSocket, myCard, gameIdShifumi } from "./socketClient";
+import {getSocket} from "./socketClient";
+import {myCard, gameIdShifumi} from "./socketShifumi.js"
 import {getUserIdFromToken} from "./loginClient.js";
 
 export function init() {

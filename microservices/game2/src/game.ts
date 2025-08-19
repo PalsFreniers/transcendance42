@@ -2,6 +2,8 @@ import { GameBoard } from "./gameObjects/gameBoard.js";
 import { io } from "./index.js"
 import { timeStart } from "./Game2Database.js";
 import { playedCard } from "./gameObjects/gameBoard.js";
+import { Socket } from "socket.io";
+
 
 // le start du jeu, les actions, les point( la fin et le lobby d'attente de joueur ?)
 
@@ -36,6 +38,22 @@ export class game
         else if (card.userId == this.playerTwoId) {
             card.userId = 2;
             this.playerTwoCardPlay = card;
+        }
+    }
+
+    public reconnect(userId: number, socket: Socket)
+    {
+        if (userId == this.playerOneId)
+        {
+            socket.join(`${this.gameId}.1`);
+            io.to(`${this.gameId}.1`).emit('started-game', this.gameId);
+            io.to(`${this.gameId}.1`).emit('card', this.gameBoard.getPlayerCard(1));
+        }
+        else if (userId == this.playerTwoId)
+        {
+            socket.join(`${this.gameId}.2`);
+            io.to(`${this.gameId}.2`).emit('started-game', this.gameId);
+            io.to(`${this.gameId}.2`).emit('card', this.gameBoard.getPlayerCard(2));
         }
     }
 

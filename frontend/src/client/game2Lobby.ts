@@ -26,7 +26,10 @@ export function init(){
 			if (!sock)
 				return console.error('error 404 : socket not found !');
 			else
+			{
 				sock.emit('create-room', getUserIdFromToken());
+				console.log(`socket(${sock.id}) emit create room !`);
+			}
 			console.log('game button pressed !');
 		})
 	}
