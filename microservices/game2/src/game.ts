@@ -77,43 +77,6 @@ export class game
         }
     }
 
-    // private async playerIsOffline() : Promise<boolean | null>
-    // {
-    //     while (1)
-    //     {
-    //         console.log('hello !');
-
-    //         if (this.playerOne.IsOnline && this.playerTwo.IsOnline)
-    //             return false;
-
-    //         if (!this.playerOne.IsOnline && this.PlayerOneTime > 0)
-    //             this.PlayerOneTime--;
-    //         if (!this.playerTwo.IsOnline && this.PlayerTwoTime > 0)
-    //             this.PlayerOneTime--;
-
-    //         if (this.PlayerOneTime == 0 && this.playerTwo.IsOnline)
-    //         {
-    //             io.to(`${this.gameId}.1`).to(`${this.gameId}.2`).emit('forfeit', this.playerOne.Name);
-    //             forfeit(this.gameId, 1);
-    //             return true;
-    //         }
-    //         if (this.PlayerTwoTime == 0 && this.playerOne.IsOnline)
-    //         {
-    //             io.to(`${this.gameId}.1`).to(`${this.gameId}.2`).emit('forfeit', this.playerTwo.Name);
-    //             forfeit(this.gameId, 2);
-    //             return true;
-    //         }
-    //         if (this.PlayerOneTime == 0 && this.PlayerTwoTime == 0)
-    //         {
-    //             io.to(`${this.gameId}.1`).to(`${this.gameId}.2`).emit('forfeit', 'all player');
-    //             forfeit(this.gameId, 0);
-    //             return true;
-    //         }
-    //         await setTimeout(() => {}, this.delay);
-    //     };
-    //     return null;
-    // }
-
     private playerIsOffline(): Promise<boolean>
     {
         return new Promise(resolve => {
