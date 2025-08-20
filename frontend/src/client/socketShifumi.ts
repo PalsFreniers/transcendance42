@@ -117,6 +117,10 @@ export function createShifumiSocket(socketShifumi: Socket | null) {
         pointsText.textContent = `${myPoints} - ${opponentPoints}`;
     });
 
+    socketShifumi.on('forfeit', (player : String) => {
+      console.log(`player ${player} as declared forfeit`);
+    });
+
     // ajouter l'agaliter sur un round
 
     // ajouter win game

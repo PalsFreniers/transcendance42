@@ -6,10 +6,23 @@ import { game } from './game.js';
 import { Manager } from './gameManager.js';
 import { playedCard } from "./gameObjects/gameBoard.js";
 import db from './dbSqlite/db.js';
+import { Player } from './game.js';
 
 const manager = Manager.getInstance();
 
 let nextGameId: number = 1;
+
+function getUserIdFromToken(token: string): number {
+  if (!token) return 0;
+  try {
+    const payloadBase64 = token.split('.')[1];
+    const payloadJson = atob(payloadBase64);
+    const payload = JSON.parse(payloadJson);
+    return payload.userId || 0;
+  } catch {
+    return 0;
+  }
+}
 
 export function socketManagemente(io: Server)
 {
@@ -39,7 +52,9 @@ export function socketManagemente(io: Server)
             console.log(`User ${userId} registered with Shifumi socket ${socket.id}`);
 
             // a metre dans une fonction pour la lisibiliter du code
-            const id = db.prepare(`SELECT id FROM games2 WHERE status = 'playing' AND (player_one_id = ? OR player_two_id = ?)`).get(userId, userId) as {id : number};
+            const id = db.prepare(`SELECT id FROM games2 WHERE status = 'playing' AND (player_one_id = ? OR player_two_id = ?)`).get(userId, userId) as { id : number } | undefined;
+            if (!id)
+                return ;
             let game = manager.getGame(id.id);
             if (game)
             {
@@ -48,6 +63,14 @@ export function socketManagemente(io: Server)
         });
 
         socket.on('disconnect', () => {
+            const playerid = getUserIdFromToken(socket.handshake.auth.token);
+            const gameId = db.prepare(`SELECT id FROM games2 WHERE status = 'playing' AND (player_one_id = ? OR player_two_id = ?)`).get(playerid, playerid) as { id : number } | undefined;
+            if (gameId)
+            {
+                const game = manager.getGame(gameId.id);
+                if (game)
+                    game.disconnect(playerid);
+            }
             console.log(`Socket Shifumi disconnected: ${socket.id}`);
             // suprimer la game en cours si status = waiting et qu'il ny a pas de second joueurs
         });
@@ -102,7 +125,19 @@ export function socketManagemente(io: Server)
             db.prepare(`UPDATE games2 SET status = ? WHERE player_one_id = ? AND status = 'waiting'`).run('playing', playerId);
 
             if (playerTwo) {
-                manager.newGame(playerId, playerTwo.player_two_id, 1)
+                manager.newGame({
+                    Id: playerId,
+                    Name : 'null',
+                    Point : 0,
+                    Card : null,
+                    IsOnline : true
+                }, {
+                    Id : playerTwo.player_two_id,
+                    Name : 'null',
+                    Point : 0,
+                    Card : null,
+                    IsOnline : true
+                }, 1);
                 console.log(`in start-game, id = ${id.id}`);
                 var shifumi = manager.getGame(id.id);
                 if (shifumi)

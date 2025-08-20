@@ -1,4 +1,4 @@
-import { game } from "./game.js";
+import { game, Player } from "./game.js";
 
 export class Manager
 {
@@ -14,11 +14,11 @@ export class Manager
         return this.instance;
     };
 
-    public newGame(userOneId: number, userTwoId: number, gameId: number)
+    public newGame(playerOne: Player, playerTwo: Player, gameId: number)
     {
         if (this.games.has(gameId))
             return false;
-        this.games.set(gameId, new game(userOneId, userTwoId, gameId));
+        this.games.set(gameId, new game(playerOne, playerTwo, gameId));
     }
 
     public getGame(gameId: number)

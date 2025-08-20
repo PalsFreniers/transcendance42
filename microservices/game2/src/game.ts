@@ -1,29 +1,38 @@
 import { GameBoard } from "./gameObjects/gameBoard.js";
 import { io } from "./index.js"
-import { timeStart } from "./Game2Database.js";
+import { timeStart, endGame, forfeit } from "./Game2Database.js";
 import { playedCard } from "./gameObjects/gameBoard.js";
 import { Socket } from "socket.io";
 
+export interface Player {
+    Id : number;
+    Name : string;
+    Point : number;
+    Card : playedCard | null;
+    IsOnline : boolean;
+}
 
 // le start du jeu, les actions, les point( la fin et le lobby d'attente de joueur ?)
 
 export class game
 {
     private gameId: number;
-    private playerOneId :number;
-    private playerTwoId :number;
-    private gameBoard :GameBoard = new GameBoard();
-    private playerOnePoint: number = 0;
-    private playerTwoPoint: number = 0;
-    private playerOneCardPlay: playedCard | null = null;
-    private playerTwoCardPlay: playedCard | null = null;
-    private delay = 1000/60;
+    private playerOne : Player;
+    private playerTwo : Player;
 
-    constructor(playerOne :number, playerTwo :number, gameId: number) {
-        this.playerOneId = playerOne;
-        console.log(`player one = ${playerOne}`);
-        this.playerTwoId = playerTwo;
-        console.log(`player two = ${playerTwo}`);
+    private PlayerOneTime : number = 10;
+    private PlayerTwoTime : number = 10;
+
+    private gameBoard :GameBoard = new GameBoard();
+    private delay = 1000;
+
+    constructor(playerOneInfo :Player, playerTwoInfo :Player, gameId: number) {
+        this.playerOne = playerOneInfo;
+        console.log(`player one = ${this.playerOne.Id}`);
+
+        this.playerTwo = playerTwoInfo;
+        console.log(`player two = ${this.playerTwo.Id}`);
+
         this.gameId = gameId;
         console.log(`game id = ${this.gameId}`);
     }
@@ -31,30 +40,124 @@ export class game
     public chooseCard(card: playedCard)
     {
         console.log(`player (${card.userId}) choose is card !`)
-        if (card.userId == this.playerOneId) {
+        if (card.userId == this.playerOne.Id) {
             card.userId = 1;
-            this.playerOneCardPlay = card;
+            this.playerOne.Card = card;
         }
-        else if (card.userId == this.playerTwoId) {
+        else if (card.userId == this.playerTwo.Id) {
             card.userId = 2;
-            this.playerTwoCardPlay = card;
+            this.playerTwo.Card = card;
         }
+    }
+
+    public disconnect(playerId: number)
+    {
+        console.log(`player ${playerId} is off line`);
+        if (playerId == this.playerOne.Id)
+            this.playerOne.IsOnline = false;
+        else if (playerId == this.playerTwo.Id)
+            this.playerTwo.IsOnline = false;
     }
 
     public reconnect(userId: number, socket: Socket)
     {
-        if (userId == this.playerOneId)
+        if (userId == this.playerOne.Id)
         {
+            this.playerOne.IsOnline = true;
             socket.join(`${this.gameId}.1`);
             io.to(`${this.gameId}.1`).emit('started-game', this.gameId);
             io.to(`${this.gameId}.1`).emit('card', this.gameBoard.getPlayerCard(1));
         }
-        else if (userId == this.playerTwoId)
+        else if (userId == this.playerTwo.Id)
         {
+            this.playerOne.IsOnline = true;
             socket.join(`${this.gameId}.2`);
             io.to(`${this.gameId}.2`).emit('started-game', this.gameId);
             io.to(`${this.gameId}.2`).emit('card', this.gameBoard.getPlayerCard(2));
         }
+    }
+
+    // private async playerIsOffline() : Promise<boolean | null>
+    // {
+    //     while (1)
+    //     {
+    //         console.log('hello !');
+
+    //         if (this.playerOne.IsOnline && this.playerTwo.IsOnline)
+    //             return false;
+
+    //         if (!this.playerOne.IsOnline && this.PlayerOneTime > 0)
+    //             this.PlayerOneTime--;
+    //         if (!this.playerTwo.IsOnline && this.PlayerTwoTime > 0)
+    //             this.PlayerOneTime--;
+
+    //         if (this.PlayerOneTime == 0 && this.playerTwo.IsOnline)
+    //         {
+    //             io.to(`${this.gameId}.1`).to(`${this.gameId}.2`).emit('forfeit', this.playerOne.Name);
+    //             forfeit(this.gameId, 1);
+    //             return true;
+    //         }
+    //         if (this.PlayerTwoTime == 0 && this.playerOne.IsOnline)
+    //         {
+    //             io.to(`${this.gameId}.1`).to(`${this.gameId}.2`).emit('forfeit', this.playerTwo.Name);
+    //             forfeit(this.gameId, 2);
+    //             return true;
+    //         }
+    //         if (this.PlayerOneTime == 0 && this.PlayerTwoTime == 0)
+    //         {
+    //             io.to(`${this.gameId}.1`).to(`${this.gameId}.2`).emit('forfeit', 'all player');
+    //             forfeit(this.gameId, 0);
+    //             return true;
+    //         }
+    //         await setTimeout(() => {}, this.delay);
+    //     };
+    //     return null;
+    // }
+
+    private playerIsOffline(): Promise<boolean>
+    {
+        return new Promise(resolve => {
+            const interval= setInterval(() => {
+
+            if (this.playerOne.IsOnline && this.playerTwo.IsOnline)
+            {
+                console.log('all on line');
+                clearInterval(interval);
+                resolve(false);
+            }
+
+            if (!this.playerOne.IsOnline && this.PlayerOneTime > 0)
+                this.PlayerOneTime--;
+            if (!this.playerTwo.IsOnline && this.PlayerTwoTime > 0)
+                this.PlayerTwoTime--;
+
+            if (this.PlayerOneTime == 0 && this.playerTwo.IsOnline)
+            {
+                console.log('player one off line');
+                io.to(`${this.gameId}.1`).to(`${this.gameId}.2`).emit('forfeit', this.playerOne.Name);
+                forfeit(this.gameId, 1);
+                clearInterval(interval);
+                resolve(true);
+            }
+            if (this.PlayerTwoTime == 0 && this.playerOne.IsOnline)
+            {
+                console.log('player 2 off line');
+                forfeit(this.gameId, 2);
+                io.to(`${this.gameId}.1`).to(`${this.gameId}.2`).emit('forfeit', this.playerTwo.Name);
+                clearInterval(interval);
+                resolve(true);
+            }
+            if (this.PlayerOneTime == 0 && this.PlayerTwoTime == 0)
+            {
+                console.log('all off line');
+                io.to(`${this.gameId}.1`).to(`${this.gameId}.2`).emit('forfeit', 'all player');
+                forfeit(this.gameId, 0);
+                clearInterval(interval);
+                resolve(true);
+            }
+
+            }, this.delay);
+        });
     }
 
     public start()
@@ -67,23 +170,39 @@ export class game
         io.to(`${this.gameId}.1`).emit('card', this.gameBoard.getPlayerCard(1));
         io.to(`${this.gameId}.2`).emit('card', this.gameBoard.getPlayerCard(2));
 
-        const loop = () => {
-            if (this.playerOneCardPlay && this.playerTwoCardPlay) {
+        const loop = async () => {
+        
+            if (!this.playerOne.IsOnline || !this.playerTwo.IsOnline) {
+                if ( await this.playerIsOffline())
+                {
+                    return ;
+                }
+            }
+
+            if (this.playerOne.Card && this.playerTwo.Card) {
+                
                 console.log('start check cards !');
-                this.playedCards(this.playerOneCardPlay, this.playerTwoCardPlay);
-                this.gameBoard.discardCard(this.playerOneCardPlay);
-                this.gameBoard.discardCard(this.playerTwoCardPlay);
+                this.playedCards(this.playerOne.Card, this.playerTwo.Card);
+                
+                this.gameBoard.discardCard(this.playerOne.Card);
+                this.gameBoard.discardCard(this.playerTwo.Card);
+                
                 this.gameBoard.drawCard(1);
                 this.gameBoard.drawCard(2);
+                
                 io.to(`${this.gameId}.1`).emit('card', this.gameBoard.getPlayerCard(1));
                 io.to(`${this.gameId}.2`).emit('card', this.gameBoard.getPlayerCard(2));
                 console.log('end check cards !');
-                this.playerOneCardPlay = null;
-                this.playerTwoCardPlay = null;
+                
+                this.playerOne.Card = null;
+                this.playerTwo.Card = null;
             }
 
-            if (this.playerOnePoint == 3 || this.playerTwoPoint == 3)
+            if (this.playerOne.Point == 3 || this.playerTwo.Point == 3)
+            {
+                endGame(this.gameId);
                 return io.to(`${this.gameId}.1`).to(`${this.gameId}.2`).emit('game-ended');
+            }
             setTimeout(loop, this.delay);
         }
         loop();
@@ -92,15 +211,15 @@ export class game
     private whoWinRound(userIdWinner: number)
     {
         if (userIdWinner == 1) {
-            this.playerOnePoint++;
-            io.to(`${this.gameId}.1`).emit('winRound', this.playerOnePoint, this.playerTwoPoint);
-            io.to(`${this.gameId}.2`).emit('loseRound', this.playerOnePoint, this.playerTwoPoint);
+            this.playerOne.Point++;
+            io.to(`${this.gameId}.1`).emit('winRound', this.playerOne.Point, this.playerTwo.Point);
+            io.to(`${this.gameId}.2`).emit('loseRound', this.playerTwo.Point, this.playerOne.Point);
         }
         else if (userIdWinner == 2)
         {
-            this.playerTwoPoint++;
-            io.to(`${this.gameId}.1`).emit('loseRound', this.playerOnePoint, this.playerTwoPoint);
-            io.to(`${this.gameId}.2`).emit('winRound', this.playerTwoPoint, this.playerOnePoint);
+            this.playerTwo.Point++;
+            io.to(`${this.gameId}.1`).emit('loseRound', this.playerOne.Point, this.playerTwo.Point);
+            io.to(`${this.gameId}.2`).emit('winRound', this.playerTwo.Point, this.playerOne.Point);
         }
     }
 
