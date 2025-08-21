@@ -1,6 +1,7 @@
 import io, { Socket } from 'socket.io-client';
 import { handleRoute} from "./navClient.js";
 import { getUserIdFromToken } from './socketClient.js';
+import * as math from "mathjs";
 
 export let gameIdShifumi: number = -1;
 export let myCard: [number, number][] = [];
@@ -33,7 +34,11 @@ export function createShifumiSocket(socketShifumi: Socket | null) {
       console.warn('Socket disconnected:', reason);
     });
 
-    // ajouter la reconexion en cas de recharge de page
+    socketShifumi.on('reconnect', () => {
+      history.pushState(null, '', '/shifumi');
+      handleRoute();
+      console.log('reconnect !');
+    });
 
     /******************************************************************************/
     /*                                                                            */
@@ -62,10 +67,7 @@ export function createShifumiSocket(socketShifumi: Socket | null) {
         opponent.textContent = `your opponent is ${username}`;
     });
 
-    // ajouter la gestion du l'adversaire qui quitte la partie
-
-    // ajouter la gestion du joueur quittant la partie
-
+    // ajouter un kick de la partie avant le lancement 
 
     /******************************************************************************/
     /*                                                                            */
@@ -92,7 +94,13 @@ export function createShifumiSocket(socketShifumi: Socket | null) {
         card3.hidden = false;
     });
 
-    // ajouter le jeu en pause/attente de la reconexion de l'adversaire 
+    socketShifumi.on('wait-opponent', () => {
+      alert('your opponent as been deconnected\nhe have 15 seconds for rejoined the game');
+    });
+
+    socketShifumi.on('opponent-reconnected', () => {
+      alert('your opponent as been reconnected');
+    });
 
     socketShifumi.on('game-ended', () => {
         console.log(`game ended`);
@@ -121,11 +129,17 @@ export function createShifumiSocket(socketShifumi: Socket | null) {
       console.log(`player ${player} as declared forfeit`);
     });
 
-    // ajouter l'agaliter sur un round
+    socketShifumi.on('equal', () => {
+      console.log('no one win this round');
+    }); // nom a changer ?
 
-    // ajouter win game
+    socketShifumi.on('winGame', () => {
+      console.log('you win this game !')
+    });
 
-    // ajouter lose game
+    socketShifumi.on('loseGame', () => {
+      console.log('you lose this game !');
+    });
 
     /******************************************************************************/
     /*                                                                            */
@@ -145,13 +159,28 @@ export function createShifumiSocket(socketShifumi: Socket | null) {
       const card3 = document.getElementById('card3-button');
       if (card3)
         card3.textContent = `[${card[2][0]}][${card[2][1]}]`;
+      console.log('received card !');
     });
 
-    // ajouter la fin du temps de choix de carte
+    socketShifumi.on('end-time', () => {
+      const random:number = math.floor(math.random() * 3);
+      const card = document.getElementById(`card${random + 1}-button`);
 
-    // ajouter la carte jouer par l'adversaire
+      socketShifumi.emit('play-card', gameIdShifumi, {
+        userId : getUserIdFromToken(),
+        cardId : myCard[random][0],
+        cardNumber : myCard[random][1]
+      });
+      if (card)
+        card.textContent = '[][]'; // a changer par l'affichage basique 
+    });
 
-    // ajouter le lancement de la piece pour changer une carte
+    socketShifumi.on('opponent-played-card', (card: [number, number]) => {
+      console.log(`opponent card received`);
+      // afficher la carte jouer par l'adversaire;
+    });
+
+    // ajouter le lancement/resulta de la piece pour changer une carte
 
     // ajouter le passage de l'information sur la piece utiliser par l'adversaire
 

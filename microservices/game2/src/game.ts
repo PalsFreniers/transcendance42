@@ -20,8 +20,8 @@ export class game
     private playerOne : Player;
     private playerTwo : Player;
 
-    private PlayerOneTime : number = 10;
-    private PlayerTwoTime : number = 10;
+    private PlayerOneTime : number = 15;
+    private PlayerTwoTime : number = 15;
 
     private gameBoard :GameBoard = new GameBoard();
     private delay = 1000;
@@ -53,26 +53,39 @@ export class game
     public disconnect(playerId: number)
     {
         console.log(`player ${playerId} is off line`);
+        io.to(`${this.gameId}.1`).to(`${this.gameId}.2`).emit('wait-opponent');
         if (playerId == this.playerOne.Id)
             this.playerOne.IsOnline = false;
         else if (playerId == this.playerTwo.Id)
             this.playerTwo.IsOnline = false;
     }
 
-    public reconnect(userId: number, socket: Socket)
+    private sleep(ms: number): Promise<void> {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+    }
+
+    public async reconnect(userId: number, socket: Socket)
     {
         if (userId == this.playerOne.Id)
         {
             this.playerOne.IsOnline = true;
             socket.join(`${this.gameId}.1`);
+            io.to(`${this.gameId}.1`).emit('reconnect');
+            io.to(`${this.gameId}.2`).emit('opponent-reconnected');
+            await this.sleep(this.delay / 5);
             io.to(`${this.gameId}.1`).emit('started-game', this.gameId);
+            await this.sleep(this.delay / 5);
             io.to(`${this.gameId}.1`).emit('card', this.gameBoard.getPlayerCard(1));
         }
         else if (userId == this.playerTwo.Id)
         {
-            this.playerOne.IsOnline = true;
+            this.playerTwo.IsOnline = true;
             socket.join(`${this.gameId}.2`);
+            io.to(`${this.gameId}.2`).emit('reconnect');
+            io.to(`${this.gameId}.1`).emit('opponent-reconnected');
+            await this.sleep(this.delay / 5);
             io.to(`${this.gameId}.2`).emit('started-game', this.gameId);
+            await this.sleep(this.delay / 5);
             io.to(`${this.gameId}.2`).emit('card', this.gameBoard.getPlayerCard(2));
         }
     }
@@ -82,8 +95,11 @@ export class game
         return new Promise(resolve => {
             const interval= setInterval(() => {
 
+            console.log(`player one is online = ${this.playerOne.IsOnline}, player two is online = ${this.playerTwo.IsOnline}`);
             if (this.playerOne.IsOnline && this.playerTwo.IsOnline)
             {
+                this.PlayerOneTime = 15;
+                this.PlayerTwoTime = 15;
                 console.log('all on line');
                 clearInterval(interval);
                 resolve(false);
@@ -136,15 +152,16 @@ export class game
         const loop = async () => {
         
             if (!this.playerOne.IsOnline || !this.playerTwo.IsOnline) {
-                if ( await this.playerIsOffline())
-                {
+                if (await this.playerIsOffline())
                     return ;
-                }
             }
 
             if (this.playerOne.Card && this.playerTwo.Card) {
                 
                 console.log('start check cards !');
+                io.to(`${this.gameId}.1`).emit('opponent-played-card', [this.playerTwo.Card.cardId, this.playerTwo.Card.cardNumber]);
+                io.to(`${this.gameId}.2`).emit('opponent-played-card', [this.playerOne.Card.cardId, this.playerOne.Card.cardNumber]);
+                this.sleep(2500);
                 this.playedCards(this.playerOne.Card, this.playerTwo.Card);
                 
                 this.gameBoard.discardCard(this.playerOne.Card);
@@ -166,7 +183,7 @@ export class game
                 endGame(this.gameId);
                 return io.to(`${this.gameId}.1`).to(`${this.gameId}.2`).emit('game-ended');
             }
-            setTimeout(loop, this.delay);
+            setTimeout(loop, this.delay / 4);
         }
         loop();
     }
