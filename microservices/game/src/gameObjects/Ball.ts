@@ -1,7 +1,7 @@
 import * as Vec2D from "vector2d";
-import {Collidable} from "./Collidable";
-import {Paddle} from "./Paddle";
-import {clamp} from "../utils";
+import {Collidable} from "./Collidable.js";
+import {Paddle} from "./Paddle.js";
+import {clamp} from "../utils.js";
 
 export class Ball {
 
@@ -12,7 +12,7 @@ export class Ball {
     };
 
     public get acceleration() {
-        return 1/100 // this much of its own speed is added to the ball's speed
+        return 1/100
     }
 
     public get baseSpeed() {

@@ -1,7 +1,7 @@
 import * as Vec2D from "vector2d"
-import {Ball} from "./gameObjects/Ball"
-import {Collidable, createRectangle} from "./gameObjects/Collidable"
-import {Paddle} from "./gameObjects/Paddle"
+import {Ball} from "./gameObjects/Ball.js"
+import {Collidable, createRectangle} from "./gameObjects/Collidable.js"
+import {Paddle} from "./gameObjects/Paddle.js"
 
 export class Game {
 

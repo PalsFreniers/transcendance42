@@ -6,7 +6,7 @@ const dbPath = '/data/db.sqlite'; // .ENV
 // Ensure directory exists (safe to skip in Docker, but optional)
 const dbDir = '/data';
 if (!fs.existsSync(dbDir)) {
-  fs.mkdirSync(dbDir, { recursive: true });
+    fs.mkdirSync(dbDir, { recursive: true });
 }
 
 const db = new Database(dbPath);

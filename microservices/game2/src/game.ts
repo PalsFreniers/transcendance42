@@ -1,4 +1,4 @@
-import { GameBoard } from "./gameObjects/gameBoard";
+import { GameBoard } from "./gameObjects/gameBoard.js";
 
 // le start du jeu, les actions, les point(, la fin et le lobby d'attente de joueur ?) 
 

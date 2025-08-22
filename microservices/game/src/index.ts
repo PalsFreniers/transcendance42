@@ -3,17 +3,22 @@ import dotenv from 'dotenv';
 import cors from '@fastify/cors';
 import jwt from '@fastify/jwt';
 import { Server } from "socket.io";
+import db from './dbSqlite/db.js';
 import {
     createRoom,
     // inGame,
     awaitForOpponent,
     joinLobby,
     historyGame,
-    handleInput, startGame, forfeit, stopGame, getScore, deleteGame
+    startGame,
+    forfeit,
+    stopGame,
+    getScore,
+    deleteGame
 } from './gameRoutes.js';
 import { GameManager } from './gameManager.js';
-import { createRoomLogic } from './gameService.js';
-import { joinLobbyLogic } from './gameService.js';
+import { Game } from './game.js';
+import { GameRecord } from './gameModel.js';
 
 dotenv.config();
 
@@ -24,101 +29,104 @@ const PORT = process.env.GAME_PORT;
 
 //REQUEST CORS
 await app.register(cors, {
-  origin: 'http://localhost:5173',
-  credentials: true,
-  methods: ['GET', 'POST'],
-    // origin: '*',
-    // credentials: true,
+    origin: 'http://localhost:5173',
+    credentials: true,
+    methods: ['GET', 'POST'],
 });
 
 export const io = new Server(app.server, {
-  path: '/pongSocket/',
-  cors: {
-    origin: 'http://localhost:5173', // ALL ORIGIN REQUEST ALLOWED
-    credentials: true,
-  }//,
-    // cors: {
-    //     origin: "*",
-    // }
+    path: '/pongSocket/',
+    cors: {
+        origin: 'http://localhost:5173',
+        credentials: true,
+    }
 });
 
 //SETUP FOR PONG GAME
 const manager = new GameManager();
 
 // TOKEN 
-await app.register(jwt , {secret: process.env.JWT_SECRET!});
+await app.register(jwt, { secret: process.env.JWT_SECRET! });
 
 io.use(async (socket, next) => {
-  try {
-    const tmp = await app.jwt.verify(socket.handshake.auth.token);
-    // socket.decoded = tmp;
-    console.log('verif passed !');
-    next();
-  }
-  catch {
-    console.log(`socket ${socket.id} can't connect !`);
-    next(new Error('Authentication error'));
-  }
+    try {
+        const tmp = await app.jwt.verify(socket.handshake.auth.token);
+        // socket.decoded = tmp;
+        console.log('verif passed !');
+        next();
+    }
+    catch {
+        console.log(`socket ${socket.id} can't connect !`);
+        next(new Error('Authentication error'));
+    }
 });
 
 // SOCKET LOGIC GAME
 io.on('connection', (socket) => {
-  console.log(`Socket connected: ${socket.id}`);
+    console.log(`Socket connected: ${socket.id}`);
 
-  socket.on('register-socket', (userId: number) => {
-    console.log(`User ${userId} registered with socket ${socket.id}`);
-    manager.registerSocket(userId, socket.id);
-  });
-
-  socket.on('create-room', ({ userId, username, lobbyName }) => {
-    try {
-      const gameData = createRoomLogic(manager, userId, username, lobbyName);
-
-      socket.join(`game-${gameData.gameId}`);
-      socket.emit('room-created', gameData);
-      console.log(`User ${userId} created and joined game-${gameData.gameId}`);
-    } catch (err) {
-      console.error('create-room error:', err);
-      socket.emit('error', err);
-    }
-  });
-
-  socket.on('join-room', ({ userId, username, hostUsername, gameId }) => {
-    try {
-      const gameData = joinLobbyLogic(manager, userId, username, hostUsername, gameId);
-
-      socket.join(`game-${gameId}`);
-      io.to(`game-${gameId}`).emit('player-joined', gameData);
-
-      console.log(`User ${userId} joined room ${gameId}`);
-    } catch (err) {
-      console.error('join-room error:', err);
-      socket.emit('error', err);
-    }
-  });
-    socket.on('join-room', (roomId: string) => {
-        socket.join(roomId);
-        console.log(`Socket ${socket.id} joined room ${roomId}`);
+    // Register socket with userId
+    socket.on('register-socket', (userId: number) => {
+        manager.registerSocket(userId, socket.id);
+        console.log(`User ${userId} registered with socket ${socket.id}`);
     });
 
-    socket.on('input', ({ gameId, playerId, key, action }) => {
-        const game = manager.findGame(playerId);
-        if (game) {
-            const paddle = game.getPaddle(Number(playerId))!;
-            let info = paddle.getState();
-            info[key === 'up' ? 0 : 1] = (action == 'keyup')
-        } else {
-            console.warn(`No active game found for player ${playerId}`);
+    // Create room (DB creation already done via API)
+    socket.on('create-room', ({ userId, gameId, lobbyName, username }) => {
+        try {
+            manager.createLobby(lobbyName, gameId);
+            manager.joinLobby(lobbyName, userId);
+            socket.join(lobbyName);
+            socket.emit('room-created', { gameId, lobbyName, username, playerTwo: null, status: 'waiting' });
+            console.log(`User ${userId} joined in-memory game-${gameId}`);
+        } catch (err) {
+            console.error('create-room error:', err);
+            socket.emit('error', err);
         }
     });
 
-  socket.on('disconnect', () => {
-    console.log(`Socket pong disconnected: ${socket.id}`);
-    manager.unregisterSocket(socket.id);
-  });
+    // Join room (DB updated via API)
+    socket.on('player-joined', ({ userId, gameId }) => {
+    try {
+        const lobbyName = `game-${gameId}`;
+        const errno = manager.joinLobby(lobbyName, userId);
+        if (errno) 
+            throw new Error(`Failed to join lobby: ${errno}`);
+        socket.join(lobbyName);
+        // Get player info from DB
+        const lobby = db.prepare(`SELECT player_one_id, player_two_id, lobby_name FROM games WHERE id = ?`).get(gameId) as { player_one_id: number; player_two_id: number | null; lobby_name: string };
+        const playerOne = lobby.player_one_id;
+        const playerTwo = lobby.player_two_id;
+
+        io.to(lobbyName).emit('player-joined', {
+            gameId,
+            lobbyName,
+            playerOne, // userId of player 1
+            playerTwo, // userId of player 2
+            status: 'ready', // update status when both players are in
+        });
+        console.log(`User ${userId} joined in-memory room ${gameId}`);
+    } catch (err) {
+        console.error('join-room error:', err);
+        socket.emit('error', err);
+    }
+});
+
+
+    // Player input
+    socket.on('input', ({ playerId, key, action }) => {
+        const game = manager.findGame(playerId);
+        if (!game)
+            return console.warn(`No active game for player ${playerId}`);
+        const paddle = game.getPaddle(playerId)!;
+        const state = paddle.getState();
+        state[key === 'up' ? 0 : 1] = action === 'keyup';
+    });
+
+    // Handle disconnect
     socket.on('disconnect', () => {
-        console.log(`Socket disconnected: ${socket.id}`);
         manager.unregisterSocket(socket.id);
+        console.log(`Socket disconnected: ${socket.id}`);
     });
 });
 
@@ -145,7 +153,6 @@ app.register(stopGame, manager);
 app.register(getScore, manager);
 app.register(deleteGame, manager);
 app.register(historyGame);
-app.register(handleInput, manager);
 
 app.listen({ port: Number(PORT), host: '0.0.0.0' }, err => {
     if (err) throw err;

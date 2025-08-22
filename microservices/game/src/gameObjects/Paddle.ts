@@ -1,6 +1,6 @@
 import * as Vec2D from "vector2d";
-import {clamp} from "../utils";
-import {Collidable, createRectangle} from "./Collidable";
+import {clamp} from "../utils.js";
+import {Collidable, createRectangle} from "./Collidable.js";
 
 export class Paddle {
 
@@ -22,7 +22,7 @@ export class Paddle {
 
     private readonly _hitbox: Collidable;
     constructor(
-        _playerID: string,
+        _playerID: number,
         _pos: Vec2D.Vector
     ) {
         this._hitbox = createRectangle(_pos, new Vec2D.Vector(this.width, this.length), `paddle.${_playerID}`);

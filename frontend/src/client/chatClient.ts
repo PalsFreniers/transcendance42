@@ -4,8 +4,8 @@ import { getUserIdFromToken } from './loginClient.js'
 export function init() {
     const token = localStorage.getItem('token'); // TOKEN LINK FROM THE USER CONNECTED
     const chat = document.getElementById('chat-container') as HTMLDivElement | null;
-    
-    if (!chat) 
+
+    if (!chat)
         return;
     console.log
     const Send = document.getElementById('chat-input') as HTMLFormElement;
@@ -20,7 +20,7 @@ export function init() {
                 socket.emit('message', msg, getUserIdFromToken(), 'toma');
             else
                 console.error(`error 404 : sokcet not found !`);
-        } 
+        }
         catch (error) {
             alert('failed to send message !');
             console.error('can\'t send message', error);

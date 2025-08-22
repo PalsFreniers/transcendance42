@@ -20,11 +20,11 @@ export async function init() {
 				<button type="submit">Save</button>`
 		});
 		const resFriends = await fetch('http://localhost:3001/api/user/friend-list', {
-		method: 'GET',
-		headers: {
-			'Content-Type': 'application/json',
-			'Authorization': `Bearer ${token}`
-		},
+			method: 'GET',
+			headers: {
+				'Content-Type': 'application/json',
+				'Authorization': `Bearer ${token}`
+			},
 		});
 		const dataFriend = await resFriends.json();
 		const friendListContainer = document.getElementById('friend-list') as HTMLUListElement;
@@ -65,14 +65,14 @@ export async function init() {
 			const friendUsername = nameFriend.value;
 			if (!friendUsername) {
 				console.error('Friend username is empty');
-				return ;
+				return;
 			}
 			try {
 				const res = await fetch('http://localhost:3001/api/user/add-friend', {
 					method: 'POST',
 					headers: {
-						'Content-Type':'application/json', 
-						'Authorization' : `Bearer ${token}`
+						'Content-Type': 'application/json',
+						'Authorization': `Bearer ${token}`
 					},
 					body: JSON.stringify({ friendUsername })
 				});
@@ -82,7 +82,7 @@ export async function init() {
 				else
 					console.log('Failed to add friend', data.error);
 			}
-			catch (err){
+			catch (err) {
 				console.error('Error:', err);
 			}
 		});

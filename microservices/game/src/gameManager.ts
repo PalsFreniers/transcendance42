@@ -6,19 +6,22 @@ export class GameManager {
 
 // Attributes
 
-    private _games = new Map<string, [Game, [string | null, string | null]]>();
+    private _games = new Map<string, [Game, [number | null, number | null]]>();
     private _userSockets = new Map<number, string>();
     private _socketToUser = new Map<string, number>();
 x
     // This find the game based on something we know on the game: either on of the playerID or one of the lobby's name
-    findGame(key: string): Game | null {
-        if (key === undefined)
-            return null;
-        for (const [name, [game, [p1, p2]]] of this._games.entries())
-            if (name === key || p1 === key || p2 === key || String(game.gameID) === key)
-                return game;
+    findGame(key: number | string): Game | null {
+    if (key === undefined) 
+        return null;
+    for (const [name, [game, [p1, p2]]] of this._games.entries()) {
+        if ((typeof key === "string" && name === key) ||   // lobbyName
+            (typeof key === "number" && (p1 === key || p2 === key || game.gameID === key))) 
+            return game;
+        }
         return null;
     }
+
 
     createLobby(lobbyName: string, gameID: number): number {
         if (this._games.has(lobbyName))
@@ -27,14 +30,14 @@ x
         return 0;
     }
 
-    joinLobby(lobbyName: string, playerID: string): number {
+    joinLobby(lobbyName: string, playerID: number): number {
         if (!this._games.has(lobbyName))
             return 1;
         if (this.findGame(playerID) != null)
             return 2;
         const [game, [p1, p2]] = this._games.get(lobbyName)!;
         if (p1 === null)
-            this._games.set(lobbyName, [game.joinTeam(new Paddle(playerID, new Vec2D.Vector(-9, 0)), "left"), [playerID, null]]);
+            this._games.set(lobbyName, [game.joinTeam(new Paddle(playerID, new Vec2D.Vector(-9, 0)), "left"), [playerID, 0]]);
         else if (p2 === null)
             this._games.set(lobbyName, [game.joinTeam(new Paddle(playerID, new Vec2D.Vector(9, 0)), "right"), [p1, playerID]]);
         else
@@ -54,7 +57,7 @@ x
         return 0;
     }
 
-    forfeit(lobbyName: string, playerID: string): number {
+    forfeit(lobbyName: string, playerID: number): number {
         // Check if game exists
         if (!this._games.has(lobbyName))
             return 1;

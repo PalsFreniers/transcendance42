@@ -7,7 +7,7 @@ const dbPath = '/data/db.sqlite'; // .ENV
 const dbDir = '/data';
 
 if (!fs.existsSync(dbDir)) {
-  fs.mkdirSync(dbDir, { recursive: true });
+    fs.mkdirSync(dbDir, { recursive: true });
 }
 
 // Create and connect to the database
