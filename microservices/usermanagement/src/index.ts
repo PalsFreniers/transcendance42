@@ -16,6 +16,7 @@ import {
   deleteProfile,
   friendAdd,
   friendDelete,
+  getUsernameFromId
   // friendSendMsg
 } from './userRoutes.js';
 import { ChatMessage, saveMessage } from './userSocket.js';
@@ -142,6 +143,7 @@ app.register(updateProfile, { prefix: '/api/user' });
 app.register(deleteProfile, { prefix: '/api/user' });
 app.register(friendAdd, { prefix: '/api/user' });
 app.register(friendDelete, { prefix: '/api/user' });
+app.register(getUsernameFromId, { prefix: '/api/user' });
 // app.register(friendSendMsg, { prefix: '/api/user' });
 
 // Start Fastify server

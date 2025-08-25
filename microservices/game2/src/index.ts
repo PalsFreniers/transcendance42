@@ -14,6 +14,15 @@ import { socketManagemente } from './socketManagement.js';
 dotenv.config();
 
 
+/* *
+*
+* faire attendre le joueur temps que sa socket n'est pas co avant de
+* faire en sorte qu'il puisse appuier sure les bouton
+* et faire en sorte qu'un user puisse etre dans une seul game et ne puisse pas
+* rejoindre ca propre game
+*
+* */
+
 //START FOR GAME SERVICES
 const app = Fastify();
 

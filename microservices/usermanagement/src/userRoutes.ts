@@ -145,3 +145,15 @@ export async function deleteProfile(app: FastifyInstance) {
     }
   });
 }
+
+export async function getUsernameFromId(app: FastifyInstance) {
+  app.get('/get-name-from-id', async (request, reply) => {
+    try {
+      const { targetId } = request.body as { targetId: string };
+      const targetUsername = db.prepare(`SELECT username FROM users WHERE id = ?`).get(targetId) as { username: string};
+      return reply.send({ target: targetUsername.username });
+    } catch (err) {
+      return reply.code(450).send({ error: 'failed to find target' });
+    }
+  });
+}

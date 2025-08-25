@@ -24,6 +24,19 @@ function getUserIdFromToken(token: string): number {
   }
 }
 
+function getUsernameFromToken(token: string): string | null {
+    if (!token) return null;
+
+    try {
+        const payloadBase64 = token.split('.')[1];
+        const payloadJson = atob(payloadBase64);
+        const payload = JSON.parse(payloadJson);
+        return payload.username || null;
+    } catch (err) {
+        return null;
+    }
+}
+
 export function socketManagemente(io: Server)
 {
     io.use(async (socket, next) => {
@@ -81,7 +94,7 @@ export function socketManagemente(io: Server)
         /*                                                                            */
         /******************************************************************************/
 
-        socket.on('join-room', (userId : number, roomId: number, username: string) => {
+        socket.on('join-room', (userId : number, roomId: number) => {
             if (!verifTokenSocket(socket))
                 return io.to(socket.id).emit('error', 'error : your token isn\'t valid !');
             if (!userId)
@@ -92,11 +105,11 @@ export function socketManagemente(io: Server)
             if (joinRoom(userId.toString(), roomId.toString())) {
                 socket.join(`${roomId.toString()}.2`);
                 io.to(socket.id).emit('roomJoined', roomId);
-                io.to(`${roomId.toString()}.1`).emit('opponent-found', username);
+                io.to(`${roomId.toString()}.1`).emit('opponent-found');
             }
         });
     
-        socket.on('create-room', (userId: number) => {
+        socket.on('create-room', (userId: number, username: string) => {
         if (!verifTokenSocket(socket))
             return io.to(socket.id).emit('error', 'your token is not valid !');
 
@@ -127,13 +140,11 @@ export function socketManagemente(io: Server)
             if (playerTwo) {
                 manager.newGame({
                     Id: playerId,
-                    Name : 'null',
                     Point : 0,
                     Card : null,
                     IsOnline : true
                 }, {
                     Id : playerTwo.player_two_id,
-                    Name : 'null',
                     Point : 0,
                     Card : null,
                     IsOnline : true

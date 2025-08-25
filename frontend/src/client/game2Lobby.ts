@@ -1,4 +1,3 @@
-
 import { getSocket } from './socketClient.js';
 import {getUserIdFromToken, getUsernameFromToken} from './loginClient.js'
 
@@ -42,7 +41,7 @@ export function init(){
 			if (!sock)
 				return console.error('error 404 : socket not found !');
 			else
-				sock.emit('join-room', getUserIdFromToken(), 1, getUsernameFromToken());
+				sock.emit('join-room', getUserIdFromToken(), 1 /* a modifier par un choix de la room */, getUsernameFromToken());
 			console.log('join button pressed !');
 		})
 	}
