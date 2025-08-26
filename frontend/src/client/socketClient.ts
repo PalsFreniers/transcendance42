@@ -81,12 +81,12 @@ export function getSockets(): [Socket, Socket, Socket] {
             const lobbyGame = document.getElementById("game-salon") as HTMLDivElement;
             lobbyGame.innerHTML = `
         <p><strong>Lobby name:</strong> ${data.lobbyName}</p>
-        <p><strong>Player 1:</strong> ${data.username}</p>
+        <p><strong>Player 1:</strong> ${data.userName}</p>
         <p><strong>Player 2:</strong> ${data.playerTwo ?? "-"}</p>
         <p><strong>Status:</strong> ${data.status}</p>`;
         });
 
-        socketPong.on("player-joined", (data) => {
+        socketPong.on('player-joined', (data) => {
             console.log("Player joined event:", data);
             // Update UI with both players
             const lobbyGame = document.getElementById("game-salon") as HTMLDivElement;

@@ -2,7 +2,7 @@ import { getUserIdFromToken } from "./loginClient.js";
 import { getSocket } from "./socketClient.js";
 
 export function init() {
-    const token = localStorage.getItem('token');
+const token = localStorage.getItem('token');
     if (!token) {
         window.location.href = '/login';
         return;
@@ -29,12 +29,9 @@ export function init() {
                     return;
                 }
                 const socket = getSocket(1);
-                const userId = getUserIdFromToken();
                 socket!.emit("create-room", {
-                    userId,
                     gameId: data.gameId,
                     lobbyName: data.lobbyName,
-                    username: data.username,
                 });
             } catch (err) {
                 console.error("Create game error", err);
@@ -59,17 +56,21 @@ export function init() {
                     return;
                 }
                 const lobby = lobbies[0];
-                await fetch("http://localhost:3002/api/game/join-lobby", {
+                const res = await fetch("http://localhost:3002/api/game/join-lobby", {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json",
                         Authorization: `Bearer ${token}`,
                     },
-                    body: JSON.stringify({ gameId: lobby.id, playerOneName: lobby.playerOneName, }),
+                    body: JSON.stringify({ gameId: lobby.id }),
                 });
+                const data = await res.json();
+                if (!data.success) {
+                    console.error("Failed to Join game:", data.error);
+                    return;
+                }
                 const socket = getSocket(1);
-                const userId = getUserIdFromToken();
-                socket!.emit("player-joined", { userId, gameId: lobby.id });
+                socket!.emit("join-room", { gameId: lobby.id });
             } catch (err) {
                 console.error("Error joining game:", err);
             }

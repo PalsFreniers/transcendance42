@@ -8,9 +8,27 @@ export class GameManager {
 
     private _games = new Map<string, [Game, [number | null, number | null]]>();
     private _userSockets = new Map<number, string>();
-    private _socketToUser = new Map<string, number>();
+    private static instance: GameManager | null = null;
 x
-    // This find the game based on something we know on the game: either on of the playerID or one of the lobby's name
+
+    static getInstance(){
+        if (!this.instance)
+            this.instance = new GameManager();
+        return this.instance
+    }
+
+    registerSocket(userId: number, socketId: string) {
+        this._userSockets.set(userId, socketId);
+    }
+
+    unregisterSocket(userId: number) {
+        this._userSockets.delete(userId);
+    }
+
+    getSocketId(userId: number): string | null {
+        return this._userSockets.get(userId) || null;
+    }
+
     findGame(key: number | string): Game | null {
     if (key === undefined) 
         return null;
@@ -21,7 +39,6 @@ x
         }
         return null;
     }
-
 
     createLobby(lobbyName: string, gameID: number): number {
         if (this._games.has(lobbyName))
@@ -116,30 +133,4 @@ x
             rightScore: game.score[1]
         };
     }
-
-    registerSocket(userId: number, socketId: string): boolean {
-        this._userSockets.set(userId, socketId);
-        this._socketToUser.set(socketId, userId);
-        return true;
-    }
-
-    unregisterSocket(socketId: string): boolean {
-        const userId = this._socketToUser.get(socketId);
-        if (userId !== undefined) {
-            this._userSockets.delete(userId);
-            this._socketToUser.delete(socketId);
-            console.log(`Cleaned up socket for user ${userId}`);
-            return true;
-        }
-        return false;
-    }
-
-    getSocketId(userId: number): string | undefined {
-        return this._userSockets.get(userId);
-    }
-
-    getUserId(socketId: string): number | undefined {
-        return this._socketToUser.get(socketId);
-    }
-
 }
