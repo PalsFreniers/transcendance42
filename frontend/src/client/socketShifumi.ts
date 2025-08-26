@@ -6,33 +6,7 @@ import * as math from "mathjs";
 export let gameIdShifumi: number = -1;
 export let myCard: [number, number][] = [];
 
-async function getUsernameById(targetId: number): Promise<string | null>
-{
-    const token = localStorage.getItem('token');
-    if (!token)
-        return null;
-    try {
-        const res = await fetch('http://localhost:3001/api/user/get-name-from-id', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${token}`
-            },
-            body: JSON.stringify({ targetId }),
-        });
-        if (res.ok)
-        {
-            const username = await res.json();
-            console.log(`user name = ${username}`);
-            return username;
-            // ajouter la recupration de username
-        }
-    } catch (err) {
-        // ajouter la gestion d'erreur
-        return null;
-    }
-    return null;
-}
+export let opponentName: string | null = null;
 
 export function createShifumiSocket(socketShifumi: Socket | null) {
     
@@ -84,15 +58,44 @@ export function createShifumiSocket(socketShifumi: Socket | null) {
       console.log(`you join room ${roomId}`)
     });
 
-    socketShifumi.on('opponent-found', () => {
+    socketShifumi.on('opponent-found', (numPlayer: number, opponentName : string) => {
       console.log('opponent found !');
       const button = document.getElementById('start-button');
-      if (button) {
+      const kick = document.getElementById('kick-opponent');
+      const opponent = document.getElementById('opponent-name');
+
+      if (opponent)
+          opponent.textContent = `your opponent is ${opponentName}`;
+
+      if (button && numPlayer == 1) {
         button.hidden = false;
       }
+
+      if (kick && numPlayer == 1)
+          kick.hidden = false;
     });
 
-    // ajouter un kick de la partie avant le lancement 
+    socketShifumi.on('kick', () => {
+        alert('you have been kick !');
+        history.pushState(null, '', '/2game');
+        handleRoute();
+    });
+
+    socketShifumi.on('opponent-leave', (reason : string) => {
+        const start = document.getElementById('start-button');
+        const kick = document.getElementById('kick-opponent');
+        const opponent = document.getElementById('opponent-name');
+
+        if (start)
+            start.hidden = true;
+        if (kick)
+            kick.hidden = true;
+        if (opponent) {
+            if (reason === 'kick')
+                opponent.textContent = 'opponent kicked';
+        }// desafichier le bouton start et le bouton kick
+    });
+
 
     /******************************************************************************/
     /*                                                                            */
@@ -100,18 +103,16 @@ export function createShifumiSocket(socketShifumi: Socket | null) {
     /*                                                                            */
     /******************************************************************************/
 
-    socketShifumi.on('started-game', (gameId: number, opponentId: number) => {
+    socketShifumi.on('started-game', (gameId: number) => {
         gameIdShifumi = gameId; // a mettre aussi dans la fonction pour rerejoindre un partie
         console.log(`game (${gameId}) started`);
 
         // a passer dans un fonction a appeler pour rendre le code plus propre 
-        const opponent = document.getElementById('opponent-name');
         const start = document.getElementById('start-button');
         const card1 = document.getElementById('card1-button');
         const card2 = document.getElementById('card2-button');
         const card3 = document.getElementById('card3-button');
-        if (opponent)
-            opponent.textContent = `your opponent is ${getUsernameById(opponentId)}`;
+
         if (start)
         start.hidden = true;
         if (card1)
@@ -133,6 +134,8 @@ export function createShifumiSocket(socketShifumi: Socket | null) {
     socketShifumi.on('game-ended', () => {
         console.log(`game ended`);
         gameIdShifumi = 0;
+        history.pushState(null, '', '/2game');
+        handleRoute();
     });
 
     /******************************************************************************/
@@ -153,13 +156,17 @@ export function createShifumiSocket(socketShifumi: Socket | null) {
         pointsText.textContent = `${myPoints} - ${opponentPoints}`;
     });
 
-    socketShifumi.on('forfeit', (player : Number) => {
-      console.log(`player ${player} as declared forfeit`);
-    });
+    socketShifumi.on('drawRound', () => {
+
+    }) // a ajouter dans le manager game
 
     socketShifumi.on('equal', () => {
-      console.log('no one win this round');
+        console.log('no one win this round');
     }); // nom a changer ?
+
+    socketShifumi.on('forfeit', (player : string) => {
+      console.log(`player ${player} as declared forfeit`);
+    });
 
     socketShifumi.on('winGame', () => {
       console.log('you win this game !')

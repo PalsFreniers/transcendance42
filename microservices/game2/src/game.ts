@@ -13,6 +13,15 @@ export interface Player {
 
 // le start du jeu, les actions, les point( la fin et le lobby d'attente de joueur ?)
 
+export async function clearRoom(room: string)
+{
+    const sockets = await io.in(room).fetchSockets();
+    for (const socket of sockets) {
+        socket.leave(room);
+    }
+    return ;
+}
+
 export class game
 {
     private gameId: number;
@@ -79,7 +88,10 @@ export class game
             if (this.playerOne.Point == 3 || this.playerTwo.Point == 3)
             {
                 endGame(this.gameId);
-                return io.to(`${this.gameId}.1`).to(`${this.gameId}.2`).emit('game-ended');
+                io.to(`${this.gameId}.1`).to(`${this.gameId}.2`).emit('game-ended');
+                await clearRoom(`${this.gameId}.1`);
+                await clearRoom(`${this.gameId}.2`);
+                return ;
             }
             setTimeout(loop, this.delay / 4);
         }
@@ -160,7 +172,7 @@ export class game
        if (playerOneCard.cardId == 0 || playerTwoCard.cardId == 0)
        {
            if (playerOneCard.cardId < playerTwoCard.cardId) {
-                this.whoWinRound(playerOneCard.userId);
+                this.whoWinRound(playerOneCard.userId); // remplacer par drawRound
            } else {
                 this.whoWinRound(playerTwoCard.userId);
            }

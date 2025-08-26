@@ -41,7 +41,7 @@ export function init(){
 			if (!sock)
 				return console.error('error 404 : socket not found !');
 			else
-				sock.emit('join-room', getUserIdFromToken(), 1 /* a modifier par un choix de la room */, getUsernameFromToken());
+				sock.emit('join-room', getUserIdFromToken());
 			console.log('join button pressed !');
 		})
 	}

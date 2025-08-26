@@ -10,10 +10,23 @@ export function init() {
     }
     const app = document.getElementById('app');
     const start = document.getElementById('start-button');
+    const kick = document.getElementById('kick-opponent');
     const card1 = document.getElementById('card1-button');
     const card2 = document.getElementById('card2-button');
     const card3 = document.getElementById('card3-button');
 
+    if (kick)
+    {
+        kick.addEventListener('click', async (e) => {
+            e.preventDefault();
+            const socketShifumi = getSocket(2);
+            if (socketShifumi)
+            {
+                socketShifumi.emit('kick-opponent');
+            }
+        });
+        kick.hidden = true;
+    }
     if (start) {
         start.addEventListener('click', async (e) => {
             e.preventDefault();
@@ -21,6 +34,8 @@ export function init() {
             if (socketShifumi) {
                 socketShifumi.emit('start-game', getUserIdFromToken());
             }
+            if (kick)
+                kick.hidden = true;
         });
         start.hidden = true;
     }

@@ -2,30 +2,30 @@ import { FastifyInstance } from 'fastify';
 import { createGameLobby, GameData } from './gameModel.js';
 import db from './dbSqlite/db.js';
 
-export async function createRoom(app: FastifyInstance) {
-  app.post('/create-game', async (request, reply) => {
-    const user = request.user as { id: number };
-    const { lobbyName, opponentId } = request.body as {
-      lobbyName: string;
-      opponentId: number;
-    };
-    // Prepare game object according to your interface
-    const newGame: GameData = {
-      playerOne: user.id,
-      playerTwo: opponentId,
-      lobbyName,
-      finalScore: '0-0',
-      status: 'waiting',
-      gameDate: new Date().toISOString(),
-    };
-    // Use createGameLobby to insert and get the ID
-    const gameId = createGameLobby(newGame);
-    return {
-      success: true,
-      gameId,
-    };
-  });
-}
+// export async function createRoom(app: FastifyInstance) {
+//   app.post('/create-game', async (request, reply) => {
+//     const user = request.user as { id: number };
+//     const { lobbyName, opponentId } = request.body as {
+//       lobbyName: string;
+//       opponentId: number;
+//     };
+//     // Prepare game object according to your interface
+//     const newGame: GameData = {
+//       playerOne: user.id,
+//       playerTwo: opponentId,
+//       lobbyName,
+//       finalScore: '0-0',
+//       status: 'waiting',
+//       gameDate: new Date().toISOString(),
+//     };
+//     // Use createGameLobby to insert and get the ID
+//     const gameId = createGameLobby(newGame);
+//     return {
+//       success: true,
+//       gameId,
+//     };
+//   });
+// }
 
 export async function awaitforOpponent(app:FastifyInstance) {
     app.post('/find-lobbies', async (request, reply) => {
