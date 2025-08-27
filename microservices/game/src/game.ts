@@ -82,29 +82,18 @@ export class Game {
     }
 
     start() {
-        this._leftTeam.forEach((paddle) => {this._allTeams.push(paddle)});
-        this._rightTeam.forEach((paddle) => {this._allTeams.push(paddle)});
+        this._leftTeam.forEach((paddle) => { this._allTeams.push(paddle); });
+        this._rightTeam.forEach((paddle) => { this._allTeams.push(paddle); });
+    
         this._ball.pos = new Vec2D.Vector(0, 0);
         this._ball.dir = new Vec2D.Vector(1, 0);
         this._state = "starting";
-
-        const setRunning = () => {this.state = "running"};
-        setTimeout(setRunning.bind(this), 2e3);
-
-        const loop = () => {
-            const start = Date.now();
-
-            this.update();
-            if (this._state === "ended")
-                return ;
-
-            const elapsed = Date.now() - start;
-            const nextTick = Math.max(0, this._tickRate - elapsed);
-
-            setTimeout(loop, nextTick);
-        };
-        loop();
+    
+        setTimeout(() => {
+            this._state = "running";
+        }, 2000);
     }
+    
 
     update() {
         this.updatePaddles();

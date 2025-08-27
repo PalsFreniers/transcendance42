@@ -97,20 +97,59 @@ export function getSockets(): [Socket, Socket, Socket] {
         <p><strong>Status:</strong> ${data.status}</p>`;
         });
 
+        socketPong.on('game-state', (state) => {
+            console.log('Game state received:', state);          
+            const canvas = document.getElementById("pong-canvas") as HTMLCanvasElement;
+            if (!canvas) 
+                return;
+            const ctx = canvas.getContext("2d");
+            if (!ctx) 
+                return;
+        
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+        
+            // Ball
+            ctx.beginPath();
+            ctx.arc(
+                state.ballPos.x * 20 + canvas.width / 2,
+                state.ballPos.y * 20 + canvas.height / 2,
+                5, 0, Math.PI * 2
+            );
+            ctx.fillStyle = "white";
+            ctx.fill();
+        
+            // Paddles
+            ctx.fillRect(
+                state.leftPaddle.x * 20 + canvas.width / 2,
+                state.leftPaddle.y * 20 + canvas.height / 2,
+                10, 50
+            );
+            ctx.fillRect(
+                state.rightPaddle.x * 20 + canvas.width / 2,
+                state.rightPaddle.y * 20 + canvas.height / 2,
+                10, 50
+            );
+        
+            // Score
+            ctx.fillStyle = "white";
+            ctx.font = "20px Arial";
+            ctx.fillText(`${state.leftScore} - ${state.rightScore}`, canvas.width / 2 - 20, 20);
+        });        
+
         document.addEventListener('keydown', (e) => {
-        if (!gameId)
-            return;
-        if (e.key === "ArrowUp" || e.key === "ArrowDown") {
-            socketPong!.emit("input", { gameId, playerId: userId, key: e.key === "ArrowUp" ? "up" : "down", action: "keydown" });
+            if (!gameId)
+                return;
+            if (e.key === "ArrowUp" || e.key === "ArrowDown") {
+                socketPong!.emit("input", { gameId, key: e.key === "ArrowUp" ? "up" : "down", action: "keydown" });
             }
         });
 
         document.addEventListener('keyup', (e) => {
-        if (!gameId)
-            return;
-        if (e.key === "ArrowUp" || e.key === "ArrowDown") {
-            socketPong!.emit("input", { gameId, playerId: userId, key: e.key === "ArrowUp" ? "up" : "down", action: "keyup" });
-        }
+            if (!gameId)
+                return;
+            if (e.key === "ArrowUp" || e.key === "ArrowDown") {
+                socketPong!.emit("input", { gameId, key: e.key === "ArrowUp" ? "up" : "down", action: "keyup" });
+            }
         });
         socketPong.on('disconnect', (reason) => {
             console.warn('Socket disconnected:', reason);

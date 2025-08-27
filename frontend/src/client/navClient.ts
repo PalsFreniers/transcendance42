@@ -189,7 +189,9 @@ function handleRoute() {
 				<input type="text" id="lobby-name" placeholder="Room name" required />
 				<button id="game-button">create Game</button>
 				<button id="join-button">Join Game</button>
-				<div id="game-salon"></div>`;
+				<div id="game-salon"></div>
+				<button id="start-game-btn">Start Game</button>
+				<canvas id="pong-canvas" width="600" height="400" style="background:black"></canvas>`;
 			import('./gameLobby.js').then((mod) => mod.init?.());
 		break;
 		case '/2game':

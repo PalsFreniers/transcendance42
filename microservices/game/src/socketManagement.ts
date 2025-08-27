@@ -56,11 +56,12 @@ export function socketManagement(io: Server) {
             try {
                 const userName = socket.data.userName;
                 const userId = socket.data.userId;
+                socket.data.lobbyName = lobbyName;
+                socket.data.gameId = `game-${gameId}`;
                 manager.createLobby(lobbyName, gameId);
                 manager.joinLobby(lobbyName, userId);
 
-                const room = `game-${gameId}`;
-                socket.join(room);
+                socket.join(socket.data.gameId);
 
                 socket.emit('room-created', {
                     gameId,
@@ -70,7 +71,7 @@ export function socketManagement(io: Server) {
                     status: 'waiting'
                 });
 
-                console.log(`User ${userId} created and joined room ${room}`);
+                console.log(`User ${userId} created and joined room ${socket.data.gameId}`);
             } catch (err) {
                 console.error('create-room error:', err);
                 socket.emit('error', err);
@@ -79,7 +80,7 @@ export function socketManagement(io: Server) {
 
         socket.on('join-room', ({ gameId }) => {
             try {
-                const room = `game-${gameId}`;
+                socket.data.gameId = `game-${gameId}`;
                 const userName = socket.data.userName;
                 const userId = socket.data.userId;
                 const lobby = db.prepare(
@@ -92,26 +93,47 @@ export function socketManagement(io: Server) {
                 const errno = manager.joinLobby(lobby.lobby_name, userId);
                 if (errno)
                     throw new Error(`Failed to join lobby: ${errno}`);
-                socket.join(room);
+                socket.join(socket.data.gameId);
+                socket.data.lobbyName = lobby.lobby_name;
                 const playerOneSocketId = manager.getSocketId(lobby.player_one_id);
                 const playerOneSocket = playerOneSocketId ? io.sockets.sockets.get(playerOneSocketId) : null;
                 const playerOneName = playerOneSocket?.data.userName ?? "Unknown";
-                io.to(room).emit('player-joined', {
+                io.to(socket.data.gameId).emit('player-joined', {
                     gameId,
                     lobbyName: lobby.lobby_name,
                     playerOne: playerOneName,
                     playerTwo: userName,
                     status: 'ready',
                 });
-                console.log(`User ${userId} joined room ${room} (lobbyName=${lobby.lobby_name})`);
+                console.log(`User ${userId} joined room ${socket.data.gameId} (lobbyName=${lobby.lobby_name})`);
             } catch (err) {
                 console.error('join-room error:', err);
                 socket.emit('error', err);
             }
         });
 
-        socket.on('input', ({ playerId, key, action }) => {
-            const game = manager.findGame(playerId);
+        socket.on('start-game', () => {
+            try {
+                const lobbyName = socket.data.lobbyName;
+                if (!lobbyName) {
+                    socket.emit('error', 'No lobby assigned to this socket');
+                    return;
+                }
+                const errno = manager.startGame(lobbyName, socket.data.gameId , io);
+                if (errno) {
+                    throw new Error(`Failed to start game: ${errno}`);
+                }
+                console.log(`Game started for lobby ${lobbyName}`);
+            } catch (err) {
+                console.error("start-game error:", err);
+                socket.emit("error", err);
+            }
+        });
+
+        socket.on('input', ({ key, action }) => {
+            const lobbyName = socket.data.lobbyName;
+            const playerId = socket.data.userId;
+            const game = manager.findGame(lobbyName);
             if (!game)
                 return console.warn(`No active game for player ${playerId}`);
             const paddle = game.getPaddle(playerId)!;
@@ -123,6 +145,7 @@ export function socketManagement(io: Server) {
             const userId = socket.data.userId;
             if (userId)
                 manager.unregisterSocket(userId);
+            socket.data.gameId = -1;
             console.log(`Socket disconnected: ${socket.id}`);
         });
     });

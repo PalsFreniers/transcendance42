@@ -1,8 +1,7 @@
-import { getUserIdFromToken } from "./loginClient.js";
 import { getSocket } from "./socketClient.js";
 
 export function init() {
-const token = localStorage.getItem('token');
+    const token = localStorage.getItem('token');
     if (!token) {
         window.location.href = '/login';
         return;
@@ -10,6 +9,7 @@ const token = localStorage.getItem('token');
     const createGameButton = document.getElementById('game-button') as HTMLButtonElement;
     const joinGameButton = document.getElementById('join-button') as HTMLButtonElement;
     const lobbyName = document.getElementById('lobby-name') as HTMLInputElement;
+    const startBtn = document.getElementById("start-game-btn") as HTMLButtonElement;
 
     if (createGameButton) {
         createGameButton.addEventListener("click", async (e) => {
@@ -74,6 +74,12 @@ const token = localStorage.getItem('token');
             } catch (err) {
                 console.error("Error joining game:", err);
             }
+        });
+    }
+    if (startBtn) {
+        startBtn.addEventListener("click", () => {
+            const socket = getSocket(1);
+            socket!.emit("start-game");
         });
     }
 }
