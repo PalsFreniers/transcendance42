@@ -9,8 +9,9 @@ RUN npm install --save-dev @types/better-sqlite3
 
 COPY . .
 
-RUN npx tsc
+RUN npm run build
 
 EXPOSE 3001
 
-CMD ["node", "dist/index.js"]
+# REMOVE DEV BY START WHEN PROJECT FINISH
+CMD ["npm", "run", "dev"]

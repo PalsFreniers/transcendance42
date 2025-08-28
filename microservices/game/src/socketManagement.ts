@@ -55,11 +55,10 @@ export function socketManagement(io: Server) {
         socket.on('create-room', ({ gameId, lobbyName }) => {
             try {
                 const userName = socket.data.userName;
-                const userId = socket.data.userId;
                 socket.data.lobbyName = lobbyName;
                 socket.data.gameId = `game-${gameId}`;
                 manager.createLobby(lobbyName, gameId);
-                manager.joinLobby(lobbyName, userId);
+                manager.joinLobby(lobbyName, socket.data.userId);
 
                 socket.join(socket.data.gameId);
 
@@ -71,7 +70,7 @@ export function socketManagement(io: Server) {
                     status: 'waiting'
                 });
 
-                console.log(`User ${userId} created and joined room ${socket.data.gameId}`);
+                console.log(`User ${socket.data.userId} created and joined room ${socket.data.gameId}`);
             } catch (err) {
                 console.error('create-room error:', err);
                 socket.emit('error', err);
@@ -82,7 +81,6 @@ export function socketManagement(io: Server) {
             try {
                 socket.data.gameId = `game-${gameId}`;
                 const userName = socket.data.userName;
-                const userId = socket.data.userId;
                 const lobby = db.prepare(
                     `SELECT player_one_id, player_two_id, lobby_name 
              FROM games WHERE id = ?`
@@ -90,7 +88,7 @@ export function socketManagement(io: Server) {
                 if (!lobby) {
                     throw new Error(`Lobby not found for gameId ${gameId}`);
                 }
-                const errno = manager.joinLobby(lobby.lobby_name, userId);
+                const errno = manager.joinLobby(lobby.lobby_name, socket.data.userId);
                 if (errno)
                     throw new Error(`Failed to join lobby: ${errno}`);
                 socket.join(socket.data.gameId);
@@ -105,7 +103,7 @@ export function socketManagement(io: Server) {
                     playerTwo: userName,
                     status: 'ready',
                 });
-                console.log(`User ${userId} joined room ${socket.data.gameId} (lobbyName=${lobby.lobby_name})`);
+                console.log(`User ${socket.data.userId} joined room ${socket.data.gameId} (lobbyName=${lobby.lobby_name})`);
             } catch (err) {
                 console.error('join-room error:', err);
                 socket.emit('error', err);
@@ -145,7 +143,6 @@ export function socketManagement(io: Server) {
             const userId = socket.data.userId;
             if (userId)
                 manager.unregisterSocket(userId);
-            socket.data.gameId = -1;
             console.log(`Socket disconnected: ${socket.id}`);
         });
     });

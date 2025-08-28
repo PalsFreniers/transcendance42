@@ -15,6 +15,9 @@ services:
       - app-network
     volumes:
       - frontend_db_data:/data
+      - ./frontend/src:/app/src:cached
+      - ./frontend/package.json:/app/package.json:cached
+      - ./frontend/tsconfig.json:/app/tsconfig.json:cached
   
   # NGINX
   nginx:
@@ -41,6 +44,10 @@ services:
     container_name: user-service
     volumes:
       - user_db_data:/data
+      # ⚡ FOR DEV FILE IN SRC NEED TO BE WATCH MODIF
+      - ./microservices/usermanagement/src:/app/src:cached
+      - ./microservices/usermanagement/package.json:/app/package.json:cached
+      - ./microservices/usermanagement/tsconfig.json:/app/tsconfig.json:cached
     ports:
       - "${USER_MANA_PORT}:${USER_MANA_PORT}"
     networks:
@@ -53,6 +60,10 @@ services:
     container_name: game-service
     volumes:
       - game_db_data:/data
+      # ⚡ FOR DEV FILE IN SRC NEED TO BE WATCH MODIF
+      - ./microservices/game/src:/app/src:cached
+      - ./microservices/game/package.json:/app/package.json:cached
+      - ./microservices/game/tsconfig.json:/app/tsconfig.json:cached
     ports:
       - "${GAME_PORT}:${GAME_PORT}"
     networks:
@@ -65,6 +76,10 @@ services:
     container_name: game2-service
     volumes:
       - game2_db_data:/data
+      # ⚡ FOR DEV FILE IN SRC NEED TO BE WATCH MODIF
+      - ./microservices/game2/src:/app/src:cached
+      - ./microservices/game2/package.json:/app/package.json:cached
+      - ./microservices/game2/tsconfig.json:/app/tsconfig.json:cached
     ports:
       - "${GAME2_PORT}:${GAME2_PORT}"
     networks:

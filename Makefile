@@ -2,21 +2,20 @@ COMPOSE=docker compose
 COMPOSE_FILE=docker-compose.yml
 
 help:
-	@echo "Usage make [TARGET]"
+	@echo "Usage: make [TARGET]"
 	@echo ""
 	@echo "Targets:"
-	@echo ""
-	@echo " -all:		Start all services (Docker)"
-	@echo " -down:		Stop all services"
-	@echo " -restart:	Restart all services"
-	@echo " -logs:		Show logs from services"
-	@echo " -build:	Build all Docker images"
-	@echo " -clean:	Remove containers, images, volumes"
-	@echo " -user:		Run only user management service"
-	@echo " -game:		Run only game service"
-	@echo " -nginx:	Run only nginx"
-	@echo " -metrics:	Run metrics (Prometheus, Grafana)"
-	@echo " -front:	Run front"
+	@echo "  all         Start all services"
+	@echo "  down        Stop all services"
+	@echo "  restart     Restart all services"
+	@echo "  logs        Show logs"
+	@echo "  build       Build all images (no cache)"
+	@echo "  clean       Remove containers, images, volumes"
+	@echo "  user        Run only user-service"
+	@echo "  game-dev    Run game service in dev mode (hot reload)"
+	@echo "  game-prod   Run game service in prod mode"
+	@echo "  nginx       Run only nginx"
+	@echo "  front       Run only frontend"
 
 all:
 	$(COMPOSE) -f $(COMPOSE_FILE) up -d
@@ -36,20 +35,12 @@ build:
 clean:
 	$(COMPOSE) -f $(COMPOSE_FILE) down -v --rmi all --remove-orphans
 
-cleanFront:
-	$(COMPOSE) -f $(COMPOSE_FILE) down -v --rmi frontend --remove-orphans
-
 user:
-	docker-compose up -d usermanagement
-
-game:
-	docker-compose up -d game
+	$(COMPOSE) -f $(COMPOSE_FILE) up -d user-service
 
 nginx:
-	docker-compose up -d nginx
-
-metrics:
-	docker-compose up -d prometheus grafana
+	$(COMPOSE) -f $(COMPOSE_FILE) up -d nginx
 
 front:
-	docker-compose up -d frontend
+	$(COMPOSE) -f $(COMPOSE_FILE) up -d frontend
+

@@ -21,8 +21,8 @@ app.setNotFoundHandler((req, reply) => {
 	reply.sendFile('/index.html');
 });
 
-app.listen({ port: 5173, host: '0.0.0.0' })
-	.then(() => console.log('✅ Frontend running on http://localhost:5173'))
+app.listen({ port: 3004, host: '0.0.0.0' })
+	.then(() => console.log('✅ Fastify running on http://localhost:3004'))
 	.catch(err => {
 		console.error('❌ Fastify failed to start:', err);
 	});

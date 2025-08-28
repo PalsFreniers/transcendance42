@@ -1,8 +1,5 @@
 import { FastifyInstance } from 'fastify';
 import db from './dbSqlite/db.js';
-import { io } from './index.js';
-import { ChatMessage } from './userSocket.js';
-import { saveMessage } from './userSocket.js';
 
 export async function profil(app: FastifyInstance) {
     app.get('/profil', async (request, reply) => {

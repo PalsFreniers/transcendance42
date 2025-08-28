@@ -13,11 +13,9 @@ RUN npm install
 # Copy app source
 COPY . .
 
-# Build TypeScript
-RUN npm run build-all
-
 # Expose frontend port
 EXPOSE 5173
+EXPOSE 3004
 
-# Run the compiled JS
-CMD ["node", "public/scripts/index.js"]
+# REMOVE DEV BY START WHEN PROJECT FINISH
+CMD ["npm", "run", "dev"] 

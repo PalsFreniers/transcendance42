@@ -5,7 +5,10 @@
   "description": "Fastify-based frontend service",
   "main": "src/index.ts",
   "scripts": {
-  "dev": "vite --respawn src/index.ts",
+  "dev:ts": "nodemon --watch src --ext ts --exec node --loader ts-node/esm src/index.ts --port 3004",
+  "dev:sass": "sass --watch src/scss:public/css",
+  "dev:vite": "vite --host --port 5173",
+  "dev": "concurrently -k -n TS,SASS,VITE -c yellow,cyan,magenta \"npm run dev:ts\" \"npm run dev:sass\" \"npm run dev:vite\"",
   "build": "tsc -p tsconfig.json",
   "build-client": "sass src/scss:public/css && vite build --config /app/public/scripts/vite.config.js",
   "build-all": "npm run build && npm run build-client",
@@ -20,7 +23,9 @@
   },
   "devDependencies": {
     "typescript": "^5.4.5",
-    "ts-node-dev": "^2.0.0",
+    "concurrently": "^8.2.2",
+    "ts-node": "^10.9.2",
+    "nodemon": "^3.0.2",
     "sass": "^1.89.2",
     "vite": "^7.1.1"
   }

@@ -13,9 +13,9 @@ RUN npm install --save-dev @types/better-sqlite3
 COPY . .
 
 # Compile TypeScript
-RUN npx tsc
+RUN npm run build
 
 EXPOSE 3003
 
-# Start the service
-CMD ["node", "dist/index.js"]
+# REMOVE DEV BY START WHEN PROJECT FINISH
+CMD ["npm", "run", "dev"]
