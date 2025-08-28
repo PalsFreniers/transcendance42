@@ -181,8 +181,9 @@ export function handleRoute() {
 					<h2>Shifumi</h2>
 					<p id="opponent-name"></p>
 					<P id="points"></p>
-					<button id="start-button">Start game</button>				
-					<button id="kick-opponent">kick</button>				
+					<button id="quit-button">quit lobby</button>
+					<button id="start-button">Start game</button>
+					<button id="kick-opponent">kick</button>
 					<button id="card1-button">card 1</button>
 					<button id="card2-button">card 2</button>
 					<button id="card3-button">card 3</button>

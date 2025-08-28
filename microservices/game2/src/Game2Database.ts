@@ -96,3 +96,9 @@ export function findGame(): number
     console.log(game.id);
     return game.id;
 }
+
+export function deleteGameFromDB(gameId)
+{
+    db.prepare(`DELETE FROM games2 WHERE id = ?`).run(gameId);
+    return true;
+}

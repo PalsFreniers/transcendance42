@@ -112,6 +112,7 @@ export class game
     {
         if (userId == this.playerOne.Id)
         {
+            socket.data.player = 1;
             this.playerOne.IsOnline = true;
             socket.join(`${this.gameId}.1`);
             io.to(`${this.gameId}.1`).emit('reconnect');
@@ -123,6 +124,7 @@ export class game
         }
         else if (userId == this.playerTwo.Id)
         {
+            socket.data.player = 2;
             this.playerTwo.IsOnline = true;
             socket.join(`${this.gameId}.2`);
             io.to(`${this.gameId}.2`).emit('reconnect');
@@ -231,6 +233,8 @@ export class game
                     io.to(`${this.gameId}.1`).to(`${this.gameId}.2`).emit('forfeit', this.playerOne.Id);
                     forfeit(this.gameId, 1);
                     clearInterval(interval);
+                    this.sleep(5000);
+                    io.to(`${this.gameId}.1`).to(`${this.gameId}.2`).emit('game-ended');
                     resolve(true);
                 }
                 if (this.PlayerTwoTime == 0 && this.playerOne.IsOnline)
@@ -239,6 +243,8 @@ export class game
                     forfeit(this.gameId, 2);
                     io.to(`${this.gameId}.1`).to(`${this.gameId}.2`).emit('forfeit', this.playerTwo.Id);
                     clearInterval(interval);
+                    this.sleep(5000);
+                    io.to(`${this.gameId}.1`).to(`${this.gameId}.2`).emit('game-ended');
                     resolve(true);
                 }
                 if (this.PlayerOneTime == 0 && this.PlayerTwoTime == 0)
@@ -247,6 +253,8 @@ export class game
                     io.to(`${this.gameId}.1`).to(`${this.gameId}.2`).emit('forfeit', 'all player');
                     forfeit(this.gameId, 0);
                     clearInterval(interval);
+                    this.sleep(5000);
+                    io.to(`${this.gameId}.1`).to(`${this.gameId}.2`).emit('game-ended');
                     resolve(true);
                 }
 

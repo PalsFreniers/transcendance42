@@ -1,6 +1,6 @@
 import { Server, Socket } from "socket.io";
 import { verifTokenSocket } from "./index.js";
-import {createRoom, getOpponentName, joinRoom, kickOpponentFromDB, findGame } from './Game2Database.js';
+import { createRoom, getOpponentName, joinRoom, kickOpponentFromDB, findGame, deleteGameFromDB } from './Game2Database.js';
 import { GameData } from './gameModel.js';
 import { game } from './game.js';
 import { Manager } from './gameManager.js';
@@ -37,6 +37,51 @@ function getUsernameFromToken(token: string): string | null {
     }
 }
 
+async function getSocketFromRoom(io, roomName, targetId): Promise<Socket | null>
+{
+    const sockets = await io.in(roomName).fetchSockets();
+    const target = sockets.find(s => s.data.userId === targetId);
+    return target;
+}
+
+async function deleteSocketRoom(io, roomId)
+{
+    const sockets = await io.in(`${roomId}.1`).fetchSockets();
+    const sockets2 = await io.in(`${roomId}.2`).fetchSockets();
+    for (const socket of sockets) {
+        socket.leave(`${roomId}.1`);
+    }
+    for (const socket of sockets2) {
+        socket.leave(`${roomId}.2`);
+    }
+}
+
+function quitLobby(io, socket: Socket): boolean
+{
+    if (socket.data.gameId <= 0)
+        return false;
+
+    const gameId = socket.data.gameId;
+    if (socket.data.player === 1)
+    {
+        socket.leave(`${gameId}.1`);
+        deleteGameFromDB(gameId);
+        io.to(`${gameId}.1`).to(`${gameId}.2`).emit('game-ended');
+        io.to(`${gameId}.1`).to(`${gameId}.2`).emit('roomInfo', 'the host of the party has been disconnected !');
+        return true;
+    }
+    if (socket.data.player === 2)
+    {
+        socket.leave(`${gameId}.2`);
+        io.to(`${gameId}.1`).to(`${gameId}.2`).emit('roomInfo', `${socket.data.userName} quit this lobby !`)
+        kickOpponentFromDB(socket.data.gameId);
+        io.to(`${socket.data.gameId}.1`).emit('opponent-leave', 'quit');
+        io.to(`${socket.data.gameId}.2`).emit('player-leave'); // a ajouter dans socketShifumi.ts pour la gestion spectateur
+        return true;
+    }
+    return false;
+}
+
 export function socketManagemente(io: Server)
 {
     io.use(async (socket, next) => {
@@ -65,16 +110,18 @@ export function socketManagemente(io: Server)
         {
             socket.data.userId = getUserIdFromToken(socket.handshake.auth.token);
             socket.data.userName = getUsernameFromToken(socket.handshake.auth.token);
+            socket.data.player = -1;
             socket.data.gameId = -1;
             console.log(`User ${userId} registered with Shifumi socket ${socket.id}`);
 
             // a metre dans une fonction pour la lisibiliter du code
             const id = db.prepare(`SELECT id FROM games2 WHERE status = 'playing' AND (player_one_id = ? OR player_two_id = ?)`).get(userId, userId) as { id : number } | undefined;
             if (!id)
-                return ;
+                return io.to(socket.id).emit('no-game');
             let game = manager.getGame(id.id);
             if (game)
             {
+                socket.data.gameId = id.id;
                 game.reconnect(userId, socket);
             }
         });
@@ -89,7 +136,10 @@ export function socketManagemente(io: Server)
                 const game = manager.getGame(gameId);
                 if (game)
                     game.disconnect(playerId);
-                // ajouter un emit pour prevenir le joueur restant qu'il a perdu sont opponent s'il etais dans une game pas lancer
+                else
+                {
+                    quitLobby(io, socket);
+                }
             }
             socket.data.gameId = -1;
             console.log(`Socket Shifumi disconnected: ${socket.id}`);
@@ -118,6 +168,7 @@ export function socketManagemente(io: Server)
 
             if (joinRoom(userId.toString(), name, gameId.toString())) {
                 socket.data.gameId = gameId;
+                socket.data.player = 2;
                 socket.join(`${gameId.toString()}.2`);
                 io.to(socket.id).emit('roomJoined', gameId);
                 io.to(`${gameId.toString()}.1`).emit('opponent-found', 1, name);
@@ -138,21 +189,31 @@ export function socketManagemente(io: Server)
                 socket.join(`${roomId.toString()}.1`);
 
             socket.data.gameId = roomId;
+            socket.data.player = 1;
             io.to(socket.id).emit('roomJoined', roomId);
         });
 
         socket.on('kick-opponent', async () =>
         {
             let opponentId = kickOpponentFromDB(socket.data.gameId);
-            const sockets = await io.in(`${socket.data.gameId}.2`).fetchSockets();
-            const target = sockets.find(s => s.data.userId === opponentId);
+            const target = await getSocketFromRoom(io, `${socket.data.gameId}.2`, opponentId);
+
             if (target) {
                 target.leave(`${socket.data.gameId}.2`);
                 io.to(target.id).emit('kick');
                 io.to(`${socket.data.gameId}.1`).emit('opponent-leave', 'kick');
+                io.to(`${socket.data.gameId}.2`).emit('player-leave'); // a ajouter dans socketShifumi.ts pour la gestion spectateur
                 target.data.gameId = -1;
             }
         });
+        
+        socket.on('quit-lobby', () => {
+            if (quitLobby(io, socket))
+                return;
+            console.error('error : fail to quit lobby !');
+            io.to(socket.id).emit('error', 'fail to quit lobby');
+        });
+
         // ajouter quit room
 
         /******************************************************************************/
@@ -163,6 +224,7 @@ export function socketManagemente(io: Server)
 
         socket.on('start-game', (playerId: number) =>
         {
+            // a metre dans un fonction a appeler pour rendre le code propre 
             const playerTwo = db.prepare(`SELECT player_two_id FROM games2 WHERE player_one_id = ? AND status = 'waiting'`).get(playerId) as { player_two_id: number };
             const id = db.prepare(`SELECT id FROM games2 WHERE player_one_id = ? AND status = 'waiting'`).get(playerId) as { id : number };
             db.prepare(`UPDATE games2 SET status = ? WHERE player_one_id = ? AND status = 'waiting'`).run('playing', playerId);

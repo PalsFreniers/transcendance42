@@ -8,6 +8,26 @@ export let myCard: [number, number][] = [];
 
 export let opponentName: string | null = null;
 
+
+export function notify(msg: string) {
+  const div = document.createElement("div");
+  div.textContent = msg;
+  div.style.position = "fixed";
+  div.style.bottom = "20px";
+  div.style.right = "20px";
+  div.style.background = "black";
+  div.style.color = "white";
+  div.style.padding = "10px";
+  div.style.borderRadius = "8px";
+  div.style.zIndex = "1000";
+
+  document.body.appendChild(div);
+
+  setTimeout(() => div.remove(),  10000);
+}
+
+
+
 export function createShifumiSocket(socketShifumi: Socket | null) {
     
     const token = localStorage.getItem('token');
@@ -49,7 +69,7 @@ export function createShifumiSocket(socketShifumi: Socket | null) {
     /******************************************************************************/
 
     socketShifumi.on('roomInfo', (info: string) => {
-      alert(info);
+      notify(info);
     });
 
     socketShifumi.on('roomJoined', (roomId: number) => {
@@ -59,7 +79,6 @@ export function createShifumiSocket(socketShifumi: Socket | null) {
     });
 
     socketShifumi.on('opponent-found', (numPlayer: number, opponentName : string) => {
-      console.log('opponent found !');
       const button = document.getElementById('start-button');
       const kick = document.getElementById('kick-opponent');
       const opponent = document.getElementById('opponent-name');
@@ -73,12 +92,13 @@ export function createShifumiSocket(socketShifumi: Socket | null) {
 
       if (kick && numPlayer == 1)
           kick.hidden = false;
+      notify('opponent found !');
     });
 
     socketShifumi.on('kick', () => {
-        alert('you have been kick !');
         history.pushState(null, '', '/2game');
         handleRoute();
+        notify('you have been kick !');
     });
 
     socketShifumi.on('opponent-leave', (reason : string) => {
@@ -109,10 +129,13 @@ export function createShifumiSocket(socketShifumi: Socket | null) {
 
         // a passer dans un fonction a appeler pour rendre le code plus propre 
         const start = document.getElementById('start-button');
+        const quit = document.getElementById('quit-button');
         const card1 = document.getElementById('card1-button');
         const card2 = document.getElementById('card2-button');
         const card3 = document.getElementById('card3-button');
 
+        if (quit)
+          quit.hidden = true;
         if (start)
         start.hidden = true;
         if (card1)
@@ -124,11 +147,11 @@ export function createShifumiSocket(socketShifumi: Socket | null) {
     });
 
     socketShifumi.on('wait-opponent', () => {
-      alert('your opponent as been deconnected\nhe have 15 seconds for rejoined the game');
+      notify('your opponent as been deconnected\nhe have 15 seconds for rejoined the game');
     });
 
     socketShifumi.on('opponent-reconnected', () => {
-      alert('your opponent as been reconnected');
+      notify('your opponent as been reconnected');
     });
 
     socketShifumi.on('game-ended', () => {
@@ -225,8 +248,18 @@ export function createShifumiSocket(socketShifumi: Socket | null) {
     /*                                                                            */
     /******************************************************************************/
 
+    socketShifumi.on('no-game', () => {
+      const path = window.location.pathname;
+      if (path === '/shifumi')
+      {
+        history.pushState(null, '', '/2game')
+        handleRoute();
+      }
+    });
+
     socketShifumi.on('error', (error: string) => {
-        console.log(error);
+      notify(error);
+      console.log(error);
     });
 
     socketShifumi.on('connect_error', (err) => {
