@@ -62,7 +62,7 @@ export class game
                 if (await this.playerIsOffline())
                     return ;
             }
-
+// ajouter le timmer de fin de choix de carte et emit('end-time')
             if (this.playerOne.Card && this.playerTwo.Card) {
                 
                 console.log('start check cards !');
