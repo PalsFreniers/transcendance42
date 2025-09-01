@@ -100,46 +100,72 @@ export function getSockets(): [Socket, Socket, Socket] {
         });
 
         socketPong.on('game-state', (state) => {
-            console.log('Game state received:', state);          
+            console.log('Game state received:', state);
+
             const canvas = document.getElementById("pong-canvas") as HTMLCanvasElement;
-            if (!canvas) 
+            if (!canvas)
                 return;
             const ctx = canvas.getContext("2d");
-            if (!ctx) 
+            if (!ctx)
                 return;
-        
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-        
-            // Ball
+            // Paramètres de la zone de jeu
+            const scale = 20; // 1 unité = 20 pixels
+            const gameWidth = 20;  // largeur du jeu en unités
+            const gameHeight = 10; // hauteur du jeu en unités
+
+            const offsetX = canvas.width / 2;
+            const offsetY = canvas.height / 2;
+
+            // Fond
+            ctx.fillStyle = "blue";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            // Bordure du jeu
+            ctx.strokeStyle = "white";
+            ctx.lineWidth = 2;
+            ctx.strokeRect(
+                offsetX - (gameWidth / 2) * scale,
+                offsetY - (gameHeight / 2) * scale,
+                gameWidth * scale,
+                gameHeight * scale
+            );
+            // Balle
             ctx.beginPath();
             ctx.arc(
-                state.ballPos.x * 20 + canvas.width / 2,
-                state.ballPos.y * 20 + canvas.height / 2,
+                state.ballPos.x * scale + offsetX,
+                state.ballPos.y * scale + offsetY,
                 5, 0, Math.PI * 2
             );
             ctx.fillStyle = "white";
             ctx.fill();
-        
+            
             // Paddles
+            const paddleWidth = 0.5 * scale; // largeur 0.5 unité
+            const paddleHeight = 2 * scale;  // longueur 2 unités
+
+            // Paddle gauche
             ctx.fillRect(
-                state.leftPaddle.x * 20 + canvas.width / 2,
-                state.leftPaddle.y * 20 + canvas.height / 2,
-                10, 50
+                state.leftPaddle.x * scale + offsetX - paddleWidth / 2,
+                state.leftPaddle.y * scale + offsetY - paddleHeight / 2,
+                paddleWidth,
+                paddleHeight
             );
+
+            // Paddle droit
             ctx.fillRect(
-                state.rightPaddle.x * 20 + canvas.width / 2,
-                state.rightPaddle.y * 20 + canvas.height / 2,
-                10, 50
+                state.rightPaddle.x * scale + offsetX - paddleWidth / 2,
+                state.rightPaddle.y * scale + offsetY - paddleHeight / 2,
+                paddleWidth,
+                paddleHeight
             );
-        
+
             // Score
             ctx.fillStyle = "white";
             ctx.font = "20px Arial";
-            ctx.fillText(`${state.leftScore} - ${state.rightScore}`, canvas.width / 2 - 20, 20);
-        });        
+            ctx.fillText(`${state.leftScore} - ${state.rightScore}`, canvas.width / 2 - 20, 30);
+        });
 
         document.addEventListener('keydown', (e) => {
-            if (!lobbyname) 
+            if (!lobbyname)
                 return;
             if (e.key === "ArrowUp" || e.key === "ArrowDown") {
                 const payload = { key: e.key === "ArrowUp" ? "up" : "down", action: "keydown" };
@@ -147,7 +173,7 @@ export function getSockets(): [Socket, Socket, Socket] {
                 socketPong!.emit("input", payload);
             }
         });
-        
+
         document.addEventListener('keyup', (e) => {
             if (!lobbyname)
                 return;
@@ -157,7 +183,7 @@ export function getSockets(): [Socket, Socket, Socket] {
                 socketPong!.emit("input", payload);
             }
         });
-        
+
         socketPong.on('disconnect', (reason) => {
             console.warn('Socket disconnected:', reason);
         });

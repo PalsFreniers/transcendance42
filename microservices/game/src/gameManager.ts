@@ -64,10 +64,9 @@ x
         const [game, [p1, p2]] = this._games.get(lobbyName)!;
         if (!p1 || !p2)
             return 2;
-    
         game.start();
     
-        // boucle principale (30 FPS)
+        // boucle principale (60 FPS)
         const loop = setInterval(() => {
             game.update();
     
@@ -81,7 +80,7 @@ x
     
             const state = this.getGameInfo(lobbyName);
             io.to(gameId).emit("game-state", state);
-        }, 1000 / 30);
+        }, 1000 / 60);
         return 0;
     }
     

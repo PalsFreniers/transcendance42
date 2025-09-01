@@ -418,6 +418,10 @@ input:-webkit-autofill {
 $pong-white: #ffffff;
 $pong-bg: transparent; // pas besoin de fond si c'est sur fond noir
 
+#pong-canvas{
+	border: 4px solid #ccc;
+}
+
 #back_shifumi {
 	padding: 0;
 	margin: 0;
@@ -433,7 +437,6 @@ $pong-bg: transparent; // pas besoin de fond si c'est sur fond noir
 		gap: 4vh;
 		align-items: flex-start;
 	}
-
  /* .pong-scene {
     perspective: 1000px;
     display: flex;
