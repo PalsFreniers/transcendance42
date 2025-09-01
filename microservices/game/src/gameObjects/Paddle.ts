@@ -58,14 +58,14 @@ export class Paddle {
     public get dir(): Vec2D.AbstractVector {
         let newDir = new Vec2D.Vector(0, 0);
         if (this._state[0])
-            newDir.y += this.speed;
-        if (this._state[1])
             newDir.y -= this.speed;
+        if (this._state[1])
+            newDir.y += this.speed;
         return newDir;
     }
 
     getState() {
-        return this._state
+        return this._state;
     }
 
 // Methods

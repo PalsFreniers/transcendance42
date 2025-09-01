@@ -97,6 +97,7 @@ export class Game {
 
     update() {
         this.updatePaddles();
+        //console.log("Paddle states:", this._allTeams.map(p => p.getState()));
         if (this._state == "running")
             this.updateBall();
         else if (this._state == "idling")
@@ -141,7 +142,8 @@ export class Game {
 
     private updatePaddles() {
         for (const paddle of this._allTeams) {
-            if (paddle.shouldMove) paddle.move();
+            if (paddle.shouldMove) 
+                paddle.move();
         }
     }
 

@@ -136,7 +136,12 @@ export function socketManagement(io: Server) {
                 return console.warn(`No active game for player ${playerId}`);
             const paddle = game.getPaddle(playerId)!;
             const state = paddle.getState();
-            state[key === 'up' ? 0 : 1] = action === 'keyup';
+            const isPressed = action === 'keydown';
+            if (key === 'up')
+                state[0] = isPressed;
+            else if (key === 'down' )
+                state[1] = isPressed;
+            console.log(`Player ${playerId} ->`, state);
         });
 
         socket.on('disconnect', () => {

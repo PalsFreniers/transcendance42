@@ -13,7 +13,7 @@ interface ChatMessage {
 let socketChat: Socket | null = null;
 let socketPong: Socket | null = null;
 let socketShifumi: Socket | null = null;
-let gameId: number | null = null;
+let lobbyname: String | null = null;
 
 function getUserIdFromToken(): number {
     const token = localStorage.getItem('token');
@@ -79,6 +79,7 @@ export function getSockets(): [Socket, Socket, Socket] {
         socketPong.on("room-created", (data) => {
             console.log("Room created event:", data);
             const lobbyGame = document.getElementById("game-salon") as HTMLDivElement;
+            lobbyname = data.lobbyName;
             lobbyGame.innerHTML = `
         <p><strong>Lobby name:</strong> ${data.lobbyName}</p>
         <p><strong>Player 1:</strong> ${data.userName}</p>
@@ -89,6 +90,7 @@ export function getSockets(): [Socket, Socket, Socket] {
         socketPong.on('player-joined', (data) => {
             console.log("Player joined event:", data);
             // Update UI with both players
+            lobbyname = data.lobbyName;
             const lobbyGame = document.getElementById("game-salon") as HTMLDivElement;
             lobbyGame.innerHTML = `
         <p><strong>Lobby name:</strong> ${data.lobbyName}</p>
@@ -137,20 +139,25 @@ export function getSockets(): [Socket, Socket, Socket] {
         });        
 
         document.addEventListener('keydown', (e) => {
-            if (!gameId)
+            if (!lobbyname) 
                 return;
             if (e.key === "ArrowUp" || e.key === "ArrowDown") {
-                socketPong!.emit("input", { gameId, key: e.key === "ArrowUp" ? "up" : "down", action: "keydown" });
+                const payload = { key: e.key === "ArrowUp" ? "up" : "down", action: "keydown" };
+                console.log("Emit input:", payload);
+                socketPong!.emit("input", payload);
             }
         });
-
+        
         document.addEventListener('keyup', (e) => {
-            if (!gameId)
+            if (!lobbyname)
                 return;
             if (e.key === "ArrowUp" || e.key === "ArrowDown") {
-                socketPong!.emit("input", { gameId, key: e.key === "ArrowUp" ? "up" : "down", action: "keyup" });
+                const payload = { key: e.key === "ArrowUp" ? "up" : "down", action: "keyup" };
+                console.log("Emit input:", payload);
+                socketPong!.emit("input", payload);
             }
         });
+        
         socketPong.on('disconnect', (reason) => {
             console.warn('Socket disconnected:', reason);
         });
