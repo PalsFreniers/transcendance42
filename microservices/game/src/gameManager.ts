@@ -1,17 +1,18 @@
-import {Game} from './game.js'
-import {Paddle} from "./gameObjects/Paddle.js";
+import { Game } from './game.js'
+import { Paddle } from "./gameObjects/Paddle.js";
 import * as Vec2D from "vector2d";
+import { socketManagement } from './socketManagement.js';
 
 export class GameManager {
 
-// Attributes
+    // Attributes
 
     private _games = new Map<string, [Game, [number | null, number | null]]>();
     private _userSockets = new Map<number, string>();
     private static instance: GameManager | null = null;
-x
+    x
 
-    static getInstance(){
+    static getInstance() {
         if (!this.instance)
             this.instance = new GameManager();
         return this.instance
@@ -32,7 +33,7 @@ x
     findGame(lobbyName: string): Game | null {
         const entry = this._games.get(lobbyName);
         return entry ? entry[0] : null;
-    }    
+    }
 
     createLobby(lobbyName: string, gameID: number): number {
         if (this._games.has(lobbyName))
@@ -55,35 +56,36 @@ x
             return 3;
         return 0;
     }
-    
+
 
     startGame(lobbyName: string, gameId: string, io: any): number {
         if (!this._games.has(lobbyName))
             return 1;
-    
+
         const [game, [p1, p2]] = this._games.get(lobbyName)!;
         if (!p1 || !p2)
             return 2;
         game.start();
-    
-        // boucle principale (60 FPS)
         const loop = setInterval(() => {
             game.update();
-    
-            /*if (game.state === "ended") {
+
+            if (game.state === "ended") {
                 clearInterval(loop);
-                io.to(lobbyName).emit("game-ended", {
-                    winner: game.getWinner()
+                const score = this.getScore(lobbyName);
+                io.to(io.socket).emit("game-end", {
+                    msg: score![0] > score![1] ? "You win" : "You loose",
+                    score
                 });
-                return;
-            }*/
-    
+                /*io.to(io.socket).emit("game-end", {
+                    msg: score![1] > score![0] ? "You win" : "You loose",
+                    score
+                });*/
+            }
             const state = this.getGameInfo(lobbyName);
             io.to(gameId).emit("game-state", state);
         }, 1000 / 60);
         return 0;
     }
-    
 
     forfeit(lobbyName: string, playerID: number): number {
         // Check if game exists
@@ -110,7 +112,7 @@ x
         return 0;
     }
 
-    getScore(lobbyName: string) : [number, number] | null {
+    getScore(lobbyName: string): [number, number] | null {
         // Check if game exists
         if (!this._games.has(lobbyName))
             return null;
@@ -118,6 +120,14 @@ x
         if (game.state !== "ended")
             return null;
         return game.score;
+    }
+
+    getPlayersID(lobbyName: string): [number | null, number | null] | null {
+        // Check if game exists
+        if (!this._games.has(lobbyName))
+            return null;
+        const [_, players] = this._games.get(lobbyName)!;
+        return players;
     }
 
     deleteGame(lobbyName: string): number {

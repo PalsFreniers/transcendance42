@@ -191,6 +191,7 @@ export function handleRoute() {
 				<button id="join-button">Join Game</button>
 				<div id="game-salon"></div>
 				<button id="start-game-btn">Start Game</button>
+				<p id="msg-end"></p>
 				<canvas id="pong-canvas" width="600" height="400"></canvas>`;
 			import('./gameLobby.js').then((mod) => mod.init?.());
 		break;

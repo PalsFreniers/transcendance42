@@ -61,11 +61,10 @@ export class Ball {
     public accelerate() {
         this.speed = Math.round(this.speed * (1 + this.acceleration) * 1e8) / 1e8;
         this.speed = Math.min(this.maxSpeed, this.speed);
-        console.log(console.log(this.speed));
     }
 
     public paddleReflect(paddle: Paddle) {
-        const relativeY = (this.pos.y - (paddle.pos.y + paddle.length / 2)) / (paddle.length / 2);
+        const relativeY = (this.pos.y - paddle.pos.y) / (paddle.length / 2);
         const dY = clamp(relativeY, -1, 1);
 
         const maxAngle = 75 * Math.PI / 180;

@@ -150,11 +150,11 @@ export class Game {
         this._ball.pos = new Vec2D.Vector(0, 0);
         this._ball.speed = 0;
         ++this._score[scoringTeam];
-        if (this._score[scoringTeam] == -1) {
+        if (this._score[scoringTeam] == 11) {
             this._state = "ended";
+            return ;
         }
-        else
-            this._state = "idling";
+        this._state = "idling";
         setTimeout(() => {
             this._ball.speed = this._ball.baseSpeed;
             this._ball.dir = new Vec2D.Vector(0.5 - scoringTeam, 0);

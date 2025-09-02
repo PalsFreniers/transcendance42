@@ -190,6 +190,16 @@ export function getSockets(): [Socket, Socket, Socket] {
             }
         });
 
+        socketPong.on('game-end', (data) => {
+            const canvas = document.getElementById("pong-canvas") as HTMLCanvasElement;
+            const msgGameEnd = document.getElementById("msg-end") as HTMLElement;
+            msgGameEnd.innerHTML = `
+            <p>${data.msg} with score of ${data.score}</p>`
+            if (!canvas)
+                return;
+            canvas.style.display = "none";
+        })
+
         socketPong.on('disconnect', (reason) => {
             console.warn('Socket disconnected:', reason);
         });

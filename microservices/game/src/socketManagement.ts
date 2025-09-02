@@ -117,7 +117,7 @@ export function socketManagement(io: Server) {
                     socket.emit('error', 'No lobby assigned to this socket');
                     return;
                 }
-                const errno = manager.startGame(lobbyName, socket.data.gameId , io);
+                const errno = manager.startGame(lobbyName, socket.data.gameId, io);
                 if (errno) {
                     throw new Error(`Failed to start game: ${errno}`);
                 }
@@ -139,7 +139,7 @@ export function socketManagement(io: Server) {
             const isPressed = action === 'keydown';
             if (key === 'up')
                 state[0] = isPressed;
-            else if (key === 'down' )
+            else if (key === 'down')
                 state[1] = isPressed;
             console.log(`Player ${playerId} ->`, state);
         });
