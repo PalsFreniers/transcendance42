@@ -49,11 +49,13 @@ export class Collidable {
 }
 
 export function createRectangle(pos: Vec2D.AbstractVector, size: Vec2D.AbstractVector, name: string): Collidable {
-    let points: Vec2D.AbstractVector[] = [];
-    for (let i = 0; i < 4; i++)
-        points.push(pos.clone());
-    points[1].add(size.clone().setY(0));
-    points[2].add(size.clone());
-    points[3].add(size.clone().setX(0));
+    const halfSize = size.clone().divS(2);
+    const topLeft = pos.clone().subtract(new Vec2D.Vector(halfSize.x, halfSize.y));
+    const points: Vec2D.AbstractVector[] = [
+        topLeft.clone(),
+        topLeft.clone().add(new Vec2D.Vector(size.x, 0)),
+        topLeft.clone().add(size),
+        topLeft.clone().add(new Vec2D.Vector(0, size.y))
+    ];
     return new Collidable(pos, points, name);
 }

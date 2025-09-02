@@ -21,7 +21,6 @@ export class Game {
     private _rightTeam: Paddle[] = [];
     private _allTeams: Paddle[] = [];
     private _score: [number, number] = [0, 0];
-    private _tickRate = 1000 / 60; // 60 FPS
     private _state: string = "notStarted";
 
 // Accessors
@@ -142,7 +141,7 @@ export class Game {
 
     private updatePaddles() {
         for (const paddle of this._allTeams) {
-            if (paddle.shouldMove) 
+            if (paddle.shouldMove)
                 paddle.move();
         }
     }
@@ -151,7 +150,6 @@ export class Game {
         this._ball.pos = new Vec2D.Vector(0, 0);
         this._ball.speed = 0;
         ++this._score[scoringTeam];
-        console.log("goal goal goal goal goal")
         if (this._score[scoringTeam] == -1) {
             this._state = "ended";
         }

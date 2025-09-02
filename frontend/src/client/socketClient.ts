@@ -109,10 +109,10 @@ export function getSockets(): [Socket, Socket, Socket] {
             const ctx = canvas.getContext("2d");
             if (!ctx)
                 return;
-            // Paramètres de la zone de jeu
+
             const scale = 20; // 1 unité = 20 pixels
-            const gameWidth = 20;  // largeur du jeu en unités
-            const gameHeight = 10; // hauteur du jeu en unités
+            const gameWidth = 20;
+            const gameHeight = 10;
 
             const offsetX = canvas.width / 2;
             const offsetY = canvas.height / 2;
@@ -120,6 +120,7 @@ export function getSockets(): [Socket, Socket, Socket] {
             // Fond
             ctx.fillStyle = "blue";
             ctx.fillRect(0, 0, canvas.width, canvas.height);
+
             // Bordure du jeu
             ctx.strokeStyle = "white";
             ctx.lineWidth = 2;
@@ -129,32 +130,35 @@ export function getSockets(): [Socket, Socket, Socket] {
                 gameWidth * scale,
                 gameHeight * scale
             );
-            // Balle
+
+            // Balle (avec hitbox correcte)
+            const ballRadius = 0.15 * scale; // rayon basé sur Ball.size
             ctx.beginPath();
             ctx.arc(
                 state.ballPos.x * scale + offsetX,
                 state.ballPos.y * scale + offsetY,
-                5, 0, Math.PI * 2
+                ballRadius,
+                0, Math.PI * 2
             );
             ctx.fillStyle = "white";
             ctx.fill();
-            
-            // Paddles
-            const paddleWidth = 0.5 * scale; // largeur 0.5 unité
-            const paddleHeight = 2 * scale;  // longueur 2 unités
+
+            // Paddles (pos envoyée = coin supérieur gauche)
+            const paddleWidth = 0.5 * scale;
+            const paddleHeight = 2 * scale;
 
             // Paddle gauche
             ctx.fillRect(
-                state.leftPaddle.x * scale + offsetX - paddleWidth / 2,
-                state.leftPaddle.y * scale + offsetY - paddleHeight / 2,
+                state.leftPaddle.x * scale + offsetX,
+                state.leftPaddle.y * scale + offsetY,
                 paddleWidth,
                 paddleHeight
             );
 
             // Paddle droit
             ctx.fillRect(
-                state.rightPaddle.x * scale + offsetX - paddleWidth / 2,
-                state.rightPaddle.y * scale + offsetY - paddleHeight / 2,
+                state.rightPaddle.x * scale + offsetX,
+                state.rightPaddle.y * scale + offsetY,
                 paddleWidth,
                 paddleHeight
             );
@@ -164,6 +168,7 @@ export function getSockets(): [Socket, Socket, Socket] {
             ctx.font = "20px Arial";
             ctx.fillText(`${state.leftScore} - ${state.rightScore}`, canvas.width / 2 - 20, 30);
         });
+
 
         document.addEventListener('keydown', (e) => {
             if (!lobbyname)

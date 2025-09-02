@@ -138,8 +138,8 @@ x
         return {
             ballPos: { x: game.ball.pos.x, y: game.ball.pos.y },
             ballDir: { x: game.ball.dir.x, y: game.ball.dir.y },
-            leftPaddle: { x: game.leftTeam[0].pos.x, y: game.leftTeam[0].pos.y },
-            rightPaddle: { x: game.rightTeam[0].pos.x, y: game.rightTeam[0].pos.y },
+            leftPaddle: { x: game.leftTeam[0].hitbox.getPoint(0).x, y: game.leftTeam[0].hitbox.getPoint(0).y },
+            rightPaddle: { x: game.rightTeam[0].hitbox.getPoint(0).x, y: game.rightTeam[0].hitbox.getPoint(0).y },
             leftScore: game.score[0],
             rightScore: game.score[1]
         };

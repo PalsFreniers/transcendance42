@@ -1,18 +1,18 @@
 import * as Vec2D from "vector2d";
-import {Collidable} from "./Collidable.js";
-import {Paddle} from "./Paddle.js";
-import {clamp} from "../utils.js";
+import { Collidable } from "./Collidable.js";
+import { Paddle } from "./Paddle.js";
+import { clamp } from "../utils.js";
 
 export class Ball {
 
-// Const member
+    // Const member
 
     public get size() {
-        return 0.1;
+        return 0.15;
     };
 
     public get acceleration() {
-        return 1/100
+        return 1 / 100
     }
 
     public get baseSpeed() {
@@ -26,15 +26,15 @@ export class Ball {
         return 0.05;
     }
 
-// Constructor
+    // Constructor
 
     constructor(
         private _pos: Vec2D.AbstractVector = new Vec2D.Vector(0, 0),
         private _dir: Vec2D.AbstractVector = new Vec2D.Vector(0, 0),
         public speed: number = this.baseSpeed
-    ) {}
+    ) { }
 
-// Accessors
+    // Accessors
 
     public get pos() {
         return this._pos;
@@ -52,7 +52,7 @@ export class Ball {
         this._dir = newDir;
     }
 
-// Methods
+    // Methods
 
     public advance() {
         this._pos.add(this._dir.clone().unit().mulS(this.dV));
@@ -61,32 +61,49 @@ export class Ball {
     public accelerate() {
         this.speed = Math.round(this.speed * (1 + this.acceleration) * 1e8) / 1e8;
         this.speed = Math.min(this.maxSpeed, this.speed);
+        console.log(console.log(this.speed));
     }
 
     public paddleReflect(paddle: Paddle) {
-        // this.dir.x = -this.dir.x;
-        const dY = clamp(this.pos.y / paddle.midPos.y, 0, 0.5);
+        const relativeY = (this.pos.y - (paddle.pos.y + paddle.length / 2)) / (paddle.length / 2);
+        const dY = clamp(relativeY, -1, 1);
 
-        let theta = 75 * (0.5 + dY) * (Math.PI / 180.0);
+        const maxAngle = 75 * Math.PI / 180;
+        const angle = dY * maxAngle;
+
         if (paddle.pos.x < 0)
-            theta = -theta
-        this.dir = this.dir.reverse().setY(0).rotate(theta).unit();
+            this.dir = new Vec2D.Vector(Math.cos(angle), Math.sin(angle)).unit();
+        else 
+            this.dir = new Vec2D.Vector(-Math.cos(angle), Math.sin(angle)).unit();
         this.advance();
+    }
+
+
+    public ballTouchPaddle(ballPos: Vec2D.AbstractVector, r: number, rectPos: Vec2D.AbstractVector, rectW: number, rectH: number): boolean {
+        const halfW = rectW / 2;
+        const halfH = rectH / 2;
+
+        const closestX = clamp(ballPos.x, rectPos.x - halfW, rectPos.x + halfW);
+        const closestY = clamp(ballPos.y, rectPos.y - halfH, rectPos.y + halfH);
+
+        const dx = ballPos.x - closestX;
+        const dy = ballPos.y - closestY;
+
+        return (dx * dx + dy * dy) <= (r * r);
     }
 
     public collide(walls: Collidable[], paddles: Paddle[]): Collidable | null {
         for (const wall of walls) {
             switch (wall.name) {
-                case ("mapRight"): if (this.pos.x > 10)  return wall; else break;
-                case ("mapLeft"):  if (this.pos.x < -10) return wall; else break;
-                case ("mapUp"):    if (this.pos.y > 5)   return wall; else break;
-                case ("mapDown"):  if (this.pos.y < -5)  return wall; else break;
+                case ("mapRight"): if (this.pos.x + this.size > 10) return wall; else break;
+                case ("mapLeft"): if (this.pos.x - this.size < -10) return wall; else break;
+                case ("mapUp"): if (this.pos.y + this.size > 5) return wall; else break;
+                case ("mapDown"): if (this.pos.y - this.size < -5) return wall; else break;
                 default: break;
             }
         }
         for (const paddle of paddles) {
-            if (paddle.pos.x + paddle.width >= this.pos.x && this.pos.x >= paddle.pos.x
-                && paddle.pos.y + paddle.length >= this.pos.y && this.pos.y >= paddle.pos.y)
+            if (this.ballTouchPaddle(this.pos, this.size, paddle.pos, paddle.width, paddle.length))
                 return paddle.hitbox;
         }
         return null;
