@@ -61,7 +61,6 @@ export function socketManagement(io: Server) {
                 manager.joinLobby(lobbyName, socket.data.userId);
 
                 socket.join(socket.data.gameId);
-
                 socket.emit('room-created', {
                     gameId,
                     lobbyName,

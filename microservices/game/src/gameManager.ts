@@ -44,6 +44,11 @@ export class GameManager {
     joinLobby(lobbyName: string, playerID: number): number {
         if (!this._games.has(lobbyName))
             return 1;
+        this._games.forEach(([_, [p1, p2]]) => {
+            if (p1 === playerID || p2 === playerID) {
+                return 4;
+            }
+        });        
         const [game, [p1, p2]] = this._games.get(lobbyName)!;
         if (p1 === playerID || p2 === playerID)
             return 2;
@@ -119,14 +124,6 @@ export class GameManager {
         if (game.state !== "ended")
             return null;
         return game.score;
-    }
-
-    getPlayersID(lobbyName: string): [number | null, number | null] | null {
-        // Check if game exists
-        if (!this._games.has(lobbyName))
-            return null;
-        const [_, players] = this._games.get(lobbyName)!;
-        return players;
     }
 
     deleteGame(lobbyName: string): number {

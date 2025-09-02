@@ -7,6 +7,14 @@ export async function createRoom(app: FastifyInstance) {
     app.post("/api/game/create-game", async (req, reply) => {
         const user = req.user as { userId: number; username: string };
         const { lobbyName } = req.body as { lobbyName: string };
+        if (!lobbyName)
+            return reply.status(401).send({ error: 'lobby name cannot be null' });
+        const lobbyExist = db.prepare(`SELECT 1 FROM games WHERE lobby_name = ?`).get(lobbyName);
+        if (lobbyExist)
+            return reply.status(402).send({ error: 'lobby already exist' });
+        const inGame = db.prepare(`SELECT 1 FROM games WHERE player_one_id = ? OR player_two_id = ?`).get(user.userId, user.userId);
+        if (inGame)
+            return reply.status(400).send({ error: 'User is already in game' });
         const gameId = await createGameLobby({
             playerOne: user.userId,
             playerTwo: null,
