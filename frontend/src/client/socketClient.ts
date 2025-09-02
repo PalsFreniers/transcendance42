@@ -1,4 +1,5 @@
 import io, { Socket } from 'socket.io-client';
+import { createShifumiSocket } from './socketShifumi';
 
 interface ChatMessage {
     from: string;
@@ -15,7 +16,7 @@ let socketPong: Socket | null = null;
 let socketShifumi: Socket | null = null;
 let lobbyname: String | null = null;
 
-function getUserIdFromToken(): number {
+export function getUserIdFromToken(): number {
     const token = localStorage.getItem('token');
     if (!token) return 0;
     try {
@@ -192,25 +193,7 @@ export function getSockets(): [Socket, Socket, Socket] {
             console.error('Connection error:', err.message);
         });
         //SOCKET SHIFUMI
-        socketShifumi = io('http://localhost:3003', {
-            path: '/shifumiSocket/',
-            auth: { token },
-            withCredentials: true,
-            transports: ['websocket'],
-        });
-        socketShifumi.on('connect', () => {
-            console.log(`Socket (${socketShifumi!.id}) connected!`);
-            // On first connect and reconnects, emit register
-            socketShifumi!.emit('register-socket', userId);
-        });
-
-        socketShifumi.on('disconnect', (reason) => {
-            console.warn('Socket disconnected:', reason);
-        });
-
-        socketShifumi.on('connect_error', (err) => {
-            console.error('Connection error:', err.message);
-        });
+       socketShifumi = createShifumiSocket(socketShifumi);
     }
 
     return [socketChat!, socketPong!, socketShifumi!];
@@ -224,3 +207,4 @@ export function getSocket(id: number) {
         default: return null;
     }
 }
+

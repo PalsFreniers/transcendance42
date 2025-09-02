@@ -89,7 +89,7 @@ function msg_lobby(event: MouseEvent){
 	}
 }
 
-function handleRoute() {
+export function handleRoute() {
 	const path = window.location.pathname;
 	const token = localStorage.getItem('token');
 	const app = document.getElementById('app');
@@ -217,6 +217,24 @@ function handleRoute() {
 			</div>
 			`;
 			import('./game2Lobby.js').then((mod) => mod.init?.());
+			break;
+		case '/shifumi':
+			app.innerHTML = `
+			<div id="back_shifumi">
+				<div id="container-button">
+					<h2>Shifumi</h2>
+					<p id="opponent-name"></p>
+					<P id="points"></p>
+					<button id="quit-button">quit lobby</button>
+					<button id="start-button">Start game</button>
+					<button id="kick-opponent">kick</button>
+					<button id="card1-button">card 1</button>
+					<button id="card2-button">card 2</button>
+					<button id="card3-button">card 3</button>
+				</div>
+			</div>
+			`;
+			import('./shifumiStart.js').then((mod) => mod.init());
 			break;
 		case '/profil':
 			app.innerHTML = `<h2>Your Profil</h2>

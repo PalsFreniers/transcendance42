@@ -2,17 +2,26 @@ import Fastify from 'fastify';
 import dotenv from 'dotenv';
 import cors from '@fastify/cors';
 import jwt from '@fastify/jwt';
-import { Server } from "socket.io";
+import { Server, Socket } from "socket.io";
 import {
-    createRoom,
-    inGame,
-    awaitforOpponent,
-    joinLobby,
-    historyGame,
-    postGame
-} from './gameRoutes.js';
+  inGame,
+  awaitforOpponent,
+  historyGame,
+  postGame
+} from './gameRoutes.js'; // a enlever
+import { socketManagemente } from './socketManagement.js';
 
 dotenv.config();
+
+
+/* *
+*
+* faire attendre le joueur temps que son socket n'est pas co avant de
+* faire en sorte qu'il puisse applier sur les boutons
+* et faire en sorte qu'un user puisse etre dans une seule game et ne puisse pas
+* rejoindre ca propre game
+*
+* */
 
 //START FOR GAME SERVICES
 const app = Fastify();
@@ -38,41 +47,26 @@ export const io = new Server(app.server, {
 // TOKEN 
 app.register(jwt, { secret: process.env.JWT_SECRET! });
 
-io.use(async (socket, next) => {
+export function verifTokenSocket(socket: Socket)
+{
     try {
-        const tmp = await app.jwt.verify(socket.handshake.auth.token);
-        // socket.decoded = tmp;
-        console.log('verif passed !');
-        next();
+        const tmp = app.jwt.verify(socket.handshake.auth.token);
+        return true ;
+    } catch {
+        // io.to(socket.id).emit("error", "Token expired or invalid");
+        return false;
     }
-    catch {
-        console.log(`socket ${socket.id} can't connect !`);
-        next(new Error('Authentication error'));
-    }
-});
+}
 
-io.on('connection', (socket) => {
-    console.log(`USER connected: ${socket.id} on Shifumi socket`);
 
-    socket.on('register-socket', (userId: number) => {
-        console.log(`User ${userId} registered with Shifumi socket ${socket.id}`);
-    });
-
-    socket.on('join-room', (roomId: string) => {
-        socket.join(roomId);
-        console.log(`Socket ${socket.id} joined room ${roomId}`);
-    });
-
-    socket.on('disconnect', () => {
-        console.log(`Socket Shifumi disconnected: ${socket.id}`);
-    });
-});
+// ajouter le socket management
+socketManagemente(io);
 
 //ROUTES
-app.register(createRoom);
+// app.register(createRoom);
 app.register(inGame);
 app.register(awaitforOpponent);
-app.register(joinLobby)
+// app.register(joinLobby)
 app.register(historyGame);
 app.register(postGame);
 

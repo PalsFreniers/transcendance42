@@ -2,7 +2,7 @@ import { getSocket } from './socketClient.js';
 import { getUserIdFromToken } from './loginClient.js'
 
 export function init() {
-    const token = localStorage.getItem('token'); // TOKEN LINK FROM THE USER CONNECTED
+    const token = localStorage.getItem('token');
     const chat = document.getElementById('chat-container') as HTMLDivElement | null;
 
     if (!chat)
@@ -17,7 +17,7 @@ export function init() {
         try {
             var socket = getSocket(0);
             if (socket)
-                socket.emit('message', msg, getUserIdFromToken(), 'toma');
+                socket.emit('message', msg, getUserIdFromToken(), 'toma'/* change by targe name */);
             else
                 console.error(`error 404 : sokcet not found !`);
         }

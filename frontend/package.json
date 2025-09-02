@@ -15,6 +15,7 @@
   "start": "vite preview --port 5173 --strictPort"
 },
   "dependencies": {
+    "mathjs": "14.5.3",
     "fastify": "^4.22.2",
     "@fastify/static": "^6.12.0",
     "dotenv": "^16.4.5",

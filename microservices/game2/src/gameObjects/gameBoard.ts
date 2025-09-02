@@ -1,6 +1,12 @@
 import { Card } from './card.js';
 import * as math from "mathjs";
 
+export interface playedCard{
+    userId: number;
+    cardId: number;
+    cardNumber: number;
+}
+
 export class GameBoard {
 
     private drawPile: Card[] = [];
@@ -49,22 +55,22 @@ export class GameBoard {
         }
     }
 
-    public discardCard(player :number, cardId :number, cardNumber :number) {
+    public discardCard(played: playedCard) {
         if (this.playerOne.length <= 0 && this.playerTwo.length <= 0)
             return ;
 
-        if (player == 1) {
+        if (played.userId == 1) {
             for (var i = 0; i < this.playerOne.length; i++) {
-                if (this.playerOne[i].getType() == cardId && this.playerOne[i].getNumber() == cardNumber) {
+                if (this.playerOne[i].getType() == played.cardId && this.playerOne[i].getNumber() == played.cardNumber) {
                     this.discardPile.push(this.playerOne[i]);
                     this.playerOne.splice(i, 1);
                     break;
                 }
             }
         }
-        if (player == 2) {
+        if (played.userId == 2) {
             for (var i = 0; i < this.playerTwo.length; i++) {
-                if (this.playerTwo[i].getType() == cardId && this.playerTwo[i].getNumber() == cardNumber) {
+                if (this.playerTwo[i].getType() == played.cardId && this.playerTwo[i].getNumber() == played.cardNumber) {
                     this.discardPile.push(this.playerTwo[i]);
                     this.playerTwo.splice(i, 1);
                     break;
@@ -73,12 +79,20 @@ export class GameBoard {
         }
     }
     
-    public getPlayerCard(player :number)
+    public getPlayerCard(player :number): [number, number][]
     {
         if (player == 1)
-            return this.playerOne;
+            return [
+                [this.playerOne[0].getType(), this.playerOne[0].getNumber()],
+                [this.playerOne[1].getType(), this.playerOne[1].getNumber()],
+                [this.playerOne[2].getType(), this.playerOne[2].getNumber()]
+            ];
         else
-            return this.playerTwo;
+            return [
+                [this.playerTwo[0].getType(), this.playerTwo[0].getNumber()],
+                [this.playerTwo[1].getType(), this.playerTwo[1].getNumber()],
+                [this.playerTwo[2].getType(), this.playerTwo[2].getNumber()]
+            ];
     }
 
     public startGame()
