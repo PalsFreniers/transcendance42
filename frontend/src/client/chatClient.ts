@@ -4,8 +4,8 @@ import { getUserIdFromToken } from './loginClient.js'
 export function init() {
     const token = localStorage.getItem('token');
     const chat = document.getElementById('chat-container') as HTMLDivElement | null;
-    
-    if (!chat) 
+
+    if (!chat)
         return;
     console.log
     const Send = document.getElementById('chat-input') as HTMLFormElement;
@@ -19,24 +19,8 @@ export function init() {
             if (socket)
                 socket.emit('message', msg, getUserIdFromToken(), 'toma'/* change by targe name */);
             else
-                console.error(`error 404 : socket not found !`);
-            
-
-            // console.log('Start sended message !');
-            // const res = await fetch('http://localhost:3001/api/user/priv-msg/toma', {
-            // method: 'POST',
-            // headers: {
-            //     'Content-Type': 'application/json',
-            //     'Authorization': `Bearer ${token}`
-            // },
-            // body: JSON.stringify({msg}),
-            // });
-            // const data = await res.json();
-            // if (res)
-            //     console.log('message send !');
-            // else
-            //     console.log('failed to send message !');
-        } 
+                console.error(`error 404 : sokcet not found !`);
+        }
         catch (error) {
             alert('failed to send message !');
             console.error('can\'t send message', error);

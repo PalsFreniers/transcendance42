@@ -1,15 +1,14 @@
 {
   "compilerOptions": {
     "target": "ES2020",
-    "module": "esnext",
-    "moduleResolution": "node",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "rootDir": "./src/client",
     "outDir": "./public/scripts",
-    "rootDir": "./src",
-    "noImplicitAny": false,
-    "esModuleInterop": true,
-    "forceConsistentCasingInFileNames": true,
     "strict": true,
+    "esModuleInterop": true,
     "skipLibCheck": true,
-    "resolveJsonModule": true
+    "noImplicitAny": false
   },
+  "exclude": ["vite.config.ts"]
 }

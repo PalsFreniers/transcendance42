@@ -47,6 +47,48 @@ function expandCercle() {
 	}
 }
 
+function msg_lobby(event: MouseEvent){
+	const chat = document.getElementById('chat');
+	
+	const target = event?.target as Node;
+	if (chat)
+	{
+		chat.innerHTML = `
+			<div id="boddy_chat">
+				<div id="page_chat">
+					<div id="lobby_friends">
+					</div>
+					<div id="lobby_chat">
+					</div>
+				</div>
+			</div>
+		`;
+		const chat_boddy = document.getElementById('page_chat');
+		const friends_lobby = document.getElementById('lobby_friends');
+
+		if (friends_lobby)
+		{
+			friends_lobby.innerHTML= `
+				<div id="flex_friends">
+					<img src="https://cdn.intra.42.fr/users/108d7ffe1b73089b5ec362651b5bd861/trebours.jpg"/>
+					<p>test</p>
+				</div>
+			`;
+		}
+		console.log("On ouvre le chat");
+		function click_event(e: MouseEvent){
+			const target = e.target as Node;
+			if (chat && !chat_boddy?.contains(target)){
+				chat.innerHTML = ``;
+				document.removeEventListener('click', click_event);
+			}
+		}
+		setTimeout(() =>{
+			document.addEventListener('click', click_event);
+		});
+	}
+}
+
 export function handleRoute() {
 	const path = window.location.pathname;
 	const token = localStorage.getItem('token');
@@ -147,7 +189,9 @@ export function handleRoute() {
 				<input type="text" id="lobby-name" placeholder="Room name" required />
 				<button id="game-button">create Game</button>
 				<button id="join-button">Join Game</button>
-				<div id="game-salon"></div>`;
+				<div id="game-salon"></div>
+				<button id="start-game-btn">Start Game</button>
+				<canvas id="pong-canvas" width="600" height="400"></canvas>`;
 			import('./gameLobby.js').then((mod) => mod.init?.());
 		break;
 		case '/2game':
@@ -263,6 +307,17 @@ export function handleRoute() {
 	}
 	else
 		chat.innerHTML= ``;
+
+	const msg = document.getElementById('friends');
+	const msg_r = document.getElementById('friends2');
+	if (token && path == '/lobby')
+	{
+		if (msg)
+			msg.addEventListener('click', msg_lobby);
+		if (msg_r)
+			msg_r.addEventListener('click', msg_lobby);	
+	}
+
 	const lienCercle = document.getElementById('lien-cercle');
 	if (lienCercle)
 		lienCercle.style.display = (path === '/') ? 'flex' : 'none';
@@ -280,7 +335,6 @@ export function handleRoute() {
 		else
 			monCercle.removeEventListener('click', expandCercle);
 	}
-
 	const zone = document.querySelector('.game1');
 	const selection = document.querySelector('#selection1');
 
@@ -354,5 +408,6 @@ export function handleRoute() {
 				but_test.style.visibility = "visible";
 		});	
 	}
+	
 }
 

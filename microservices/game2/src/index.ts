@@ -8,7 +8,7 @@ import {
   awaitforOpponent,
   historyGame,
   postGame
-} from './gameRoutes.js';
+} from './gameRoutes.js'; // a enlever
 import { socketManagemente } from './socketManagement.js';
 
 dotenv.config();
@@ -36,16 +36,16 @@ await app.register(cors, {
 });
 
 export const io = new Server(app.server, {
-  path: '/shifumiSocket/',
-  cors: {
-    origin: 'http://localhost:5173',
-    credentials: true,
-    methods: ['GET', 'POST'],
-  },
+    path: '/shifumiSocket/',
+    cors: {
+        origin: 'http://localhost:5173',
+        credentials: true,
+        methods: ['GET', 'POST'],
+    },
 });
 
 // TOKEN 
-app.register(jwt , {secret: process.env.JWT_SECRET!});
+app.register(jwt, { secret: process.env.JWT_SECRET! });
 
 export function verifTokenSocket(socket: Socket)
 {
@@ -72,18 +72,18 @@ app.register(postGame);
 
 // HOOK
 app.addHook('onRequest', async (request, reply) => {
-  try {
-    if (request.headers.authorization) {
-      await request.jwtVerify();
-    } else {
-     return reply.status(401).send({ error: 'Unauthorized: No token provided' });
+    try {
+        if (request.headers.authorization) {
+            await request.jwtVerify();
+        } else {
+            return reply.status(401).send({ error: 'Unauthorized: No token provided' });
+        }
+    } catch (err) {
+        return reply.status(401).send({ error: 'Unauthorized: Invalid token' });
     }
-  } catch (err) {
-    return reply.status(401).send({ error: 'Unauthorized: Invalid token' });
-  }
 });
 
 app.listen({ port: Number(PORT), host: '0.0.0.0' }, err => {
-  if (err) throw err;
-  console.log(`Game 2 service running on port ${PORT}`);
+    if (err) throw err;
+    console.log(`Game 2 service running on port ${PORT}`);
 });

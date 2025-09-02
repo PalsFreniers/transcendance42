@@ -1,56 +1,94 @@
-import * as Vec2D from 'vector2d';
-import { Paddle } from './Paddle.js';
+import * as Vec2D from "vector2d";
+import {Collidable} from "./Collidable.js";
+import {Paddle} from "./Paddle.js";
+import {clamp} from "../utils.js";
 
 export class Ball {
-  pos = new Vec2D.Vector(0, 0);
-  dir = new Vec2D.Vector(1, 0);
-  speed = 0.2;
-  readonly size = 0.1;
-  readonly acceleration = 1 / 100;
-  readonly baseSpeed = 0.2;
-  readonly maxSpeed = 2;
-  readonly dV = 0.05;
 
-  advance() {
-    this.pos.add(this.dir.clone().unit().mulS(this.dV));
-  }
-  accelerate() {
-    this.speed = Math.min(this.maxSpeed, this.speed * (1 + this.acceleration));
-  }
-  update(map, paddles: Paddle[]) {
-    const iter = this.speed / this.dV;
-    for (let i = 0; i < iter; i++) {
-      this.advance();
-      const col = this.collide(map, paddles);
-      if (!col) continue;
-      if (/^paddle/.test(col.name)) {
-        const paddle = paddles.find(p => p.hitbox.name === col.name)!;
-        this.reflect(paddle);
-      } else {
-        this.bounceWall(col);
-      }
-      this.accelerate();
+// Const member
+
+    public get size() {
+        return 0.1;
+    };
+
+    public get acceleration() {
+        return 1/100
     }
-  }
-  reflect(p: Paddle) {
-    this.dir.x = -this.dir.x;
-    this.advance();
-  }
-  bounceWall(w) {
-    this.dir.y = -this.dir.y;
-    this.advance();
-  }
-  collide(map, paddles: Paddle[]) {
-    for (const w of map) {
-      if (Math.abs(this.pos.x) > 10 || Math.abs(this.pos.y) > 5) return w;
+
+    public get baseSpeed() {
+        return 0.2;
     }
-    for (const p of paddles) {
-      if (Math.abs(this.pos.x - p.hitbox.pos.x) < p.width &&
-        Math.abs(this.pos.y - p.hitbox.pos.y) < p.length)
-        {
-            return p.hitbox;
+    public get maxSpeed() {
+        return this.baseSpeed * 10;
+    }
+
+    public get dV() {
+        return 0.05;
+    }
+
+// Constructor
+
+    constructor(
+        private _pos: Vec2D.AbstractVector = new Vec2D.Vector(0, 0),
+        private _dir: Vec2D.AbstractVector = new Vec2D.Vector(0, 0),
+        public speed: number = this.baseSpeed
+    ) {}
+
+// Accessors
+
+    public get pos() {
+        return this._pos;
+    }
+
+    public set pos(newPos: Vec2D.AbstractVector) {
+        this._pos = newPos;
+    }
+
+    public get dir() {
+        return this._dir;
+    }
+
+    public set dir(newDir: Vec2D.AbstractVector) {
+        this._dir = newDir;
+    }
+
+// Methods
+
+    public advance() {
+        this._pos.add(this._dir.clone().unit().mulS(this.dV));
+    }
+
+    public accelerate() {
+        this.speed = Math.round(this.speed * (1 + this.acceleration) * 1e8) / 1e8;
+        this.speed = Math.min(this.maxSpeed, this.speed);
+    }
+
+    public paddleReflect(paddle: Paddle) {
+        // this.dir.x = -this.dir.x;
+        const dY = clamp(this.pos.y / paddle.midPos.y, 0, 0.5);
+
+        let theta = 75 * (0.5 + dY) * (Math.PI / 180.0);
+        if (paddle.pos.x < 0)
+            theta = -theta
+        this.dir = this.dir.reverse().setY(0).rotate(theta).unit();
+        this.advance();
+    }
+
+    public collide(walls: Collidable[], paddles: Paddle[]): Collidable | null {
+        for (const wall of walls) {
+            switch (wall.name) {
+                case ("mapRight"): if (this.pos.x > 10)  return wall; else break;
+                case ("mapLeft"):  if (this.pos.x < -10) return wall; else break;
+                case ("mapUp"):    if (this.pos.y > 5)   return wall; else break;
+                case ("mapDown"):  if (this.pos.y < -5)  return wall; else break;
+                default: break;
+            }
         }
+        for (const paddle of paddles) {
+            if (paddle.pos.x + paddle.width >= this.pos.x && this.pos.x >= paddle.pos.x
+                && paddle.pos.y + paddle.length >= this.pos.y && this.pos.y >= paddle.pos.y)
+                return paddle.hitbox;
+        }
+        return null;
     }
-    return null;
-  }
 }

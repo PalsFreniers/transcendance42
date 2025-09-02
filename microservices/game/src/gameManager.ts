@@ -1,79 +1,147 @@
-import { Game } from './game.js';
-import { Paddle } from './gameObjects/Paddle.js';
+import {Game} from './game.js'
+import {Paddle} from "./gameObjects/Paddle.js";
+import * as Vec2D from "vector2d";
 
-export class  GameManager {
-  private games = new Map<string, Game>();
-  private userSockets = new Map<number, string>();
-  private socketToUser = new Map<string, number>();
+export class GameManager {
 
-  private gameKey(a: string, b: string) {
-    return [a, b].sort().join('-');
-  }
+// Attributes
 
-  registerGame(p1: string, p2: string, gameId: number): boolean {
-    const key = this.gameKey(p1, p2);
-    if (this.games.has(key)) 
-      return false;
-    if ([...this.games.keys()].some(k => k.includes(p1) || k.includes(p2))) 
-      return false;
-    this.games.set(key,
-      new Game(gameId)
-        .joinTeam(new Paddle(p1), 'left')
-        .joinTeam(new Paddle(p2), 'right')
-    );
-    return true;
-  }
+    private _games = new Map<string, [Game, [number | null, number | null]]>();
+    private _userSockets = new Map<number, string>();
+    private static instance: GameManager | null = null;
+x
 
-  async startGame(p1: string, p2: string): Promise<number[]> {
-    const key = this.gameKey(p1, p2);
-    const game = this.games.get(key);
-    if (!game) return [];
-    game.start();
-    while (game.state !== 'ended') {
-      await new Promise(res => setTimeout(res, 100));
+    static getInstance(){
+        if (!this.instance)
+            this.instance = new GameManager();
+        return this.instance
     }
-    const score = game.score;
-    this.games.delete(key);
-    return score;
-  }
 
-  getGameInfo(playerId: string): Game | undefined {
-    return [...this.games.values()]
-      .find(g =>
-        g.leftTeam.concat(g.rightTeam)
-          .some(p => p.playerID === playerId)
-      );
-  }
-
-  receiveInput(playerId: string, key: string, action: 'keydown' | 'keyup'): boolean {
-    const game = this.getGameInfo(playerId);
-    if (!game) return false;
-    game.handleClientInput(playerId, key, action);
-    return true;
-  }
-
-  registerSocket(userId: number, socketId: string): boolean {
-    this.userSockets.set(userId, socketId);
-    this.socketToUser.set(socketId, userId);
-    return true;
-  }
-
-  unregisterSocket(socketId: string): boolean {
-    const userId = this.socketToUser.get(socketId);
-    if (userId !== undefined) {
-      this.userSockets.delete(userId);
-      this.socketToUser.delete(socketId);
-      console.log(`Cleaned up socket for user ${userId}`);
-      return true;
+    registerSocket(userId: number, socketId: string) {
+        this._userSockets.set(userId, socketId);
     }
-    return false;
-  }
 
-  getSocketId(userId: number): string | undefined {
-    return this.userSockets.get(userId);
-  }
+    unregisterSocket(userId: number) {
+        this._userSockets.delete(userId);
+    }
 
-  getUserId(socketId: string): number | undefined {
-    return this.socketToUser.get(socketId);
-  }
+    getSocketId(userId: number): string | null {
+        return this._userSockets.get(userId) || null;
+    }
+
+    findGame(lobbyName: string): Game | null {
+        const entry = this._games.get(lobbyName);
+        return entry ? entry[0] : null;
+    }    
+
+    createLobby(lobbyName: string, gameID: number): number {
+        if (this._games.has(lobbyName))
+            return 1;
+        this._games.set(lobbyName, [new Game(gameID), [null, null]]);
+        return 0;
+    }
+
+    joinLobby(lobbyName: string, playerID: number): number {
+        if (!this._games.has(lobbyName))
+            return 1;
+        const [game, [p1, p2]] = this._games.get(lobbyName)!;
+        if (p1 === playerID || p2 === playerID)
+            return 2;
+        if (p1 === null)
+            this._games.set(lobbyName, [game.joinTeam(new Paddle(playerID, new Vec2D.Vector(-9, 0)), "left"), [playerID, null]]);
+        else if (p2 === null)
+            this._games.set(lobbyName, [game.joinTeam(new Paddle(playerID, new Vec2D.Vector(9, 0)), "right"), [p1, playerID]]);
+        else
+            return 3;
+        return 0;
+    }
+    
+
+    startGame(lobbyName: string, gameId: string, io: any): number {
+        if (!this._games.has(lobbyName))
+            return 1;
+    
+        const [game, [p1, p2]] = this._games.get(lobbyName)!;
+        if (!p1 || !p2)
+            return 2;
+        game.start();
+    
+        // boucle principale (60 FPS)
+        const loop = setInterval(() => {
+            game.update();
+    
+            /*if (game.state === "ended") {
+                clearInterval(loop);
+                io.to(lobbyName).emit("game-ended", {
+                    winner: game.getWinner()
+                });
+                return;
+            }*/
+    
+            const state = this.getGameInfo(lobbyName);
+            io.to(gameId).emit("game-state", state);
+        }, 1000 / 60);
+        return 0;
+    }
+    
+
+    forfeit(lobbyName: string, playerID: number): number {
+        // Check if game exists
+        if (!this._games.has(lobbyName))
+            return 1;
+        const [game, [p1, p2]] = this._games.get(lobbyName)!;
+        if (playerID != p1 && playerID != p2)
+            return 2
+        game.state = "ended";
+        if (p1 === playerID)
+            game.score = [0, 11];
+        else
+            game.score = [11, 0];
+        return 0;
+    }
+
+    stopGame(lobbyName: string): number {
+        // Check if game exists
+        if (!this._games.has(lobbyName))
+            return 1;
+        // Stops the game
+        const [game, [_, __]] = this._games.get(lobbyName)!;
+        game.state = "ended";
+        return 0;
+    }
+
+    getScore(lobbyName: string) : [number, number] | null {
+        // Check if game exists
+        if (!this._games.has(lobbyName))
+            return null;
+        const [game, [_, __]] = this._games.get(lobbyName)!;
+        if (game.state !== "ended")
+            return null;
+        return game.score;
+    }
+
+    deleteGame(lobbyName: string): number {
+        // Check if game exists
+        if (!this._games.has(lobbyName))
+            return 1;
+        const [game, [_, __]] = this._games.get(lobbyName)!;
+        if (game.state !== "ended")
+            return 2;
+        this._games.delete(lobbyName);
+        return 0;
+    }
+
+    getGameInfo(lobbyName: string) {
+        const [game, [_, __]] = this._games.get(lobbyName)!;
+        if (game === undefined)
+            return null;
+        return {
+            ballPos: { x: game.ball.pos.x, y: game.ball.pos.y },
+            ballDir: { x: game.ball.dir.x, y: game.ball.dir.y },
+            leftPaddle: { x: game.leftTeam[0].pos.x, y: game.leftTeam[0].pos.y },
+            rightPaddle: { x: game.rightTeam[0].pos.x, y: game.rightTeam[0].pos.y },
+            leftScore: game.score[0],
+            rightScore: game.score[1]
+        };
+    }
 }

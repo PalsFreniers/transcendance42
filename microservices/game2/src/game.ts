@@ -4,6 +4,7 @@ import { timeStart, endGame, forfeit } from "./Game2Database.js";
 import { playedCard } from "./gameObjects/gameBoard.js";
 import { Socket } from "socket.io";
 
+
 export interface Player {
     Id : number;
     Point : number;
