@@ -1,12 +1,9 @@
 import { Server, Socket } from "socket.io";
 import { verifTokenSocket } from "./index.js";
 import { createRoom, getOpponentName, joinRoom, kickOpponentFromDB, findGame, deleteGameFromDB } from './Game2Database.js';
-import { GameData } from './gameModel.js';
-import { game } from './game.js';
 import { Manager } from './gameManager.js';
 import { playedCard } from "./gameObjects/gameBoard.js";
 import db from './dbSqlite/db.js';
-import { Player } from './game.js';
 
 const manager = Manager.getInstance();
 

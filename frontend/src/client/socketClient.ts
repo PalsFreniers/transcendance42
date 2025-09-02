@@ -1,5 +1,5 @@
 import io, { Socket } from 'socket.io-client';
-import { createShifumiSocket } from './socketShifumi';
+import { createShifumiSocket } from './socketShifumi.js';
 
 interface ChatMessage {
     from: string;
