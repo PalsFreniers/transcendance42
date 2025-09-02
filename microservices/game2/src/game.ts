@@ -173,11 +173,7 @@ export class game
 
        if (playerOneCard.cardId == 0 || playerTwoCard.cardId == 0)
        {
-           if (playerOneCard.cardId < playerTwoCard.cardId) {
-                this.whoWinRound(playerOneCard.userId); // remplacer par drawRound
-           } else {
-                this.whoWinRound(playerTwoCard.userId);
-           }
+           io.to(`${this.gameId}.1`).to(`${this.gameId}.2`).emit('drawRound');
            return ;
        }
        switch (playerOneCard.cardId)

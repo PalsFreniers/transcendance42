@@ -1,31 +1,13 @@
 import io, { Socket } from 'socket.io-client';
 import { handleRoute} from "./navClient.js";
 import { getUserIdFromToken } from './socketClient.js';
+import { notify } from './notify.js'
 import * as math from "mathjs";
 
 export let gameIdShifumi: number = -1;
 export let myCard: [number, number][] = [];
 
 export let opponentName: string | null = null;
-
-
-export function notify(msg: string) {
-  const div = document.createElement("div");
-  div.textContent = msg;
-  div.style.position = "fixed";
-  div.style.bottom = "20px";
-  div.style.right = "20px";
-  div.style.background = "black";
-  div.style.color = "white";
-  div.style.padding = "10px";
-  div.style.borderRadius = "8px";
-  div.style.zIndex = "1000";
-
-  document.body.appendChild(div);
-
-  setTimeout(() => div.remove(),  10000);
-}
-
 
 
 export function createShifumiSocket(socketShifumi: Socket | null) {
@@ -133,7 +115,10 @@ export function createShifumiSocket(socketShifumi: Socket | null) {
         const card1 = document.getElementById('card1-button');
         const card2 = document.getElementById('card2-button');
         const card3 = document.getElementById('card3-button');
+        const pointsText = document.getElementById('points');
 
+        if (pointsText)
+            pointsText.textContent = `0 - 0`
         if (quit)
           quit.hidden = true;
         if (start)
