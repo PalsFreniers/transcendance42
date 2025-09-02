@@ -143,7 +143,6 @@ export function getSockets(): [Socket, Socket, Socket] {
             ctx.fillStyle = "white";
             ctx.fill();
 
-            // Paddles (pos envoyée = coin supérieur gauche)
             const paddleWidth = 0.5 * scale;
             const paddleHeight = 2 * scale;
 
@@ -194,7 +193,7 @@ export function getSockets(): [Socket, Socket, Socket] {
             const canvas = document.getElementById("pong-canvas") as HTMLCanvasElement;
             const msgGameEnd = document.getElementById("msg-end") as HTMLElement;
             msgGameEnd.innerHTML = `
-            <p>${data.msg} with score of ${data.score}</p>`
+            <p>${data.msg} with score of ${data.score[0]} - ${data.score[1]}</p>`
             if (!canvas)
                 return;
             canvas.style.display = "none";

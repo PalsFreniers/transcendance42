@@ -1,7 +1,6 @@
 import { Game } from './game.js'
 import { Paddle } from "./gameObjects/Paddle.js";
 import * as Vec2D from "vector2d";
-import { socketManagement } from './socketManagement.js';
 
 export class GameManager {
 
@@ -68,18 +67,18 @@ export class GameManager {
         game.start();
         const loop = setInterval(() => {
             game.update();
-
             if (game.state === "ended") {
                 clearInterval(loop);
                 const score = this.getScore(lobbyName);
-                io.to(io.socket).emit("game-end", {
+                console.log(p1, p2);
+                io.to(this._userSockets.get(p1)).emit("game-end", {
                     msg: score![0] > score![1] ? "You win" : "You loose",
-                    score
+                    score: [score![0], score![1]]
                 });
-                /*io.to(io.socket).emit("game-end", {
+                io.to(this._userSockets.get(p2)).emit("game-end", {
                     msg: score![1] > score![0] ? "You win" : "You loose",
-                    score
-                });*/
+                    score: [score![1], score![0]]
+                });
             }
             const state = this.getGameInfo(lobbyName);
             io.to(gameId).emit("game-state", state);

@@ -150,7 +150,7 @@ export class Game {
         this._ball.pos = new Vec2D.Vector(0, 0);
         this._ball.speed = 0;
         ++this._score[scoringTeam];
-        if (this._score[scoringTeam] == 11) {
+        if (this._score[scoringTeam] == 2) {
             this._state = "ended";
             return ;
         }
