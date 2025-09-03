@@ -1,5 +1,6 @@
 import {createGameLobby, GameData} from "./gameModel.js";
 import db from './dbSqlite/db.js';
+import { Manager } from './gameManager.js';
 
 
 export function timeStart(gameId: number)
@@ -101,4 +102,18 @@ export function deleteGameFromDB(gameId)
 {
     db.prepare(`DELETE FROM games2 WHERE id = ?`).run(gameId);
     return true;
+}
+
+export function checkReconnect(io, socket, userId)
+{
+    const manager = Manager.getInstance();
+    const id = db.prepare(`SELECT id FROM games2 WHERE status = 'playing' AND (player_one_id = ? OR player_two_id = ?)`).get(userId, userId) as { id : number } | undefined;
+    if (!id)
+        return io.to(socket.id).emit('no-game');
+    let game = manager.getGame(id.id);
+    if (game)
+    {
+        socket.data.gameId = id.id;
+        game.reconnect(userId, socket);
+    }
 }
