@@ -17,5 +17,5 @@ RUN npm run build
 
 EXPOSE 3002
 
-# Start the service
+# REMOVE DEV BY START WHEN PROJECT FINISH
 CMD ["npm", "run", "dev"]

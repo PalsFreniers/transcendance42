@@ -101,7 +101,7 @@ export function getSockets(): [Socket, Socket, Socket] {
         });
 
         socketPong.on('game-state', (state) => {
-            console.log('Game state received:', state);
+            // console.log('Game state received:', state);
 
             const canvas = document.getElementById("pong-canvas") as HTMLCanvasElement;
             if (!canvas)
@@ -168,10 +168,16 @@ export function getSockets(): [Socket, Socket, Socket] {
             ctx.fillText(`${state.leftScore} - ${state.rightScore}`, canvas.width / 2 - 20, 30);
         });
 
+        socketPong.on('player-is-disconnect', (data) => {
+            const msgGameEnd = document.getElementById("msg-end") as HTMLElement;
+            msgGameEnd.innerHTML = `
+            <p>${data.userName} is dictonnect, wait for reconnection...</p>`;
+        })
 
         document.addEventListener('keydown', (e) => {
+            /*console.log(`lobbyname ${lobbyname}`);
             if (!lobbyname)
-                return;
+                return;*/
             if (e.key === "ArrowUp" || e.key === "ArrowDown") {
                 const payload = { key: e.key === "ArrowUp" ? "up" : "down", action: "keydown" };
                 console.log("Emit input:", payload);
@@ -180,8 +186,8 @@ export function getSockets(): [Socket, Socket, Socket] {
         });
 
         document.addEventListener('keyup', (e) => {
-            if (!lobbyname)
-                return;
+            /*if (!lobbyname)
+                return;*/
             if (e.key === "ArrowUp" || e.key === "ArrowDown") {
                 const payload = { key: e.key === "ArrowUp" ? "up" : "down", action: "keyup" };
                 console.log("Emit input:", payload);

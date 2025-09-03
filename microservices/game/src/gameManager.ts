@@ -29,9 +29,15 @@ export class GameManager {
         return this._userSockets.get(userId) || null;
     }
 
-    findGame(lobbyName: string): Game | null {
-        const entry = this._games.get(lobbyName);
-        return entry ? entry[0] : null;
+    findGame(info: string): Game | null {
+        const entry = this._games.get(info);
+        if (entry)
+            return entry[0];
+        for (const [_, [game, [p1, p2]]] of this._games) {
+            if (p1?.toString() === info || p2?.toString() === info)
+                return game;
+        }
+        return null;
     }
 
     createLobby(lobbyName: string, gameID: number): number {
@@ -48,7 +54,7 @@ export class GameManager {
             if (p1 === playerID || p2 === playerID) {
                 return 4;
             }
-        });        
+        });
         const [game, [p1, p2]] = this._games.get(lobbyName)!;
         if (p1 === playerID || p2 === playerID)
             return 2;
@@ -61,17 +67,20 @@ export class GameManager {
         return 0;
     }
 
-
-    startGame(lobbyName: string, gameId: string, io: any): number {
+    startGame(lobbyName: string, gameId: string, io: any) {
         if (!this._games.has(lobbyName))
             return 1;
-
         const [game, [p1, p2]] = this._games.get(lobbyName)!;
         if (!p1 || !p2)
             return 2;
         game.start();
-        const loop = setInterval(() => {
-            game.update();
+        const loop = setInterval(async () => {
+            const isOffline = await this.playerIsOffline(p1, p2, io, lobbyName);
+            if (isOffline) {
+                clearInterval(loop);
+                return;
+            } else
+                game.update();
             if (game.state === "ended") {
                 clearInterval(loop);
                 const score = this.getScore(lobbyName);
@@ -84,15 +93,14 @@ export class GameManager {
                     msg: score![1] > score![0] ? "You win" : "You loose",
                     score: [score![1], score![0]]
                 });
+                this.deleteGame(lobbyName);
             }
             const state = this.getGameInfo(lobbyName);
             io.to(gameId).emit("game-state", state);
         }, 1000 / 60);
-        return 0;
     }
 
     forfeit(lobbyName: string, playerID: number): number {
-        // Check if game exists
         if (!this._games.has(lobbyName))
             return 1;
         const [game, [p1, p2]] = this._games.get(lobbyName)!;
@@ -107,7 +115,6 @@ export class GameManager {
     }
 
     stopGame(lobbyName: string): number {
-        // Check if game exists
         if (!this._games.has(lobbyName))
             return 1;
         // Stops the game
@@ -117,7 +124,6 @@ export class GameManager {
     }
 
     getScore(lobbyName: string): [number, number] | null {
-        // Check if game exists
         if (!this._games.has(lobbyName))
             return null;
         const [game, [_, __]] = this._games.get(lobbyName)!;
@@ -127,7 +133,6 @@ export class GameManager {
     }
 
     deleteGame(lobbyName: string): number {
-        // Check if game exists
         if (!this._games.has(lobbyName))
             return 1;
         const [game, [_, __]] = this._games.get(lobbyName)!;
@@ -138,6 +143,8 @@ export class GameManager {
     }
 
     getGameInfo(lobbyName: string) {
+        if (!this._games.has(lobbyName))
+            return null;
         const [game, [_, __]] = this._games.get(lobbyName)!;
         if (game === undefined)
             return null;
@@ -149,5 +156,60 @@ export class GameManager {
             leftScore: game.score[0],
             rightScore: game.score[1]
         };
+    }
+
+    playerIsOffline(p1: number, p2:number, io: any, lobbyName: string): Promise<boolean> {
+        return new Promise(resolve => {
+            let PlayerOneTime = 15;
+            let PlayerTwoTime = 15;
+            const game = this.findGame(lobbyName)!;
+
+            const socketCheck = setInterval(() => {
+                const socketp1 = this.getSocketId(p1);
+                const socketp2 = this.getSocketId(p2);
+
+                const p1IsOnline = p1 && io.sockets.sockets.get(socketp1);
+                const p2IsOnline = p2 && io.sockets.sockets.get(socketp2);
+
+                if (p1IsOnline && p2IsOnline){
+                    PlayerOneTime = 15;
+                    PlayerTwoTime = 15;
+                    clearInterval(socketCheck);
+                    game.state = "running";
+                    resolve(false);
+                }
+                let isOffline = false;
+                if (!p1IsOnline) {
+                    PlayerOneTime--;
+                    isOffline = true;
+                }
+                if (!p2IsOnline) {
+                    PlayerTwoTime--;
+                    isOffline = true;
+                }
+                if (isOffline)
+                    game.state = "idling";
+                if (!p1IsOnline && p2IsOnline){
+                    if (PlayerTwoTime <= 0){
+                        this.forfeit(lobbyName, p1);
+                        clearInterval(socketCheck);
+                        resolve(true);
+                    }
+                }
+                if (p1IsOnline && !p2IsOnline){
+                    if (PlayerTwoTime <= 0){
+                        this.forfeit(lobbyName, p2);
+                        clearInterval(socketCheck);
+                        resolve(true);
+                    }
+                }
+                if (!p1IsOnline && !p2IsOnline){
+                    this.deleteGame(lobbyName);
+                    clearInterval(socketCheck);
+                    resolve(true);
+                }
+            }, 1000);
+        });
+
     }
 }

@@ -2,6 +2,7 @@ import * as Vec2D from "vector2d"
 import {Ball} from "./gameObjects/Ball.js"
 import {Collidable, createRectangle} from "./gameObjects/Collidable.js"
 import {Paddle} from "./gameObjects/Paddle.js"
+import { clamp } from "./utils.js"
 
 export class Game {
 
@@ -58,9 +59,10 @@ export class Game {
     }
 
     getPaddle(playerID: number) {
-        const paddleName = "paddle." + playerID;
+        const paddleName = "paddle." + playerID.toString();
         for (const paddle of this._allTeams)
             if (paddle.hitbox.name === paddleName) return paddle;
+        return null;
     }
 
 // Methods
@@ -136,6 +138,7 @@ export class Game {
     }
 
     private idlingBall() {
+        console.log("idling in 60FPS");
         return ;
     }
 
@@ -150,10 +153,16 @@ export class Game {
         this._ball.pos = new Vec2D.Vector(0, 0);
         this._ball.speed = 0;
         ++this._score[scoringTeam];
-        if (this._score[scoringTeam] == 2) {
-            this._state = "ended";
-            return ;
-        }
+        this._allTeams.forEach(paddle => {
+            let dY = paddle.hitbox.pos.y;
+            paddle.hitbox.pos.y = clamp(paddle.hitbox.pos.y - paddle.hitbox.pos.y, -5 + paddle.length / 2, 5 - paddle.length / 2);
+            dY = paddle.hitbox.pos.y - dY;
+            paddle.hitbox.getPoints().forEach((point) => { point.y += dY });
+        })
+        // if (this._score[scoringTeam] == 2) {
+        //     this._state = "ended";
+        //     return ;
+        // }
         this._state = "idling";
         setTimeout(() => {
             this._ball.speed = this._ball.baseSpeed;

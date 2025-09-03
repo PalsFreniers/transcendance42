@@ -1,4 +1,4 @@
-import { Server, Socket } from "socket.io";
+import { Server } from "socket.io";
 import { GameManager } from "./gameManager.js";
 import { verifTokenSocket } from "./index.js";
 import db from './dbSqlite/db.js';
@@ -31,6 +31,13 @@ function getUsernameFromToken(token: string): string | null {
     }
 }
 
+export async function clearRoom(room: string, io: Server){
+    const sockets = await io.in(room).fetchSockets();
+    sockets.forEach(socket => {
+        socket.leave(room);
+    });
+}
+
 export function socketManagement(io: Server) {
     io.use(async (socket, next) => {
         if (verifTokenSocket(socket)) {
@@ -44,12 +51,23 @@ export function socketManagement(io: Server) {
     });
     // SOCKET LOGIC GAME
     io.on('connection', (socket) => {
-        socket.on('register-socket', (userId: number) => {
+        socket.on('register-socket', () => {
             socket.data.userId = getUserIdFromToken(socket.handshake.auth.token);
             socket.data.userName = getUsernameFromToken(socket.handshake.auth.token);
             manager.registerSocket(socket.data.userId, socket.id);
-            socket.data.gameId = -1;
-            console.log(`User ${userId} registered with socket ${socket.id}`);
+            const game = manager.findGame(socket.data.userId?.toString());
+            if (game) {
+                socket.data.gameId = `game-${game.gameID}`;
+                socket.join(socket.data.gameId);
+                const lobbyname = db.prepare(`
+                    SELECT lobby_name FROM games WHERE id = ?`
+                ).get(socket.data.gameId) as { lobbyname: string };
+                socket.data.lobbyname = lobbyname;
+                console.log(socket.data.lobbyname);
+            }
+            else
+                socket.data.gameId = -1;
+            console.log(`User ${socket.data.userId} registered with socket ${socket.id}`);
         });
 
         socket.on('create-room', ({ gameId, lobbyName }) => {
@@ -128,12 +146,14 @@ export function socketManagement(io: Server) {
         });
 
         socket.on('input', ({ key, action }) => {
-            const lobbyName = socket.data.lobbyName;
+            console.log("socket.on(input)")
             const playerId = socket.data.userId;
-            const game = manager.findGame(lobbyName);
+            const game = manager.findGame(playerId.toString());
             if (!game)
                 return console.warn(`No active game for player ${playerId}`);
+            console.log(playerId);
             const paddle = game.getPaddle(playerId)!;
+            console.log(paddle.hitbox.name);
             const state = paddle.getState();
             const isPressed = action === 'keydown';
             if (key === 'up')
@@ -144,9 +164,12 @@ export function socketManagement(io: Server) {
         });
 
         socket.on('disconnect', () => {
-            const userId = socket.data.userId;
-            if (userId)
-                manager.unregisterSocket(userId);
+            const game = manager.findGame(socket.data.userId)
+            if (game)
+                game.state = "idling";
+            manager.unregisterSocket(socket.data.userId);
+            if (socket.data.gameId != -1)
+                io.to(socket.data.gameId).emit('player-is-disconnect', { username: socket.data.userName});
             console.log(`Socket disconnected: ${socket.id}`);
         });
     });

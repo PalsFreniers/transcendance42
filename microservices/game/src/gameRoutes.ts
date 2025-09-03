@@ -13,8 +13,8 @@ export async function createRoom(app: FastifyInstance) {
         if (lobbyExist)
             return reply.status(402).send({ error: 'lobby already exist' });
         const inGame = db.prepare(`SELECT 1 FROM games WHERE player_one_id = ? OR player_two_id = ?`).get(user.userId, user.userId);
-        if (inGame)
-            return reply.status(400).send({ error: 'User is already in game' });
+        // if (inGame)
+        //     return reply.status(400).send({ error: 'User is already in game' });
         const gameId = await createGameLobby({
             playerOne: user.userId,
             playerTwo: null,
