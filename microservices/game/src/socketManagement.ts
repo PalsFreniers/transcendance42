@@ -164,9 +164,6 @@ export function socketManagement(io: Server) {
         });
 
         socket.on('disconnect', () => {
-            const game = manager.findGame(socket.data.userId)
-            if (game)
-                game.state = "idling";
             manager.unregisterSocket(socket.data.userId);
             if (socket.data.gameId != -1)
                 io.to(socket.data.gameId).emit('player-is-disconnect', { username: socket.data.userName});

@@ -74,13 +74,17 @@ export class GameManager {
         if (!p1 || !p2)
             return 2;
         game.start();
-        const loop = setInterval(async () => {
-            const isOffline = await this.playerIsOffline(p1, p2, io, lobbyName);
-            if (isOffline) {
-                clearInterval(loop);
-                return;
-            } else
-                game.update();
+        const loop = setInterval( () => {
+            this.playerIsOffline(p1, p2, io, lobbyName).then(isOffline => {
+                if (isOffline) {
+                    clearInterval(loop);
+                    return;
+                }
+            });
+            game.update();
+            console.log("gamestate in boucle", game.state);
+            const state = this.getGameInfo(lobbyName);
+            io.to(gameId).emit("game-state", state);
             if (game.state === "ended") {
                 clearInterval(loop);
                 const score = this.getScore(lobbyName);
@@ -95,7 +99,6 @@ export class GameManager {
                 });
                 this.deleteGame(lobbyName);
             }
-            const state = this.getGameInfo(lobbyName);
             io.to(gameId).emit("game-state", state);
         }, 1000 / 60);
     }
@@ -158,7 +161,7 @@ export class GameManager {
         };
     }
 
-    playerIsOffline(p1: number, p2:number, io: any, lobbyName: string): Promise<boolean> {
+    playerIsOffline(p1: number, p2: number, io: any, lobbyName: string): Promise<boolean> {
         return new Promise(resolve => {
             let PlayerOneTime = 15;
             let PlayerTwoTime = 15;
@@ -170,40 +173,36 @@ export class GameManager {
 
                 const p1IsOnline = p1 && io.sockets.sockets.get(socketp1);
                 const p2IsOnline = p2 && io.sockets.sockets.get(socketp2);
+                console.log(game.state);
 
-                if (p1IsOnline && p2IsOnline){
+                if (p1IsOnline && p2IsOnline) {
                     PlayerOneTime = 15;
                     PlayerTwoTime = 15;
                     clearInterval(socketCheck);
                     game.state = "running";
                     resolve(false);
+                    return ;
                 }
-                let isOffline = false;
-                if (!p1IsOnline) {
+                game.state = "idling";
+                if (!p1IsOnline)
                     PlayerOneTime--;
-                    isOffline = true;
-                }
-                if (!p2IsOnline) {
+                if (!p2IsOnline)
                     PlayerTwoTime--;
-                    isOffline = true;
-                }
-                if (isOffline)
-                    game.state = "idling";
-                if (!p1IsOnline && p2IsOnline){
-                    if (PlayerTwoTime <= 0){
+                if (!p1IsOnline && p2IsOnline) {
+                    if (PlayerTwoTime <= 0) {
                         this.forfeit(lobbyName, p1);
                         clearInterval(socketCheck);
                         resolve(true);
                     }
                 }
-                if (p1IsOnline && !p2IsOnline){
-                    if (PlayerTwoTime <= 0){
+                if (p1IsOnline && !p2IsOnline) {
+                    if (PlayerTwoTime <= 0) {
                         this.forfeit(lobbyName, p2);
                         clearInterval(socketCheck);
                         resolve(true);
                     }
                 }
-                if (!p1IsOnline && !p2IsOnline){
+                if (!p1IsOnline && !p2IsOnline) {
                     this.deleteGame(lobbyName);
                     clearInterval(socketCheck);
                     resolve(true);
