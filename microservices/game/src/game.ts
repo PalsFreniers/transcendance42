@@ -138,7 +138,6 @@ export class Game {
     }
 
     private idlingBall() {
-        console.log("idling in 60FPS");
         return ;
     }
 
@@ -159,10 +158,10 @@ export class Game {
             dY = paddle.hitbox.pos.y - dY;
             paddle.hitbox.getPoints().forEach((point) => { point.y += dY });
         })
-        // if (this._score[scoringTeam] == 2) {
-        //     this._state = "ended";
-        //     return ;
-        // }
+        if (this._score[scoringTeam] == 2) {
+             this._state = "ended";
+             return ;
+         }
         this._state = "idling";
         setTimeout(() => {
             this._ball.speed = this._ball.baseSpeed;

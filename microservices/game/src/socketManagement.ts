@@ -64,6 +64,7 @@ export function socketManagement(io: Server) {
                 ).get(socket.data.gameId) as { lobbyname: string };
                 socket.data.lobbyname = lobbyname;
                 console.log(socket.data.lobbyname);
+                socket.emit('in-game');
             }
             else
                 socket.data.gameId = -1;
@@ -134,10 +135,11 @@ export function socketManagement(io: Server) {
                     socket.emit('error', 'No lobby assigned to this socket');
                     return;
                 }
+                if (socket.data.gameId === -1)
+                    throw new Error(`Failed to start game, you are already in game`);
                 const errno = manager.startGame(lobbyName, socket.data.gameId, io);
-                if (errno) {
+                if (errno)
                     throw new Error(`Failed to start game: ${errno}`);
-                }
                 console.log(`Game started for lobby ${lobbyName}`);
             } catch (err) {
                 console.error("start-game error:", err);
@@ -146,27 +148,21 @@ export function socketManagement(io: Server) {
         });
 
         socket.on('input', ({ key, action }) => {
-            console.log("socket.on(input)")
             const playerId = socket.data.userId;
             const game = manager.findGame(playerId.toString());
             if (!game)
                 return console.warn(`No active game for player ${playerId}`);
-            console.log(playerId);
             const paddle = game.getPaddle(playerId)!;
-            console.log(paddle.hitbox.name);
             const state = paddle.getState();
             const isPressed = action === 'keydown';
             if (key === 'up')
                 state[0] = isPressed;
             else if (key === 'down')
                 state[1] = isPressed;
-            console.log(`Player ${playerId} ->`, state);
         });
 
         socket.on('disconnect', () => {
             manager.unregisterSocket(socket.data.userId);
-            if (socket.data.gameId != -1)
-                io.to(socket.data.gameId).emit('player-is-disconnect', { username: socket.data.userName});
             console.log(`Socket disconnected: ${socket.id}`);
         });
     });

@@ -1,5 +1,6 @@
 import io, { Socket } from 'socket.io-client';
 import { createShifumiSocket } from './socketShifumi.js';
+import { handleRoute } from './navClient.js';
 
 interface ChatMessage {
     from: string;
@@ -43,7 +44,6 @@ export function getSockets(): [Socket, Socket, Socket] {
         });
         socketChat.on('connect', () => {
             console.log(`Socket (${socketChat!.id}) connected!`);
-            // On first connect and reconnects, emit register
             socketChat!.emit('register-socket', userId);
         });
 
@@ -100,9 +100,15 @@ export function getSockets(): [Socket, Socket, Socket] {
         <p><strong>Status:</strong> ${data.status}</p>`;
         });
 
-        socketPong.on('game-state', (state) => {
-            // console.log('Game state received:', state);
+        socketPong.on('in-game', () => {
+            const path = window.location.pathname;
+            if (path === '/lobby') {
+                history.pushState(null, '', '/game')
+                handleRoute();
+            }
+        })
 
+        socketPong.on('game-state', (state) => {
             const canvas = document.getElementById("pong-canvas") as HTMLCanvasElement;
             if (!canvas)
                 return;
@@ -131,7 +137,7 @@ export function getSockets(): [Socket, Socket, Socket] {
                 gameHeight * scale
             );
 
-            // Balle (avec hitbox correcte)
+            // Balle
             const ballRadius = 0.15 * scale; // rayon basé sur Ball.size
             ctx.beginPath();
             ctx.arc(
@@ -166,18 +172,16 @@ export function getSockets(): [Socket, Socket, Socket] {
             ctx.fillStyle = "white";
             ctx.font = "20px Arial";
             ctx.fillText(`${state.leftScore} - ${state.rightScore}`, canvas.width / 2 - 20, 30);
+
+            // Paused
+            if (state.state === "idling") {
+                ctx.fillStyle = "white";
+                ctx.font = "30px Arial bolder"
+                ctx.fillText(`GAME PAUSED WAITING FOR OPPONENT`, 10 , 70);
+            }
         });
 
-        socketPong.on('player-is-disconnect', (data) => {
-            const msgGameEnd = document.getElementById("msg-end") as HTMLElement;
-            msgGameEnd.innerHTML = `
-            <p>${data.userName} is dictonnect, wait for reconnection...</p>`;
-        })
-
         document.addEventListener('keydown', (e) => {
-            /*console.log(`lobbyname ${lobbyname}`);
-            if (!lobbyname)
-                return;*/
             if (e.key === "ArrowUp" || e.key === "ArrowDown") {
                 const payload = { key: e.key === "ArrowUp" ? "up" : "down", action: "keydown" };
                 console.log("Emit input:", payload);
@@ -186,8 +190,6 @@ export function getSockets(): [Socket, Socket, Socket] {
         });
 
         document.addEventListener('keyup', (e) => {
-            /*if (!lobbyname)
-                return;*/
             if (e.key === "ArrowUp" || e.key === "ArrowDown") {
                 const payload = { key: e.key === "ArrowUp" ? "up" : "down", action: "keyup" };
                 console.log("Emit input:", payload);
@@ -213,7 +215,7 @@ export function getSockets(): [Socket, Socket, Socket] {
             console.error('Connection error:', err.message);
         });
         //SOCKET SHIFUMI
-       socketShifumi = createShifumiSocket(socketShifumi);
+        socketShifumi = createShifumiSocket(socketShifumi);
     }
 
     return [socketChat!, socketPong!, socketShifumi!];

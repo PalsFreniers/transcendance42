@@ -1,6 +1,7 @@
 import { Game } from './game.js'
 import { Paddle } from "./gameObjects/Paddle.js";
 import * as Vec2D from "vector2d";
+import db from "./dbSqlite/db.js"
 
 export class GameManager {
 
@@ -82,13 +83,9 @@ export class GameManager {
                 }
             });
             game.update();
-            console.log("gamestate in boucle", game.state);
-            const state = this.getGameInfo(lobbyName);
-            io.to(gameId).emit("game-state", state);
             if (game.state === "ended") {
                 clearInterval(loop);
                 const score = this.getScore(lobbyName);
-                console.log(p1, p2);
                 io.to(this._userSockets.get(p1)).emit("game-end", {
                     msg: score![0] > score![1] ? "You win" : "You loose",
                     score: [score![0], score![1]]
@@ -99,6 +96,7 @@ export class GameManager {
                 });
                 this.deleteGame(lobbyName);
             }
+            const state = this.getGameInfo(lobbyName);
             io.to(gameId).emit("game-state", state);
         }, 1000 / 60);
     }
@@ -117,15 +115,6 @@ export class GameManager {
         return 0;
     }
 
-    stopGame(lobbyName: string): number {
-        if (!this._games.has(lobbyName))
-            return 1;
-        // Stops the game
-        const [game, [_, __]] = this._games.get(lobbyName)!;
-        game.state = "ended";
-        return 0;
-    }
-
     getScore(lobbyName: string): [number, number] | null {
         if (!this._games.has(lobbyName))
             return null;
@@ -141,6 +130,7 @@ export class GameManager {
         const [game, [_, __]] = this._games.get(lobbyName)!;
         if (game.state !== "ended")
             return 2;
+        db.prepare(`DELETE FROM games WHERE id = ?`).run(game.gameID);
         this._games.delete(lobbyName);
         return 0;
     }
@@ -157,7 +147,8 @@ export class GameManager {
             leftPaddle: { x: game.leftTeam[0].hitbox.getPoint(0).x, y: game.leftTeam[0].hitbox.getPoint(0).y },
             rightPaddle: { x: game.rightTeam[0].hitbox.getPoint(0).x, y: game.rightTeam[0].hitbox.getPoint(0).y },
             leftScore: game.score[0],
-            rightScore: game.score[1]
+            rightScore: game.score[1],
+            state: game.state
         };
     }
 
@@ -173,7 +164,6 @@ export class GameManager {
 
                 const p1IsOnline = p1 && io.sockets.sockets.get(socketp1);
                 const p2IsOnline = p2 && io.sockets.sockets.get(socketp2);
-                console.log(game.state);
 
                 if (p1IsOnline && p2IsOnline) {
                     PlayerOneTime = 15;
@@ -193,6 +183,7 @@ export class GameManager {
                         this.forfeit(lobbyName, p1);
                         clearInterval(socketCheck);
                         resolve(true);
+                        return;
                     }
                 }
                 if (p1IsOnline && !p2IsOnline) {
@@ -200,6 +191,7 @@ export class GameManager {
                         this.forfeit(lobbyName, p2);
                         clearInterval(socketCheck);
                         resolve(true);
+                        return;
                     }
                 }
                 if (!p1IsOnline && !p2IsOnline) {
