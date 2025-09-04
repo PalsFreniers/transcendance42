@@ -179,6 +179,13 @@ export function getSockets(): [Socket, Socket, Socket] {
                 ctx.font = "30px Arial bolder"
                 ctx.fillText(`GAME PAUSED WAITING FOR OPPONENT`, 10 , 70);
             }
+
+            // Resume
+            if (state.state === "resume"){
+                ctx.fillStyle = "white";
+                ctx.font = "30px Arial bolder"
+                ctx.fillText(`GAME RESUMING IN ${state.resumeTimer}`, 30 , 70);
+            }
         });
 
         document.addEventListener('keydown', (e) => {

@@ -10,7 +10,6 @@ export class GameManager {
     private _games = new Map<string, [Game, [number | null, number | null]]>();
     private _userSockets = new Map<number, string>();
     private static instance: GameManager | null = null;
-    x
 
     static getInstance() {
         if (!this.instance)
@@ -148,7 +147,8 @@ export class GameManager {
             rightPaddle: { x: game.rightTeam[0].hitbox.getPoint(0).x, y: game.rightTeam[0].hitbox.getPoint(0).y },
             leftScore: game.score[0],
             rightScore: game.score[1],
-            state: game.state
+            state: game.state,
+            resumeTimer: game.resumeTimer
         };
     }
 
@@ -168,8 +168,8 @@ export class GameManager {
                 if (p1IsOnline && p2IsOnline) {
                     PlayerOneTime = 15;
                     PlayerTwoTime = 15;
-                    clearInterval(socketCheck);
-                    game.state = "running";
+                    if (game.state === 'idling')
+                        game.state = 'resume';
                     resolve(false);
                     return ;
                 }
