@@ -1,5 +1,6 @@
 import { FastifyInstance } from 'fastify';
 import db from './dbSqlite/db.js';
+import { GameStats, addStats } from './gameStatsModel.js';
 
 export async function profil(app: FastifyInstance) {
     app.get('/profil', async (request, reply) => {
@@ -139,6 +140,19 @@ export async function deleteProfile(app: FastifyInstance) {
             return reply.send({ success: true });
         } catch (err) {
             return reply.code(500).send({ error: 'Failed to delete profile' });
+        }
+    });
+}
+
+export async function addStatsInDB(app: FastifyInstance) {
+    app.post('/add-stats', async (request, reply) => {
+        console.log(`start save stats`);
+        try {
+            const { stats } = request.body as {stats: GameStats};
+            addStats(stats);
+            return reply.send({ success: true });
+        } catch (err) {
+            return reply.code(500).send({ error: 'Failed to add stats in gameStats table'});
         }
     });
 }

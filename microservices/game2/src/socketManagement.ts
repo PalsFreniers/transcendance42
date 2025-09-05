@@ -1,6 +1,6 @@
 import { Server, Socket } from "socket.io";
 import { verifTokenSocket } from "./index.js";
-import { createRoom, getOpponentName, joinRoom, kickOpponentFromDB, findGame, deleteGameFromDB } from './Game2Database.js';
+import { createRoom, getOpponentName, joinRoom, kickOpponentFromDB, findGame, deleteGameFromDB, saveStats } from './Game2Database.js';
 import { GameData } from './gameModel.js';
 import { game } from './game.js';
 import { Manager } from './gameManager.js';
@@ -222,7 +222,7 @@ export function socketManagemente(io: Server)
         /*                                                                            */
         /******************************************************************************/
 
-        socket.on('start-game', (playerId: number) =>
+        socket.on('start-game', async (playerId: number) =>
         {
             // a metre dans un fonction a appeler pour rendre le code propre 
             const playerTwo = db.prepare(`SELECT player_two_id FROM games2 WHERE player_one_id = ? AND status = 'waiting'`).get(playerId) as { player_two_id: number };
@@ -244,7 +244,9 @@ export function socketManagemente(io: Server)
                 console.log(`in start-game, id = ${id.id}`);
                 var shifumi = manager.getGame(id.id);
                 if (shifumi)
-                    shifumi.start();
+                {
+                    shifumi.start(socket.handshake.auth.token);
+                }
             }
         });
 

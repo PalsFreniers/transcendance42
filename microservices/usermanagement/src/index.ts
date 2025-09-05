@@ -16,6 +16,7 @@ import {
     deleteProfile,
     friendAdd,
     friendDelete,
+    addStatsInDB,
     // friendSendMsg
 } from './userRoutes.js';
 import { ChatMessage, saveMessage } from './userSocket.js';
@@ -28,7 +29,7 @@ const PORT = process.env.USER_MANA_PORT;
 
 //REQUEST CORS
 await app.register(cors, {
-    origin: 'http://localhost:5173',
+    origin: ['http://localhost:5173', 'http://localhost:3003'],
     credentials: true,
     methods: ['GET', 'POST'],
 });
@@ -142,6 +143,7 @@ app.register(updateProfile, { prefix: '/api/user' });
 app.register(deleteProfile, { prefix: '/api/user' });
 app.register(friendAdd, { prefix: '/api/user' });
 app.register(friendDelete, { prefix: '/api/user' });
+app.register(addStatsInDB, { prefix: '/api/user' });
 // app.register(friendSendMsg, { prefix: '/api/user' });
 
 // Start Fastify server
