@@ -5,6 +5,7 @@
 
 body
 {
+	font-family: 'Public Pixel', sans-serif;
 	user-select: none;
 	background-color: rgb(3, 1, 8);
 	#img{
@@ -14,12 +15,17 @@ body
 	overflow-y: hidden;
 }
 
+a{
+	font-size: 12px;
+}
+
 a:visited {
 	color: #fff;
 }
 
 p{
 	color: #fff;
+	font-size: 12px;
 }
 
 #back {
@@ -103,7 +109,6 @@ p{
 #back_login{
 	margin: 0;
 	box-sizing: border-box;
-	font-family: "Open Sans", sans-serif;
 	display: flex;
 	align-items: center;
 	justify-content: center;
@@ -124,7 +129,6 @@ p{
 
 .wrapper {
 	box-sizing: border-box;
-	font-family: "Open Sans", sans-serif;
 	width: 400px;
 	border-radius: 8px;
 	padding: 30px;
@@ -153,7 +157,7 @@ h2 {
 	left: 0;
 	transform: translateY(-50%);
 	color: #fff;
-	font-size: 16px;
+	font-size: 12px;
 	pointer-events: none;
 	transition: 0.15s ease;
 }
@@ -163,12 +167,12 @@ h2 {
 	background: transparent;
 	border: none;
 	outline: none;
-	font-size: 16px;
+	font-size:12px; 
 	color: #fff;
 }
 .input-field input:focus~label,
 .input-field input:not(:placeholder-shown)~label {
-	font-size: 0.8rem;
+	font-size: 12px;
 	top: 10px;
 	transform: translateY(-120%);
 }
@@ -199,14 +203,15 @@ h2 {
 button {
 	background: #fff;
 	color: #000;
-	font-weight: 600;
+	font-weight: 400;
 	border: none;
 	padding: 12px 20px;
 	cursor: pointer;
 	border-radius: 3px;
-	font-size: 16px;
+	font-size: 12px;
 	border: 2px solid transparent;
 	transition: 0.3s ease;
+	font-family: 'Public Pixel', sans-serif;
 }
 button:hover {
 	color: #fff;
@@ -244,10 +249,10 @@ input:-webkit-autofill {
 				all 0.3s ease;
 		.game1 {
 			position: absolute;
-			background-image: url("https://sdmntprukwest.oaiusercontent.com/files/00000000-db24-6243-95e8-5e2eeef08827/raw?se=2025-08-08T15%3A29%3A56Z&sp=r&sv=2024-08-04&sr=b&scid=34d866a2-2b91-52b4-b1e2-13fe0d4ac65f&skoid=82a3371f-2f6c-4f81-8a78-2701b362559b&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2025-08-08T08%3A01%3A58Z&ske=2025-08-09T08%3A01%3A58Z&sks=b&skv=2024-08-04&sig=QBAuuHADff54ewZ4jQOhZCWXnFoZ87VxZvAu2lOpfJc%3D");
+			background-image: url("https://i.pinimg.com/originals/fd/fe/94/fdfe94c7bdd0bf4afdd830e0b2c515e9.gif");
 			background-repeat: no-repeat;
-			background-size: 50%;
-			background-position: center;
+			background-size: cover;
+			background-position: bottom left;
 			top: 20px;
 			left: 0;
 			right: 0;
@@ -296,7 +301,7 @@ input:-webkit-autofill {
 		}
 		.game2 {
 			position: absolute;
-			background-image: url("https://img.freepik.com/photos-gratuite/vaisseau-spatial-brillant-orbite-autour-planete-dans-galaxie-etoilee-generee-par-ia_188544-9655.jpg?t=st=1753794048~exp=1753797648~hmac=fe305c37f43ac01c59fb83924bbf212cfdb9610230e69db1e6892f967c4846f8&w=1380");
+			background-image: url("https://i.pinimg.com/originals/8c/f6/06/8cf60608f95bfae20a9e78884e1a33cb.gif");
 			background-repeat: no-repeat;
 			background-size: cover;
 			background-position:  bottom right;
@@ -396,6 +401,21 @@ input:-webkit-autofill {
 		#friends2:hover {
 			scale: (1.1);
 		}
+		#offline {
+			position: relative;
+			top: -5%;
+			left: 70%;
+			width: 4%;
+			height: 4%;
+			z-index: 7;
+			filter: drop-shadow(4px 4px 10px crimson);
+			cursor: pointer;
+			transition: transform 0.2s ease;
+		  }
+		  
+		  #offline:hover {
+			transform: scale(1.1);
+		  }
 		#perso {
 			
 		}

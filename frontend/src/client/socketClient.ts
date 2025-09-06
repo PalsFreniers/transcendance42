@@ -170,7 +170,7 @@ export function getSockets(): [Socket, Socket, Socket] {
 
             // Score
             ctx.fillStyle = "white";
-            ctx.font = "20px Arial";
+            ctx.font = "20px Public Pixel";
             ctx.fillText(`${state.leftScore} - ${state.rightScore}`, canvas.width / 2 - 20, 30);
 
             // Paused

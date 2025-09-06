@@ -80,6 +80,7 @@ export function init() {
         startBtn.addEventListener("click", () => {
             const socket = getSocket(1);
             socket!.emit("start-game");
+            startBtn.style.display = "none";
         });
     }
 }
