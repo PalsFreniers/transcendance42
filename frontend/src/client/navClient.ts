@@ -181,13 +181,19 @@ export function handleRoute() {
 		case '/game':
 			app.innerHTML = `
 			<div id="back-pong">
-				<h2>Game Area</h2>
-				<input type="text" id="lobby-name" placeholder="Room name" required />
-				<button id="game-button">create Game</button>
-				<button id="join-button">Join Game</button>
-				<div id="game-salon"></div>
-				<button id="start-game-btn">Start Game</button>
-				<p id="msg-end"></p>
+				<div class="pong-wrapper">
+    				<h2 class="pong-title">🎮 Game Area</h2>
+					<div id="pong-controls">
+      					<input type="text" id="lobby-name" placeholder="Room name" required />
+      					<div class="pong-buttons">
+        					<button id="game-button">Create Game</button>
+        					<button id="join-button">Join Game</button>
+        					<button id="start-game-btn">Start Game</button>
+      					</div>
+    				</div>
+					<div id="game-salon" class="pong-lobby"></div>
+					<p id="msg-end" class="pong-message"></p>
+  				</div>
 				<canvas id="pong-canvas" width="600" height="400"></canvas>
 			</div>`;
 			import('./gameLobby.js').then((mod) => mod.init?.());
@@ -415,12 +421,12 @@ export function handleRoute() {
 			},
 			body: JSON.stringify({}),
 		});
-	
+
 		const data = await res.json();
 		if (data.success) {
 			// remove token from localStorage
 			localStorage.removeItem("token");
-	
+
 			// optional: redirect to login page
 			handleRoute();
 		} else {

@@ -275,7 +275,7 @@
 	transition: background-color 9999s ease-out, color 9999s ease-out;
   }
   
-  /******************************************************************************/
+/******************************************************************************/
 /*                                                                            */
 /*                        Main page game & management                         */
 /*                                                                            */
@@ -462,7 +462,7 @@
   
   /******************************************************************************/
   /*                                                                            */
-  /*                        			Pong game                             	  */
+  /*                        			Pong game                             	*/
   /*                                                                            */
   /******************************************************************************/
   
@@ -473,27 +473,110 @@
 	background: url("https://i.pinimg.com/originals/42/45/54/42455498933d57e8af7156813472d0fa.gif");
 	background-position: center;
 	background-size: cover;
+	display: flex;
+	flex-direction: column;
+	row-gap: 5%;
+	align-items: center;
+	justify-content: center;
   }
   
-  #lobby-name {
-	border-radius: $radius-xl;
-	font-family: $font-main;
+  .pong-wrapper {
+	background: rgba($color-black, 0.6);
+	border: 1px solid rgba($color-white, 0.3);
+	backdrop-filter: $blur-strong;
+	border-radius: $radius-lg;
+	padding: 20px 30px;
+	width: 500px;
+	text-align: center;
+	color: $color-white;
+  }
+  
+  .pong-title {
+	font-size: $font-size-md;
+	color: $color-accent-alt;
+	margin-bottom: 20px;
+  }
+  
+  #pong-controls {
+	display: flex;
+	flex-direction: column;
+	gap: 15px;
+  
+	#lobby-name {
+	  border-radius: $radius-xl;
+	  border: 1px solid $color-secondary;
+	  padding: 8px 12px;
+	  font-family: $font-main;
+	  font-size: $font-size-xs;
+	  color: $color-accent;
+	  background: rgba($color-white, 0.1);
+	  text-align: center;
+  
+	  &:focus {
+		outline: none;
+		border-color: $color-accent-alt;
+		box-shadow: 0 0 6px $color-accent-alt;
+	  }
+	}
+  
+	.pong-buttons {
+	  display: flex;
+	  flex-wrap: wrap;
+	  justify-content: center;
+	  gap: 10px;
+  
+	  button {
+		background: $btn-bg;
+		color: $btn-text;
+		padding: 10px 16px;
+		font-size: $font-size-xs;
+		border-radius: $radius-md;
+		border: 2px solid transparent;
+		cursor: pointer;
+		transition: $transition-fast;
+  
+		&:hover {
+		  background: $color-accent-alt;
+		  color: $color-black;
+		  border-color: $color-black;
+		}
+	  }
+	}
+  }
+  
+  .pong-lobby {
+	margin-top: 20px;
+	padding: 12px;
+	border-radius: $radius-md;
+	background: rgba($color-white, 0.08);
+	border: 1px solid rgba($color-white, 0.2);
 	font-size: $font-size-xs;
-	color: $color-accent;
+	text-align: left;
+  
+	p {
+	  margin: 6px 0;
+	  strong {
+		color: $color-accent-alt;
+	  }
+	}
+  }
+  
+  .pong-message {
+	margin-top: 15px;
+	font-size: $font-size-sm;
+	color: $color-secondary;
+	font-weight: bold;
   }
   
   #pong-canvas {
 	display: none;
 	border: 4px solid $bg-light;
-	position: absolute;
-	top: 50%;
-	left: 50%;
-	transform: translate(-50%, -50%);
-  }
+	border-radius: $radius-lg;
+  }  
   
   /******************************************************************************/
   /*                                                                            */
-  /*                        		 Shifumi game                             	  */
+  /*                        		 Shifumi game                             	*/
   /*                                                                            */
   /******************************************************************************/
   
@@ -516,7 +599,7 @@
   
   /******************************************************************************/
   /*                                                                            */
-  /*                        		 	  Chat                            	      */
+  /*                        		 	  Chat                            	    */
   /*                                                                            */
   /******************************************************************************/
   

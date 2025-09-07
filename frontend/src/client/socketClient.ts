@@ -110,7 +110,7 @@ export function getSockets(): [Socket, Socket, Socket] {
 
         socketPong.on('game-state', (state) => {
             const canvas = document.getElementById("pong-canvas") as HTMLCanvasElement;
-            const startBtn = document.getElementById("start-game-btn") as HTMLButtonElement;
+            const startBtn = document.getElementById("pong-controls") as HTMLButtonElement;
             startBtn.style.display = "none";
             canvas.style.display = "block";
             if (!canvas) return;
