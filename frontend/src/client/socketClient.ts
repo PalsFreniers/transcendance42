@@ -113,10 +113,11 @@ export function getSockets(): [Socket, Socket, Socket] {
             const startBtn = document.getElementById("pong-controls") as HTMLButtonElement;
             startBtn.style.display = "none";
             canvas.style.display = "block";
-            if (!canvas) return;
+            if (!canvas) 
+                return;
             const ctx = canvas.getContext("2d");
-            if (!ctx) return;
-
+            if (!ctx) 
+                return;
             const scale = 20;
             const gameWidth = 20;
             const gameHeight = 10;
@@ -156,7 +157,7 @@ export function getSockets(): [Socket, Socket, Socket] {
 
             // Halo néon
             ctx.save();
-            ctx.shadowColor = "#ffdd00";   // jaune néon
+            ctx.shadowColor = "#ffdd00";
             ctx.shadowBlur = 15;
 
             // Cercle principal
@@ -169,7 +170,6 @@ export function getSockets(): [Socket, Socket, Socket] {
             ctx.stroke();
             ctx.restore();
 
-            // Petit cœur blanc brillant au centre
             ctx.beginPath();
             ctx.arc(ballX, ballY, ballRadius / 2, 0, Math.PI * 2);
             ctx.fillStyle = "#ffffff";
