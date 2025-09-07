@@ -1,112 +1,158 @@
-*{
+@import "variables";
+
+/******************************************************************************/
+/*                                                                            */
+/*                                Global css rules                            */
+/*                                                                            */
+/******************************************************************************/
+
+* {
 	padding: 0;
 	margin: 0;
-}
-
-body
-{
-	font-family: 'Public Pixel', sans-serif;
+  }
+  
+  body {
+	font-family: $font-main, sans-serif;
 	user-select: none;
-	background-color: rgb(3, 1, 8);
-	#img{
-		position: absolute
-	}
+	background-color: $bg-dark;
 	overflow-x: hidden;
 	overflow-y: hidden;
-}
-
-a{
-	font-size: 12px;
-}
-
-a:visited {
-	color: #fff;
-}
-
-p{
-	color: #fff;
-	font-size: 12px;
-}
-
-#back {
+  
+	#img {
+	  position: absolute;
+	}
+  }
+  
+  a {
+	font-size: $font-size-xs;
+	&:visited {
+	  color: $color-white;
+	}
+  }
+  
+  p {
+	color: $color-white;
+	font-size: $font-size-xs;
+  }
+  
+  button {
+	background: $btn-bg;
+	color: $btn-text;
+	font-weight: 400;
+	border: none;
+	padding: 12px 20px;
+	cursor: pointer;
+	border-radius: $radius-md;
+	font-size: $font-size-xs;
+	border: 2px solid transparent;
+	transition: $transition-fast;
+	font-family: $font-main, sans-serif;
+  
+	&:hover {
+	  color: $btn-text;
+	  border-color: $btn-hover-border;
+	  background: $btn-hover-bg;
+	}
+  }
+  
+  /******************************************************************************/
+  /*                                                                            */
+  /*                                Main screen 42                              */
+  /*                                                                            */
+  /******************************************************************************/
+  
+  #back {
 	background-image: url("https://mir-s3-cdn-cf.behance.net/project_modules/fs/9bc27292880429.5e569ff84e4d0.gif");
 	background-position: center;
-  	background-size: cover;
+	background-size: cover;
 	height: 100vh;
 	width: 100vw;
-}
-
-#moncercle{
-	background-color:#000000;
-	border-radius:50%;
-	width:300px;
-	height:300px;
-	filter: drop-shadow(0 0 0 rgb(99, 218, 198)) drop-shadow(0 0 5px rgb(99, 218, 198));
+  }
+  
+  #moncercle {
+	background-color: $color-black;
+	border-radius: 50%;
+	width: 300px;
+	height: 300px;
+	filter: $shadow-cyan;
 	top: 50%;
 	left: 50%;
 	position: absolute;
 	transform: translate(-50%, -50%);
 	animation: pulse 2s infinite ease-in-out;
-	transition: transform 0.2s;
-	transition:
-		transform 0.6s ease-in-out,
-		height 0.6s ease-in-out,
-		width 0.6s ease-in-out,
-		padding 0.6s ease-in-out,
-		box-sizing 0.6s ease-in-out,
-		border-radius 0.6s ease-in-out,
-		border 0.6s ease-in-out,
-		filter 0.6s ease-in-out;
+	transition: transform $transition-slow,
+	  height $transition-slow,
+	  width $transition-slow,
+	  padding $transition-slow,
+	  box-sizing $transition-slow,
+	  border-radius $transition-slow,
+	  border $transition-slow,
+	  filter $transition-slow;
+  
 	&.expand {
-		background: transparent;
-		height: 400px;
-		width: 360px;
-		border-radius: 8px;
-		padding: 30px;
-		filter:none;
-		transform: translate(-50%, -50%);
-		border: 1px solid rgba(255, 255, 255, 0.5);
-		box-sizing: border-box;
-		backdrop-filter: blur(8px);
-    	-webkit-backdrop-filter: blur(8px);
+	  background: transparent;
+	  height: 400px;
+	  width: 360px;
+	  border-radius: $radius-lg;
+	  padding: 30px;
+	  filter: none;
+	  transform: translate(-50%, -50%);
+	  border: 1px solid rgba($color-white, 0.5);
+	  box-sizing: border-box;
+	  backdrop-filter: $blur-strong;
+	  -webkit-backdrop-filter: $blur-strong;
 	}
+  
 	&.expandlobby {
-		background: transparent;
-		height: 100%;
-		width: 100%;
-		border-radius: 8px;
-		padding: 30px;
-		filter:none;
-		transform: translate(-50%, -50%);
-		border: 1px solid rgba(255, 255, 255, 0.5);
-		box-sizing: border-box;
-		backdrop-filter: blur(8px);
-    	-webkit-backdrop-filter: blur(8px);
+	  background: transparent;
+	  height: 100%;
+	  width: 100%;
+	  border-radius: $radius-lg;
+	  padding: 30px;
+	  filter: none;
+	  transform: translate(-50%, -50%);
+	  border: 1px solid rgba($color-white, 0.5);
+	  box-sizing: border-box;
+	  backdrop-filter: $blur-strong;
+	  -webkit-backdrop-filter: $blur-strong;
 	}
+  
 	cursor: pointer;
+  
 	#img {
-		width:200px;
-		height:200px;
-		top: 51%;
-		left: 49%;
-		transform: translate(-50%, -50%);
-		transition:
-			opacity 0.3s ease-in-out;
-		filter: drop-shadow(0 0 0 rgb(99, 218, 198)) drop-shadow(0 0 5px rgb(99, 218, 198));
+	  width: 200px;
+	  height: 200px;
+	  top: 51%;
+	  left: 49%;
+	  transform: translate(-50%, -50%);
+	  transition: opacity $transition-fast;
+	  filter: $shadow-cyan;
 	}
-
+  
 	&.expand #img {
-		opacity: 0;
+	  opacity: 0;
 	}
-}
-
-@keyframes pulse {
-	0%   { transform: translate(-50%, -50%) scale(1); }
-	50%  { transform: translate(-50%, -50%) scale(1.1); }
-	100% { transform: translate(-50%, -50%) scale(1); }
-}
-
-#back_login{
+  }
+  
+  @keyframes pulse {
+	0% {
+	  transform: translate(-50%, -50%) scale(1);
+	}
+	50% {
+	  transform: translate(-50%, -50%) scale(1.1);
+	}
+	100% {
+	  transform: translate(-50%, -50%) scale(1);
+	}
+  }
+  
+  /******************************************************************************/
+  /*                                                                            */
+  /*                        Login form & Register form                          */
+  /*                                                                            */
+  /******************************************************************************/
+  
+  #back_login {
 	margin: 0;
 	box-sizing: border-box;
 	display: flex;
@@ -115,131 +161,125 @@ p{
 	min-height: 100vh;
 	width: 100%;
 	padding: 0 10px;
-}
-
-#back_login::before {
-  content: "";
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  background: url("https://mir-s3-cdn-cf.behance.net/project_modules/fs/9bc27292880429.5e569ff84e4d0.gif"), #000;
-  background-position: center;
-  background-size: cover;
-}
-
-#back-pong{
-	position: fixed;
-	width: 100%;
-	height: 100vh;
-	background: url("https://i.pinimg.com/originals/42/45/54/42455498933d57e8af7156813472d0fa.gif");
-	background-position: center;
-	background-size: cover;
-}
-
-.wrapper {
+  
+	&::before {
+	  content: "";
+	  position: absolute;
+	  width: 100%;
+	  height: 100%;
+	  background: url("https://mir-s3-cdn-cf.behance.net/project_modules/fs/9bc27292880429.5e569ff84e4d0.gif"),
+		$color-black;
+	  background-position: center;
+	  background-size: cover;
+	}
+  }
+  
+  .wrapper {
 	box-sizing: border-box;
 	width: 400px;
-	border-radius: 8px;
+	border-radius: $radius-lg;
 	padding: 30px;
 	text-align: center;
-	border: 1px solid rgba(255, 255, 255, 0.5);
-	backdrop-filter: blur(8px);
-	-webkit-backdrop-filter: blur(8px);
-}
-form {
+	border: 1px solid rgba($color-white, 0.5);
+	backdrop-filter: $blur-strong;
+	-webkit-backdrop-filter: $blur-strong;
+  }
+  
+  form {
 	display: flex;
 	flex-direction: column;
-}
-h2 {
+  }
+  
+  h2 {
 	font-size: 2rem;
 	margin-bottom: 20px;
-	color: #fff;
-}
-.input-field {
+	color: $color-white;
+  }
+  
+  .input-field {
 	position: relative;
-	border-bottom: 2px solid #ccc;
+	border-bottom: 2px solid $bg-light;
 	margin: 15px 0;
-}
-.input-field label {
-	position: absolute;
-	top: 50%;
-	left: 0;
-	transform: translateY(-50%);
-	color: #fff;
-	font-size: 12px;
-	pointer-events: none;
-	transition: 0.15s ease;
-}
-.input-field input {
-	width: 100%;
-	height: 40px;
-	background: transparent;
-	border: none;
-	outline: none;
-	font-size:12px; 
-	color: #fff;
-}
-.input-field input:focus~label,
-.input-field input:not(:placeholder-shown)~label {
-	font-size: 12px;
-	top: 10px;
-	transform: translateY(-120%);
-}
-.forget {
+  
+	label {
+	  position: absolute;
+	  top: 50%;
+	  left: 0;
+	  transform: translateY(-50%);
+	  color: $color-white;
+	  font-size: $font-size-xs;
+	  pointer-events: none;
+	  transition: 0.15s ease;
+	}
+  
+	input {
+	  width: 100%;
+	  height: 40px;
+	  background: transparent;
+	  border: none;
+	  outline: none;
+	  font-size: $font-size-xs;
+	  color: $color-white;
+  
+	  &:focus ~ label,
+	  &:not(:placeholder-shown) ~ label {
+		font-size: $font-size-xs;
+		top: 10px;
+		transform: translateY(-120%);
+	  }
+	}
+  }
+  
+  .forget {
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
 	margin: 25px 0 35px 0;
-	color: #fff;
-}
-#remember {
-	accent-color: #fff;
-}
-.forget label {
-	display: flex;
-	align-items: center;
-}
-.forget label p {
-	margin-left: 8px;
-}
-.wrapper a {
+	color: $color-white;
+  
+	#remember {
+	  accent-color: $color-white;
+	}
+  
+	label {
+	  display: flex;
+	  align-items: center;
+  
+	  p {
+		margin-left: 8px;
+	  }
+	}
+  }
+  
+  .wrapper a {
 	color: #efefef;
 	text-decoration: none;
-}
-.wrapper a:hover {
-	text-decoration: underline;
-}
-button {
-	background: #ccc;
-	color: #0034de;
-	font-weight: 400;
-	border: none;
-	padding: 12px 20px;
-	cursor: pointer;
-	border-radius: 3px;
-	font-size: 12px;
-	border: 2px solid transparent;
-	transition: 0.3s ease;
-	font-family: 'Public Pixel', sans-serif;
-}
-button:hover {
-	color: #0034de;
-	border-color: rgb(187, 16, 158);
-	background: rgba(255, 255, 255, 0.15);
-}
-.register, .login {
+  
+	&:hover {
+	  text-decoration: underline;
+	}
+  }
+  
+  .register,
+  .login {
 	text-align: center;
 	margin-top: 30px;
-	color: #fff;
-}
-input:-webkit-autofill {
-    -webkit-box-shadow: 0 0 0 1000px transparent inset;
-    -webkit-text-fill-color: white;
-    caret-color: white;
-    background-color: transparent;
-    transition: background-color 9999s ease-out, color 9999s ease-out;
-}
-
+	color: $color-white;
+  }
+  
+  input:-webkit-autofill {
+	-webkit-box-shadow: 0 0 0 1000px transparent inset;
+	-webkit-text-fill-color: $color-white;
+	caret-color: $color-white;
+	background-color: transparent;
+	transition: background-color 9999s ease-out, color 9999s ease-out;
+  }
+  
+  /******************************************************************************/
+/*                                                                            */
+/*                        Main page game & management                         */
+/*                                                                            */
+/******************************************************************************/
 
 #lobby {
 	background: none;
@@ -247,388 +287,312 @@ input:-webkit-autofill {
 	padding: 0;
 	width: 100%;
 	height: 100%;
-	//background-color: rgb(7, 7, 7);
+  
 	#selection1 {
+	  position: absolute;
+	  left: 0;
+	  top: 0;
+	  width: calc(50vw - 20px);
+	  height: 100vh;
+	  transition: all $transition-fast;
+  
+	  .game1 {
 		position: absolute;
+		background-image: url("https://i.pinimg.com/originals/fd/fe/94/fdfe94c7bdd0bf4afdd830e0b2c515e9.gif");
+		background-repeat: no-repeat;
+		background-size: cover;
+		background-position: bottom left;
+		top: 20px;
 		left: 0;
-		top: 0px;
+		right: 0;
+		bottom: 0;
 		width: calc(50vw - 20px);
 		height: 100vh;
-		transition:
-				all 0.3s ease;
-		.game1 {
-			position: absolute;
-			background-image: url("https://i.pinimg.com/originals/fd/fe/94/fdfe94c7bdd0bf4afdd830e0b2c515e9.gif");
-			background-repeat: no-repeat;
-			background-size: cover;
-			background-position: bottom left;
-			top: 20px;
-			left: 0;
-			right: 0;
-			bottom: 0;
-			width: calc(50vw - 20px);
-			height: 100vh;
-			z-index: 7;
-			box-sizing: border-box;
-			clip-path: polygon(0% 100%, 100% 100%, 100% 23%, 0% 0%);
-			cursor: default;
-			transition:
-				all 0.3s ease;
-			h2 {
-				position: absolute;
-				left: 25%;
-				top: 50%;
-				transform: translate(-25%, -50%);
-				font-size: 42px;
-				color: #000000;
-				z-index: 10;
-			}
+		z-index: 7;
+		box-sizing: border-box;
+		clip-path: polygon(0% 100%, 100% 100%, 100% 23%, 0% 0%);
+		cursor: default;
+		transition: all $transition-fast;
+  
+		h2 {
+		  position: absolute;
+		  left: 25%;
+		  top: 50%;
+		  transform: translate(-25%, -50%);
+		  font-size: $font-size-lg;
+		  color: $color-black;
+		  z-index: 10;
 		}
-		.game1:hover{
-			width: 50vw;
-			top: 0;
-			h2{
-				color: #ccc;
-			}
-		}
-	}
-	#selection1.active{
-		height: 100%;
+	  }
+  
+	  .game1:hover {
 		width: 50vw;
+		top: 0;
+  
+		h2 {
+		  color: $bg-light;
+		}
+	  }
 	}
-
+  
+	#selection1.active {
+	  height: 100%;
+	  width: 50vw;
+	}
+  
 	#selection2 {
+	  position: absolute;
+	  left: calc(50vw + 20px);
+	  top: 0;
+	  width: calc(50vw - 20px);
+	  height: 100vh;
+	  transition: all $transition-fast;
+  
+	  .game2 {
 		position: absolute;
-		left: calc(50vw + 20px);
-		top: 0px;
+		background-image: url("https://i.pinimg.com/originals/8c/f6/06/8cf60608f95bfae20a9e78884e1a33cb.gif");
+		background-repeat: no-repeat;
+		background-size: cover;
+		background-position: bottom right;
+		top: 20px;
+		left: 0;
+		right: 0;
+		bottom: 0;
 		width: calc(50vw - 20px);
 		height: 100vh;
-		transition:
-				all 0.3s ease;
-		.game2 {
-			background: none;
+		z-index: 7;
+		box-sizing: border-box;
+		clip-path: polygon(0% 100%, 100% 100%, 100% 0%, 0% 23%);
+		cursor: default;
+		transition: all $transition-fast;
+  
+		h2 {
+		  position: absolute;
+		  left: 25%;
+		  top: 50%;
+		  transform: translate(-25%, -50%);
+		  font-size: $font-size-lg;
+		  color: $color-black;
+		  z-index: 10;
 		}
-		.game2 {
-			position: absolute;
-			background-image: url("https://i.pinimg.com/originals/8c/f6/06/8cf60608f95bfae20a9e78884e1a33cb.gif");
-			background-repeat: no-repeat;
-			background-size: cover;
-			background-position:  bottom right;
-			top: 20px;
-			left: 0px;
-			right: 0;
-			bottom: 0;
-			width: calc(50vw - 20px);
-			height: 100vh;
-			z-index: 7;
-			box-sizing: border-box;
-			clip-path: polygon(0% 100%, 100% 100%, 100% 0%, 0% 23%);
-			cursor: default;
-			transition:
-				all 0.3s ease;
-			h2 {
-				position: absolute;
-				left: 25%;
-				top: 50%;
-				transform: translate(-25%, -50%);
-				font-size: 42px;
-				color: #000000;
-				z-index: 10;
-			}
-		}
-		.game2:hover{
-			top: 0;
-			height: 100%;
-			width: calc(50vw);
-			h2{
-				color: #ccc;
-			}
-		}
-	}
-	#selection2.active{
-		left: 50vw;
+	  }
+  
+	  .game2:hover {
+		top: 0;
 		height: 100%;
 		width: 50vw;
+  
+		h2 {
+		  color: $bg-light;
+		}
+	  }
 	}
+  
+	#selection2.active {
+	  left: 50vw;
+	  height: 100%;
+	  width: 50vw;
+	}
+  
 	#profils {
-		background-image: url("https://mir-s3-cdn-cf.behance.net/project_modules/fs/9bc27292880429.5e569ff84e4d0.gif");
-		background-size: contain;
-		position: absolute;
-		clip-path: polygon(50% 100%, 0% 0%, 100% 0%);
-		top: 0%;
-		left: 0%;
-		width: 100%;
-		height: 23vh;
-		z-index: 6;
-		#parametre {
-			position: relative;
-			top: 5%;
-			left: 60%;
-			width: 5%;
-			height: 5%;
-			z-index: 7;
-			filter: drop-shadow(4px 4px 10px crimson);
+	  background-image: url("https://mir-s3-cdn-cf.behance.net/project_modules/fs/9bc27292880429.5e569ff84e4d0.gif");
+	  background-size: contain;
+	  position: absolute;
+	  clip-path: polygon(50% 100%, 0% 0%, 100% 0%);
+	  top: 0;
+	  left: 0;
+	  width: 100%;
+	  height: 23vh;
+	  z-index: 6;
+  
+	  #parametre,
+	  #return,
+	  #friends,
+	  #friends2,
+	  #offline {
+		position: relative;
+		z-index: 7;
+		filter: $shadow-accent;
+		cursor: pointer;
+		transition: transform $transition-fast;
+  
+		&:hover {
+		  transform: scale(1.1);
 		}
-		#parametre:hover {
-			scale: (1.1);
-		}
-		#return {
-			position: relative;
-			top: 3%;
-			left: 65%;
-			width: 5%;
-			height: 5%;
-			z-index: 7;
-			filter: drop-shadow(4px 4px 10px crimson);
-		}
-		#return:hover {
-			scale: (1.1);
-		}
-		#friends {
-			visibility: visible;
-			position: relative;
-			top: 3%;
-			left: 35%;
-			width: 5%;
-			height: 5%;
-			z-index: 7;
-			filter: drop-shadow(4px 4px 10px crimson);
-		}
-		#friends:hover {
-			scale: (1.1);
-		}
-		#friends2 {
-			visibility: hidden;
-			position: relative;
-			top: calc(3% - 10px);
-			left: 35%;
-			width: 5%;
-			height: 5%;
-			z-index: 7;
-			filter: drop-shadow(4px 4px 10px crimson);
-		}
-		#friends2:hover {
-			scale: (1.1);
-		}
-		#offline {
-			position: relative;
-			top: -5%;
-			left: 70%;
-			width: 4%;
-			height: 4%;
-			z-index: 7;
-			filter: drop-shadow(4px 4px 10px crimson);
-			cursor: pointer;
-			transition: transform 0.2s ease;
-		  }
-		  
-		  #offline:hover {
-			transform: scale(1.1);
-		  }
-		#perso {
-			
-		}
-		/*svg{
-			box-sizing: border-box;
-			border: 2px solid transparent;
-			background-color: transparent;
-			backdrop-filter: blur(0.2rem);
-			border-radius:50%;
-		}*/
+	  }
+  
+	  #parametre {
+		top: 5%;
+		left: 60%;
+		width: 5%;
+		height: 5%;
+	  }
+  
+	  #return {
+		top: 3%;
+		left: 65%;
+		width: 5%;
+		height: 5%;
+	  }
+  
+	  #friends {
+		visibility: visible;
+		top: 3%;
+		left: 35%;
+		width: 5%;
+		height: 5%;
+	  }
+  
+	  #friends2 {
+		visibility: hidden;
+		top: calc(3% - 10px);
+		left: 35%;
+		width: 5%;
+		height: 5%;
+	  }
+  
+	  #offline {
+		top: -5%;
+		left: 70%;
+		width: 4%;
+		height: 4%;
+	  }
 	}
-}
-
-#lobby-name {
-	border-radius: 10px;
-	font-family: 'public pixel';
-	font-size: 12px;
-	color: crimson;
-}
-
-#chat-container {
+  }
+  
+  /******************************************************************************/
+  /*                                                                            */
+  /*                        			Pong game                             	  */
+  /*                                                                            */
+  /******************************************************************************/
+  
+  #back-pong {
+	position: fixed;
+	width: 100%;
+	height: 100vh;
+	background: url("https://i.pinimg.com/originals/42/45/54/42455498933d57e8af7156813472d0fa.gif");
+	background-position: center;
+	background-size: cover;
+  }
+  
+  #lobby-name {
+	border-radius: $radius-xl;
+	font-family: $font-main;
+	font-size: $font-size-xs;
+	color: $color-accent;
+  }
+  
+  #pong-canvas {
+	display: none;
+	border: 4px solid $bg-light;
 	position: absolute;
-	top: 87%;
-	left: 10px;
-}
-
-$pong-white: #ffffff;
-$pong-bg: transparent; // pas besoin de fond si c'est sur fond noir
-
-#pong-canvas {
-	display: none;              /* keep hidden until game starts */
-	border: 4px solid #ccc;
-	position: absolute;         /* position relative to the viewport */
 	top: 50%;
 	left: 50%;
-	transform: translate(-50%, -50%); /* true centering */
-}
+	transform: translate(-50%, -50%);
+  }
   
-#back_shifumi {
+  /******************************************************************************/
+  /*                                                                            */
+  /*                        		 Shifumi game                             	  */
+  /*                                                                            */
+  /******************************************************************************/
+  
+  #back_shifumi {
 	padding: 0;
 	margin: 0;
 	display: flex;
 	gap: 10px;
 	margin-top: 20px;
-	min-height: 300px; // important pour que le pong ait la place
-
-	#container-button {
-		display: flex;
-		left: 15vw;
-		flex-direction: column;
-		gap: 4vh;
-		align-items: flex-start;
-	}
- /* .pong-scene {
-    perspective: 1000px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 20px;
-    width: 50%; // ou une taille fixe selon ton layout
-
-    .pong-court {
-      width: 400px;
-      height: 600px;
-      border: 2px solid $pong-white;
-      transform: rotateX(60deg) rotateZ(45deg);
-      position: relative;
-      transform-style: preserve-3d;
-      box-sizing: border-box;
-
-      .paddle {
-        width: 60px;
-        height: 4px;
-        background: $pong-white;
-        position: absolute;
-
-        &.left {
-          top: 10px;
-          left: 5%;
-			animation: paddleMoveLeft 2s ease-in-out infinite alternate;
-        }
-
-        &.right {
-          bottom: 10px;
-          right: 5%;
-		  animation: paddleMoveRight 2s ease-in-out infinite alternate;
-        }
-      }
-
-      .ball {
-        width: 8px;
-        height: 8px;
-        background: $pong-white;
-        border-radius: 50%;
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-		animation: ballMove 4s linear infinite alternate;
-      }
-    }
-  }*/
+	min-height: 300px;
   
-}
-/*
-@keyframes paddleMoveLeft {
-  0%   { left: 80%; }
-  100% { left: 5%; }
-}
-
-@keyframes paddleMoveRight {
-  0%   { right: 5%; }
-  100% { right: 80%; }
-}
-
-@keyframes ballMove {
-	0% {
-		top: 3%;
-		left: 80%;
-		transform: translate(-50%, -50%);
+	#container-button {
+	  display: flex;
+	  left: 15vw;
+	  flex-direction: column;
+	  gap: 4vh;
+	  align-items: flex-start;
 	}
-	25% {
-		top: 50%;
-		left: 3%;
-		transform: translate(-50%, -50%);
-	}
-	50% {
-		top: 98%;
-		left: 10%;
-		transform: translate(-50%, -50%);
-	}
-	75% {
-		top: 50%;
-		left: 98%;
-		transform: translate(-50%, -50%);
-	}
-	100% {
-		top: 2%;
-		left: 80%;
-		transform: translate(-50%, -50%);
-	}
-}
-*/
-
-#boddy_chat{
+  }
+  
+  /******************************************************************************/
+  /*                                                                            */
+  /*                        		 	  Chat                            	      */
+  /*                                                                            */
+  /******************************************************************************/
+  
+  #chat-container {
+	position: absolute;
+	top: 87%;
+	left: 10px;
+  }
+  
+  #boddy_chat {
 	position: absolute;
 	left: 0;
 	top: 0;
-	width:100%;
+	width: 100%;
 	height: 100%;
 	z-index: 29;
-	#page_chat{
-		position: absolute;
-		border: #fff 1px;
-		background-color: #fff;
-		border-radius: 2px;
-		width: 60%;
-		height: 80%;
-		left: 20%;
-		top: 10%;
-		z-index: 30;
-		#lobby_friends{
-			position: relative;
-			background-color: #727272;
-			width: 30%;
+  
+	#page_chat {
+	  position: absolute;
+	  border: 1px solid $color-white;
+	  background-color: $color-white;
+	  border-radius: $radius-sm;
+	  width: 60%;
+	  height: 80%;
+	  left: 20%;
+	  top: 10%;
+	  z-index: 30;
+  
+	  #lobby_friends {
+		position: relative;
+		background-color: $color-gray;
+		width: 30%;
+		height: 100%;
+		z-index: 31;
+		display: flex;
+		flex-direction: column;
+  
+		#flex_friends {
+		  height: 10%;
+		  border: 1px solid $color-white;
+		  width: 100%;
+		  display: flex;
+		  flex-direction: row;
+		  justify-content: space-between;
+  
+		  img {
+			object-fit: cover;
+			width: 20%;
 			height: 100%;
-			z-index: 31;
-			display: flex;
-			flex-direction: column;
-			#flex_friends{
-				height: 10%;
-				border: #fff 1px;
-				width: 100%;
-				display: flex;
-				flex-direction: row;
-				justify-content: space-between;
-				
-				img{
-					object-fit: cover;
-					width: 20%;
-					height: 100%;
-					background-color: #5a4f4f;
-					border: #fff 1px;
-					border-radius: 50%;
-				}
-				p{
-					align-items: center;
-					text-align: center;
-					font-size: 2rem;
-					width: 75%;
-					height: 100%;
-					background-color: #242121;
-					border: #fff 1px;
-				}
-			}
-		}
-		#lobby_chat{
-			position: relative;
-			top: -100%;
-			left: 30%;
-			background-color: #ca8181;
-			width: 70%;
+			background-color: lighten($color-gray, 10%);
+			border: 1px solid $color-white;
+			border-radius: 50%;
+		  }
+  
+		  p {
+			align-items: center;
+			text-align: center;
+			font-size: 2rem;
+			width: 75%;
 			height: 100%;
-			z-index: 31;
+			background-color: darken($color-gray, 30%);
+			border: 1px solid $color-white;
+			color: $color-white;
+		  }
 		}
+	  }
+  
+	  #lobby_chat {
+		position: relative;
+		top: -100%;
+		left: 30%;
+		background-color: lighten($color-accent, 20%);
+		width: 70%;
+		height: 100%;
+		z-index: 31;
+	  }
 	}
-}
+  }
+  

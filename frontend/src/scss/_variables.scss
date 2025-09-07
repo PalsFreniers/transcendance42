@@ -1,0 +1,38 @@
+//Colors
+$bg-dark: rgb(3, 1, 8);
+$bg-light: #ccc;
+$color-primary: #0034de;
+$color-secondary: rgb(187, 16, 158);
+$color-accent: crimson;
+$color-white: #fff;
+$color-gray: #727272;
+$color-black: #000;
+
+//Typo
+$font-main: 'Public Pixel';
+$font-size-xs: 12px;
+$font-size-sm: 20px;
+$font-size-md: 30px;
+$font-size-lg: 42px;
+
+//Radius
+$radius-sm: 2px;
+$radius-md: 3px;
+$radius-lg: 8px;
+$radius-xl: 10px;
+
+//Box shadow & Transition
+$shadow-accent: drop-shadow(4px 4px 10px $color-accent);
+$shadow-cyan: drop-shadow(0 0 5px rgb(99, 218, 198));
+
+$blur-light: blur(0.2rem);
+$blur-strong: blur(8px);
+
+$transition-fast: 0.3s ease;
+$transition-slow: 0.6s ease-in-out;
+
+//Button
+$btn-bg: $bg-light;
+$btn-text: $color-primary;
+$btn-hover-bg: rgba(255, 255, 255, 0.15);
+$btn-hover-border: $color-secondary;
