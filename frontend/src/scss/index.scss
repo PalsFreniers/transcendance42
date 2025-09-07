@@ -49,9 +49,9 @@
 	font-family: $font-main, sans-serif;
   
 	&:hover {
-	  color: $btn-text;
-	  border-color: $btn-hover-border;
-	  background: $btn-hover-bg;
+		background: $color-accent-alt;
+		color: $color-black;
+		border-color: $color-black;
 	}
   }
   

@@ -194,7 +194,7 @@ export function getSockets(): [Socket, Socket, Socket] {
                 paddleHeight
             );
 
-            ctx.fillStyle = "#f5f5f5";
+            ctx.fillStyle = "#ffdd00";
             ctx.font = "20px 'Public Pixel'";
             ctx.textAlign = "center";
             ctx.fillText(`${state.leftScore} - ${state.rightScore}`, canvas.width / 2, 40);
