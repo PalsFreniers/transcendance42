@@ -9,33 +9,34 @@
 * {
 	padding: 0;
 	margin: 0;
-  }
-  
-  body {
+}
+
+body {
 	font-family: $font-main, sans-serif;
 	user-select: none;
 	background-color: $bg-dark;
 	overflow-x: hidden;
 	overflow-y: hidden;
-  
+
 	#img {
-	  position: absolute;
+		position: absolute;
 	}
-  }
-  
-  a {
+}
+
+a {
 	font-size: $font-size-xs;
+
 	&:visited {
-	  color: $color-white;
+		color: $color-white;
 	}
-  }
-  
-  p {
+}
+
+p {
 	color: $color-white;
 	font-size: $font-size-xs;
-  }
-  
-  button {
+}
+
+button {
 	background: $btn-bg;
 	color: $btn-text;
 	font-weight: 400;
@@ -47,29 +48,29 @@
 	border: 2px solid transparent;
 	transition: $transition-fast;
 	font-family: $font-main, sans-serif;
-  
+
 	&:hover {
 		background: $color-accent-alt;
 		color: $color-black;
 		border-color: $color-black;
 	}
-  }
-  
-  /******************************************************************************/
-  /*                                                                            */
-  /*                                Main screen 42                              */
-  /*                                                                            */
-  /******************************************************************************/
-  
-  #back {
+}
+
+/******************************************************************************/
+/*                                                                            */
+/*                                Main screen 42                              */
+/*                                                                            */
+/******************************************************************************/
+
+#back {
 	background-image: url("https://mir-s3-cdn-cf.behance.net/project_modules/fs/9bc27292880429.5e569ff84e4d0.gif");
 	background-position: center;
 	background-size: cover;
 	height: 100vh;
 	width: 100vw;
-  }
-  
-  #moncercle {
+}
+
+#moncercle {
 	background-color: $color-black;
 	border-radius: 50%;
 	width: 300px;
@@ -81,78 +82,80 @@
 	transform: translate(-50%, -50%);
 	animation: pulse 2s infinite ease-in-out;
 	transition: transform $transition-slow,
-	  height $transition-slow,
-	  width $transition-slow,
-	  padding $transition-slow,
-	  box-sizing $transition-slow,
-	  border-radius $transition-slow,
-	  border $transition-slow,
-	  filter $transition-slow;
-  
+		height $transition-slow,
+		width $transition-slow,
+		padding $transition-slow,
+		box-sizing $transition-slow,
+		border-radius $transition-slow,
+		border $transition-slow,
+		filter $transition-slow;
+
 	&.expand {
-	  background: transparent;
-	  height: 400px;
-	  width: 360px;
-	  border-radius: $radius-lg;
-	  padding: 30px;
-	  filter: none;
-	  transform: translate(-50%, -50%);
-	  border: 1px solid rgba($color-white, 0.5);
-	  box-sizing: border-box;
-	  backdrop-filter: $blur-strong;
-	  -webkit-backdrop-filter: $blur-strong;
+		background: transparent;
+		height: 400px;
+		width: 360px;
+		border-radius: $radius-lg;
+		padding: 30px;
+		filter: none;
+		transform: translate(-50%, -50%);
+		border: 1px solid rgba($color-white, 0.5);
+		box-sizing: border-box;
+		backdrop-filter: $blur-strong;
+		-webkit-backdrop-filter: $blur-strong;
 	}
-  
+
 	&.expandlobby {
-	  background: transparent;
-	  height: 100%;
-	  width: 100%;
-	  border-radius: $radius-lg;
-	  padding: 30px;
-	  filter: none;
-	  transform: translate(-50%, -50%);
-	  border: 1px solid rgba($color-white, 0.5);
-	  box-sizing: border-box;
-	  backdrop-filter: $blur-strong;
-	  -webkit-backdrop-filter: $blur-strong;
+		background: transparent;
+		height: 100%;
+		width: 100%;
+		border-radius: $radius-lg;
+		padding: 30px;
+		filter: none;
+		transform: translate(-50%, -50%);
+		border: 1px solid rgba($color-white, 0.5);
+		box-sizing: border-box;
+		backdrop-filter: $blur-strong;
+		-webkit-backdrop-filter: $blur-strong;
 	}
-  
+
 	cursor: pointer;
-  
+
 	#img {
-	  width: 200px;
-	  height: 200px;
-	  top: 51%;
-	  left: 49%;
-	  transform: translate(-50%, -50%);
-	  transition: opacity $transition-fast;
-	  filter: $shadow-cyan;
+		width: 200px;
+		height: 200px;
+		top: 51%;
+		left: 49%;
+		transform: translate(-50%, -50%);
+		transition: opacity $transition-fast;
+		filter: $shadow-cyan;
 	}
-  
+
 	&.expand #img {
-	  opacity: 0;
+		opacity: 0;
 	}
-  }
-  
-  @keyframes pulse {
+}
+
+@keyframes pulse {
 	0% {
-	  transform: translate(-50%, -50%) scale(1);
+		transform: translate(-50%, -50%) scale(1);
 	}
+
 	50% {
-	  transform: translate(-50%, -50%) scale(1.1);
+		transform: translate(-50%, -50%) scale(1.1);
 	}
+
 	100% {
-	  transform: translate(-50%, -50%) scale(1);
+		transform: translate(-50%, -50%) scale(1);
 	}
-  }
-  
-  /******************************************************************************/
-  /*                                                                            */
-  /*                        Login form & Register form                          */
-  /*                                                                            */
-  /******************************************************************************/
-  
-  #back_login {
+}
+
+/******************************************************************************/
+/*                                                                            */
+/*                        Login form & Register form                          */
+/*                                                                            */
+/******************************************************************************/
+
+#back_login {
 	margin: 0;
 	box-sizing: border-box;
 	display: flex;
@@ -161,20 +164,20 @@
 	min-height: 100vh;
 	width: 100%;
 	padding: 0 10px;
-  
+
 	&::before {
-	  content: "";
-	  position: absolute;
-	  width: 100%;
-	  height: 100%;
-	  background: url("https://mir-s3-cdn-cf.behance.net/project_modules/fs/9bc27292880429.5e569ff84e4d0.gif"),
-		$color-black;
-	  background-position: center;
-	  background-size: cover;
+		content: "";
+		position: absolute;
+		width: 100%;
+		height: 100%;
+		background: url("https://mir-s3-cdn-cf.behance.net/project_modules/fs/9bc27292880429.5e569ff84e4d0.gif"),
+			$color-black;
+		background-position: center;
+		background-size: cover;
 	}
-  }
-  
-  .wrapper {
+}
+
+.wrapper {
 	box-sizing: border-box;
 	width: 400px;
 	border-radius: $radius-lg;
@@ -183,98 +186,98 @@
 	border: 1px solid rgba($color-white, 0.5);
 	backdrop-filter: $blur-strong;
 	-webkit-backdrop-filter: $blur-strong;
-  }
-  
-  form {
+}
+
+form {
 	display: flex;
 	flex-direction: column;
-  }
-  
-  h2 {
+}
+
+h2 {
 	font-size: 2rem;
 	margin-bottom: 20px;
 	color: $color-white;
-  }
-  
-  .input-field {
+}
+
+.input-field {
 	position: relative;
 	border-bottom: 2px solid $bg-light;
 	margin: 15px 0;
-  
+
 	label {
-	  position: absolute;
-	  top: 50%;
-	  left: 0;
-	  transform: translateY(-50%);
-	  color: $color-white;
-	  font-size: $font-size-xs;
-	  pointer-events: none;
-	  transition: 0.15s ease;
-	}
-  
-	input {
-	  width: 100%;
-	  height: 40px;
-	  background: transparent;
-	  border: none;
-	  outline: none;
-	  font-size: $font-size-xs;
-	  color: $color-white;
-  
-	  &:focus ~ label,
-	  &:not(:placeholder-shown) ~ label {
+		position: absolute;
+		top: 50%;
+		left: 0;
+		transform: translateY(-50%);
+		color: $color-white;
 		font-size: $font-size-xs;
-		top: 10px;
-		transform: translateY(-120%);
-	  }
+		pointer-events: none;
+		transition: 0.15s ease;
 	}
-  }
-  
-  .forget {
+
+	input {
+		width: 100%;
+		height: 40px;
+		background: transparent;
+		border: none;
+		outline: none;
+		font-size: $font-size-xs;
+		color: $color-white;
+
+		&:focus~label,
+		&:not(:placeholder-shown)~label {
+			font-size: $font-size-xs;
+			top: 10px;
+			transform: translateY(-120%);
+		}
+	}
+}
+
+.forget {
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
 	margin: 25px 0 35px 0;
 	color: $color-white;
-  
+
 	#remember {
-	  accent-color: $color-white;
+		accent-color: $color-white;
 	}
-  
+
 	label {
-	  display: flex;
-	  align-items: center;
-  
-	  p {
-		margin-left: 8px;
-	  }
+		display: flex;
+		align-items: center;
+
+		p {
+			margin-left: 8px;
+		}
 	}
-  }
-  
-  .wrapper a {
+}
+
+.wrapper a {
 	color: #efefef;
 	text-decoration: none;
-  
+
 	&:hover {
-	  text-decoration: underline;
+		text-decoration: underline;
 	}
-  }
-  
-  .register,
-  .login {
+}
+
+.register,
+.login {
 	text-align: center;
 	margin-top: 30px;
 	color: $color-white;
-  }
-  
-  input:-webkit-autofill {
+}
+
+input:-webkit-autofill {
 	-webkit-box-shadow: 0 0 0 1000px transparent inset;
 	-webkit-text-fill-color: $color-white;
 	caret-color: $color-white;
 	background-color: transparent;
 	transition: background-color 9999s ease-out, color 9999s ease-out;
-  }
-  
+}
+
 /******************************************************************************/
 /*                                                                            */
 /*                        Main page game & management                         */
@@ -287,186 +290,186 @@
 	padding: 0;
 	width: 100%;
 	height: 100%;
-  
+
 	#selection1 {
-	  position: absolute;
-	  left: 0;
-	  top: 0;
-	  width: calc(50vw - 20px);
-	  height: 100vh;
-	  transition: all $transition-fast;
-  
-	  .game1 {
 		position: absolute;
-		background-image: url("https://i.pinimg.com/originals/fd/fe/94/fdfe94c7bdd0bf4afdd830e0b2c515e9.gif");
-		background-repeat: no-repeat;
-		background-size: cover;
-		background-position: bottom left;
-		top: 20px;
 		left: 0;
-		right: 0;
-		bottom: 0;
+		top: 0;
 		width: calc(50vw - 20px);
 		height: 100vh;
-		z-index: 7;
-		box-sizing: border-box;
-		clip-path: polygon(0% 100%, 100% 100%, 100% 23%, 0% 0%);
-		cursor: default;
 		transition: all $transition-fast;
-  
-		h2 {
-		  position: absolute;
-		  left: 25%;
-		  top: 50%;
-		  transform: translate(-25%, -50%);
-		  font-size: $font-size-lg;
-		  color: $color-accent-alt;
-		  z-index: 10;
+
+		.game1 {
+			position: absolute;
+			background-image: url("https://i.pinimg.com/originals/fd/fe/94/fdfe94c7bdd0bf4afdd830e0b2c515e9.gif");
+			background-repeat: no-repeat;
+			background-size: cover;
+			background-position: bottom left;
+			top: 20px;
+			left: 0;
+			right: 0;
+			bottom: 0;
+			width: calc(50vw - 20px);
+			height: 100vh;
+			z-index: 7;
+			box-sizing: border-box;
+			clip-path: polygon(0% 100%, 100% 100%, 100% 23%, 0% 0%);
+			cursor: default;
+			transition: all $transition-fast;
+
+			h2 {
+				position: absolute;
+				left: 25%;
+				top: 50%;
+				transform: translate(-25%, -50%);
+				font-size: $font-size-lg;
+				color: $color-accent-alt;
+				z-index: 10;
+			}
 		}
-	  }
-  
-	  .game1:hover {
-		width: 50vw;
-		top: 0;
-  
-		h2 {
-		  color: $bg-light;
+
+		.game1:hover {
+			width: 50vw;
+			top: 0;
+
+			h2 {
+				color: $bg-light;
+			}
 		}
-	  }
 	}
-  
+
 	#selection1.active {
-	  height: 100%;
-	  width: 50vw;
-	}
-  
-	#selection2 {
-	  position: absolute;
-	  left: calc(50vw + 20px);
-	  top: 0;
-	  width: calc(50vw - 20px);
-	  height: 100vh;
-	  transition: all $transition-fast;
-  
-	  .game2 {
-		position: absolute;
-		background-image: url("https://i.pinimg.com/originals/8c/f6/06/8cf60608f95bfae20a9e78884e1a33cb.gif");
-		background-repeat: no-repeat;
-		background-size: cover;
-		background-position: bottom right;
-		top: 20px;
-		left: 0;
-		right: 0;
-		bottom: 0;
-		width: calc(50vw - 20px);
-		height: 100vh;
-		z-index: 7;
-		box-sizing: border-box;
-		clip-path: polygon(0% 100%, 100% 100%, 100% 0%, 0% 23%);
-		cursor: default;
-		transition: all $transition-fast;
-  
-		h2 {
-		  position: absolute;
-		  left: 25%;
-		  top: 50%;
-		  transform: translate(-25%, -50%);
-		  font-size: $font-size-lg;
-		  color: $color-secondary;
-		  z-index: 10;
-		}
-	  }
-  
-	  .game2:hover {
-		top: 0;
 		height: 100%;
 		width: 50vw;
-  
-		h2 {
-		  color: $bg-light;
-		}
-	  }
 	}
-  
+
+	#selection2 {
+		position: absolute;
+		left: calc(50vw + 20px);
+		top: 0;
+		width: calc(50vw - 20px);
+		height: 100vh;
+		transition: all $transition-fast;
+
+		.game2 {
+			position: absolute;
+			background-image: url("https://i.pinimg.com/originals/8c/f6/06/8cf60608f95bfae20a9e78884e1a33cb.gif");
+			background-repeat: no-repeat;
+			background-size: cover;
+			background-position: bottom right;
+			top: 20px;
+			left: 0;
+			right: 0;
+			bottom: 0;
+			width: calc(50vw - 20px);
+			height: 100vh;
+			z-index: 7;
+			box-sizing: border-box;
+			clip-path: polygon(0% 100%, 100% 100%, 100% 0%, 0% 23%);
+			cursor: default;
+			transition: all $transition-fast;
+
+			h2 {
+				position: absolute;
+				left: 25%;
+				top: 50%;
+				transform: translate(-25%, -50%);
+				font-size: $font-size-lg;
+				color: $color-secondary;
+				z-index: 10;
+			}
+		}
+
+		.game2:hover {
+			top: 0;
+			height: 100%;
+			width: 50vw;
+
+			h2 {
+				color: $bg-light;
+			}
+		}
+	}
+
 	#selection2.active {
-	  left: 50vw;
-	  height: 100%;
-	  width: 50vw;
+		left: 50vw;
+		height: 100%;
+		width: 50vw;
 	}
-  
+
 	#profils {
-	  background-image: url("https://mir-s3-cdn-cf.behance.net/project_modules/fs/9bc27292880429.5e569ff84e4d0.gif");
-	  background-size: contain;
-	  position: absolute;
-	  clip-path: polygon(50% 100%, 0% 0%, 100% 0%);
-	  top: 0;
-	  left: 0;
-	  width: 100%;
-	  height: 23vh;
-	  z-index: 6;
-  
-	  #parametre,
-	  #return,
-	  #friends,
-	  #friends2,
-	  #offline {
-		position: relative;
-		z-index: 7;
-		filter: $shadow-accent;
-		cursor: pointer;
-		transition: transform $transition-fast;
-  
-		&:hover {
-		  transform: scale(1.1);
+		background-image: url("https://mir-s3-cdn-cf.behance.net/project_modules/fs/9bc27292880429.5e569ff84e4d0.gif");
+		background-size: contain;
+		position: absolute;
+		clip-path: polygon(50% 100%, 0% 0%, 100% 0%);
+		top: 0;
+		left: 0;
+		width: 100%;
+		height: 23vh;
+		z-index: 6;
+
+		#parametre,
+		#return,
+		#friends,
+		#friends2,
+		#offline {
+			position: relative;
+			z-index: 7;
+			filter: $shadow-accent;
+			cursor: pointer;
+			transition: transform $transition-fast;
+
+			&:hover {
+				transform: scale(1.1);
+			}
 		}
-	  }
-  
-	  #parametre {
-		top: 5%;
-		left: 60%;
-		width: 5%;
-		height: 5%;
-	  }
-  
-	  #return {
-		top: 3%;
-		left: 65%;
-		width: 5%;
-		height: 5%;
-	  }
-  
-	  #friends {
-		visibility: visible;
-		top: 3%;
-		left: 35%;
-		width: 5%;
-		height: 5%;
-	  }
-  
-	  #friends2 {
-		visibility: hidden;
-		top: calc(3% - 10px);
-		left: 35%;
-		width: 5%;
-		height: 5%;
-	  }
-  
-	  #offline {
-		top: -5%;
-		left: 70%;
-		width: 4%;
-		height: 4%;
-	  }
+
+		#parametre {
+			top: 5%;
+			left: 60%;
+			width: 5%;
+			height: 5%;
+		}
+
+		#return {
+			top: 3%;
+			left: 65%;
+			width: 5%;
+			height: 5%;
+		}
+
+		#friends {
+			visibility: visible;
+			top: 3%;
+			left: 35%;
+			width: 5%;
+			height: 5%;
+		}
+
+		#friends2 {
+			visibility: hidden;
+			top: calc(3% - 10px);
+			left: 35%;
+			width: 5%;
+			height: 5%;
+		}
+
+		#offline {
+			top: -5%;
+			left: 70%;
+			width: 4%;
+			height: 4%;
+		}
 	}
-  }
-  
-  /******************************************************************************/
-  /*                                                                            */
-  /*                        			Pong game                             	*/
-  /*                                                                            */
-  /******************************************************************************/
-  
-  #back-pong {
+}
+
+/******************************************************************************/
+/*                                                                            */
+/*                        			Pong game                             	*/
+/*                                                                            */
+/******************************************************************************/
+
+#back-pong {
 	position: fixed;
 	width: 100%;
 	height: 100vh;
@@ -478,9 +481,9 @@
 	row-gap: 5%;
 	align-items: center;
 	justify-content: center;
-  }
-  
-  .pong-wrapper {
+}
+
+.pong-wrapper {
 	background: rgba($color-black, 0.6);
 	border: 1px solid rgba($color-white, 0.3);
 	backdrop-filter: $blur-strong;
@@ -489,62 +492,62 @@
 	width: 500px;
 	text-align: center;
 	color: $color-white;
-  }
-  
-  .pong-title {
+}
+
+.pong-title {
 	font-size: $font-size-md;
 	color: $color-accent-alt;
 	margin-bottom: 20px;
-  }
-  
-  #pong-controls {
+}
+
+#pong-controls {
 	display: flex;
 	flex-direction: column;
 	gap: 15px;
-  
+
 	#lobby-name {
-	  border-radius: $radius-xl;
-	  border: 1px solid $color-secondary;
-	  padding: 8px 12px;
-	  font-family: $font-main;
-	  font-size: $font-size-xs;
-	  color: $color-accent;
-	  background: rgba($color-white, 0.1);
-	  text-align: center;
-  
-	  &:focus {
-		outline: none;
-		border-color: $color-accent-alt;
-		box-shadow: 0 0 6px $color-accent-alt;
-	  }
-	}
-  
-	.pong-buttons {
-	  display: flex;
-	  flex-wrap: wrap;
-	  justify-content: center;
-	  gap: 10px;
-  
-	  button {
-		background: $btn-bg;
-		color: $btn-text;
-		padding: 10px 16px;
+		border-radius: $radius-xl;
+		border: 1px solid $color-secondary;
+		padding: 8px 12px;
+		font-family: $font-main;
 		font-size: $font-size-xs;
-		border-radius: $radius-md;
-		border: 2px solid transparent;
-		cursor: pointer;
-		transition: $transition-fast;
-  
-		&:hover {
-		  background: $color-accent-alt;
-		  color: $color-black;
-		  border-color: $color-black;
+		color: $color-accent;
+		background: rgba($color-white, 0.1);
+		text-align: center;
+
+		&:focus {
+			outline: none;
+			border-color: $color-accent-alt;
+			box-shadow: 0 0 6px $color-accent-alt;
 		}
-	  }
 	}
-  }
-  
-  .pong-lobby {
+
+	.pong-buttons {
+		display: flex;
+		flex-wrap: wrap;
+		justify-content: center;
+		gap: 10px;
+
+		button {
+			background: $btn-bg;
+			color: $btn-text;
+			padding: 10px 16px;
+			font-size: $font-size-xs;
+			border-radius: $radius-md;
+			border: 2px solid transparent;
+			cursor: pointer;
+			transition: $transition-fast;
+
+			&:hover {
+				background: $color-accent-alt;
+				color: $color-black;
+				border-color: $color-black;
+			}
+		}
+	}
+}
+
+.pong-lobby {
 	margin-top: 20px;
 	padding: 12px;
 	border-radius: $radius-md;
@@ -552,130 +555,189 @@
 	border: 1px solid rgba($color-white, 0.2);
 	font-size: $font-size-xs;
 	text-align: left;
-  
+
 	p {
-	  margin: 6px 0;
-	  strong {
-		color: $color-accent-alt;
-	  }
+		margin: 6px 0;
+
+		strong {
+			color: $color-accent-alt;
+		}
 	}
-  }
-  
-  .pong-message {
+}
+
+.pong-message {
 	margin-top: 15px;
 	font-size: $font-size-sm;
 	color: $color-secondary;
 	font-weight: bold;
-  }
-  
-  #pong-canvas {
+}
+
+#pong-canvas {
 	display: none;
 	border: 4px solid $bg-light;
 	border-radius: $radius-lg;
-  }  
-  
-  /******************************************************************************/
-  /*                                                                            */
-  /*                        		 Shifumi game                             	*/
-  /*                                                                            */
-  /******************************************************************************/
-  
-  #back_shifumi {
-	padding: 0;
-	margin: 0;
+}
+
+/******************************************************************************/
+/*                                                                            */
+/*                        		 Shifumi game                             	*/
+/*                                                                            */
+/******************************************************************************/
+
+#back_shifumi {
+	position: fixed;
+	width: 100%;
+	height: 100vh;
+	background: url("https://i.pinimg.com/originals/8c/13/01/8c1301d108a7a4f555d1cb8f0ffb63d5.gif");
+	background-position: center;
+	background-size: cover;
 	display: flex;
-	gap: 10px;
-	margin-top: 20px;
-	min-height: 300px;
-  
-	#container-button {
-	  display: flex;
-	  left: 15vw;
-	  flex-direction: column;
-	  gap: 4vh;
-	  align-items: flex-start;
+	align-items: center;
+	justify-content: center;
+
+	.shifumi-wrapper {
+		background: rgba($color-black, 0.6);
+		border: 1px solid rgba($color-white, 0.3);
+		backdrop-filter: $blur-strong;
+		border-radius: $radius-lg;
+		padding: 20px 30px;
+		width: 500px;
+		text-align: center;
+		color: $color-white;
 	}
-  }
-  
-  /******************************************************************************/
-  /*                                                                            */
-  /*                        		 	  Chat                            	    */
-  /*                                                                            */
-  /******************************************************************************/
-  
-  #chat-container {
+
+	.shifumi-title {
+		font-size: $font-size-md;
+		color: $color-accent-alt;
+		margin-bottom: 20px;
+	}
+
+	#shifumi-controls {
+		display: flex;
+		flex-direction: column;
+		gap: 15px;
+
+		#lobby-name {
+			border-radius: $radius-xl;
+			border: 1px solid $color-secondary;
+			padding: 8px 12px;
+			font-family: $font-main;
+			font-size: $font-size-xs;
+			color: $color-accent;
+			background: rgba($color-white, 0.1);
+			text-align: center;
+	
+			&:focus {
+				outline: none;
+				border-color: $color-accent-alt;
+				box-shadow: 0 0 6px $color-accent-alt;
+			}
+		}
+
+		.shifumi-buttons {
+			display: flex;
+			flex-wrap: wrap;
+			justify-content: center;
+			gap: 10px;
+
+			button {
+				background: $btn-bg;
+				color: $btn-text;
+				padding: 10px 16px;
+				font-size: $font-size-xs;
+				border-radius: $radius-md;
+				border: 2px solid transparent;
+				cursor: pointer;
+				transition: $transition-fast;
+
+				&:hover {
+					background: $color-accent-alt;
+					color: $color-black;
+					border-color: $color-black;
+				}
+			}
+		}
+	}
+}
+
+/******************************************************************************/
+/*                                                                            */
+/*                        		 	  Chat                            	    */
+/*                                                                            */
+/******************************************************************************/
+
+#chat-container {
 	position: absolute;
 	top: 87%;
 	left: 10px;
-  }
-  
-  #boddy_chat {
+}
+
+#boddy_chat {
 	position: absolute;
 	left: 0;
 	top: 0;
 	width: 100%;
 	height: 100%;
 	z-index: 29;
-  
+
 	#page_chat {
-	  position: absolute;
-	  border: 1px solid $color-white;
-	  background-color: $color-white;
-	  border-radius: $radius-sm;
-	  width: 60%;
-	  height: 80%;
-	  left: 20%;
-	  top: 10%;
-	  z-index: 30;
-  
-	  #lobby_friends {
-		position: relative;
-		background-color: $color-gray;
-		width: 30%;
-		height: 100%;
-		z-index: 31;
-		display: flex;
-		flex-direction: column;
-  
-		#flex_friends {
-		  height: 10%;
-		  border: 1px solid $color-white;
-		  width: 100%;
-		  display: flex;
-		  flex-direction: row;
-		  justify-content: space-between;
-  
-		  img {
-			object-fit: cover;
-			width: 20%;
+		position: absolute;
+		border: 1px solid $color-white;
+		background-color: $color-white;
+		border-radius: $radius-sm;
+		width: 60%;
+		height: 80%;
+		left: 20%;
+		top: 10%;
+		z-index: 30;
+
+		#lobby_friends {
+			position: relative;
+			background-color: $color-gray;
+			width: 30%;
 			height: 100%;
-			background-color: lighten($color-gray, 10%);
-			border: 1px solid $color-white;
-			border-radius: 50%;
-		  }
-  
-		  p {
-			align-items: center;
-			text-align: center;
-			font-size: 2rem;
-			width: 75%;
-			height: 100%;
-			background-color: darken($color-gray, 30%);
-			border: 1px solid $color-white;
-			color: $color-white;
-		  }
+			z-index: 31;
+			display: flex;
+			flex-direction: column;
+
+			#flex_friends {
+				height: 10%;
+				border: 1px solid $color-white;
+				width: 100%;
+				display: flex;
+				flex-direction: row;
+				justify-content: space-between;
+
+				img {
+					object-fit: cover;
+					width: 20%;
+					height: 100%;
+					background-color: lighten($color-gray, 10%);
+					border: 1px solid $color-white;
+					border-radius: 50%;
+				}
+
+				p {
+					align-items: center;
+					text-align: center;
+					font-size: 2rem;
+					width: 75%;
+					height: 100%;
+					background-color: darken($color-gray, 30%);
+					border: 1px solid $color-white;
+					color: $color-white;
+				}
+			}
 		}
-	  }
-  
-	  #lobby_chat {
-		position: relative;
-		top: -100%;
-		left: 30%;
-		background-color: lighten($color-accent, 20%);
-		width: 70%;
-		height: 100%;
-		z-index: 31;
-	  }
+
+		#lobby_chat {
+			position: relative;
+			top: -100%;
+			left: 30%;
+			background-color: lighten($color-accent, 20%);
+			width: 70%;
+			height: 100%;
+			z-index: 31;
+		}
 	}
-  }
-  
+}

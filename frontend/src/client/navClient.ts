@@ -201,23 +201,21 @@ export function handleRoute() {
 		case '/2game':
 			app.innerHTML = `
 			<div id="back_shifumi">
-				<h2>Shifumi</h2>
-				<div id="container-button">
-					<button id="solo-button">Join Solo</button>
-					<button id="match-button">Join Matchmaking</button>
-					<button id="tournois-button">Tournois</button>
-					<button id="game-button">create Room</button>
-					<button id="join-button">Join Room</button>
-					<button id="spec-button">Spectateur</button>
-					<button id="custom-button">Customisation</button>
-				</div>
-				<div class="pong-scene">
-					<div class="pong-court">
-						<div class="paddle left"></div>
-						<div class="paddle right"></div>
-						<div class="ball"></div>
-					</div>
-				</div>
+  				<div class="shifumi-wrapper">
+    				<h2 class="shifumi-title">✊ Shifumi</h2>
+    				<div id="shifumi-controls">
+						<input type="text" id="lobby-name" placeholder="Room name" required />
+      					<div class="shifumi-buttons">
+        					<button id="solo-button">Join Solo</button>
+        					<button id="match-button">Join Matchmaking</button>
+        					<button id="tournois-button">Tournois</button>
+        					<button id="game-button">Create Room</button>
+        					<button id="join-button">Join Room</button>
+        					<button id="spec-button">Spectator</button>
+        					<button id="custom-button">Customisation</button>
+      					</div>
+    				</div>
+  				</div>
 			</div>
 			`;
 			import('./game2Lobby.js').then((mod) => mod.init?.());
