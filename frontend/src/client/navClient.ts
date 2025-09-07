@@ -179,14 +179,17 @@ export function handleRoute() {
 			import('./registerClient.js').then((mod) => mod.init?.());
 			break;
 		case '/game':
-			app.innerHTML = `<h2>Game Area</h2>
+			app.innerHTML = `
+			<div id="back-pong">
+				<h2>Game Area</h2>
 				<input type="text" id="lobby-name" placeholder="Room name" required />
 				<button id="game-button">create Game</button>
 				<button id="join-button">Join Game</button>
 				<div id="game-salon"></div>
 				<button id="start-game-btn">Start Game</button>
 				<p id="msg-end"></p>
-				<canvas id="pong-canvas" width="600" height="400"></canvas>`;
+				<canvas id="pong-canvas" width="600" height="400"></canvas>
+			</div>`;
 			import('./gameLobby.js').then((mod) => mod.init?.());
 			break;
 		case '/2game':

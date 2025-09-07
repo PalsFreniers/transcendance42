@@ -110,26 +110,39 @@ export function getSockets(): [Socket, Socket, Socket] {
 
         socketPong.on('game-state', (state) => {
             const canvas = document.getElementById("pong-canvas") as HTMLCanvasElement;
-            if (!canvas)
-                return;
+            const startBtn = document.getElementById("start-game-btn") as HTMLButtonElement;
+            startBtn.style.display = "none";
+            canvas.style.display = "block";
+            if (!canvas) return;
             const ctx = canvas.getContext("2d");
-            if (!ctx)
-                return;
+            if (!ctx) return;
 
-            const scale = 20; // 1 unité = 20 pixels
+            const scale = 20;
             const gameWidth = 20;
             const gameHeight = 10;
 
             const offsetX = canvas.width / 2;
             const offsetY = canvas.height / 2;
 
-            // Fond
-            ctx.fillStyle = "blue";
+            ctx.fillStyle = "#000000";
             ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-            // Bordure du jeu
-            ctx.strokeStyle = "white";
-            ctx.lineWidth = 2;
+            ctx.strokeStyle = "rgba(187, 16, 158, 0.4)";
+            for (let x = 0; x < canvas.width; x += scale) {
+                ctx.beginPath();
+                ctx.moveTo(x, 0);
+                ctx.lineTo(x, canvas.height);
+                ctx.stroke();
+            }
+            for (let y = 0; y < canvas.height; y += scale) {
+                ctx.beginPath();
+                ctx.moveTo(0, y);
+                ctx.lineTo(canvas.width, y);
+                ctx.stroke();
+            }
+
+            ctx.strokeStyle = "#0034de";
+            ctx.lineWidth = 4;
             ctx.strokeRect(
                 offsetX - (gameWidth / 2) * scale,
                 offsetY - (gameHeight / 2) * scale,
@@ -137,22 +150,35 @@ export function getSockets(): [Socket, Socket, Socket] {
                 gameHeight * scale
             );
 
-            // Balle
-            const ballRadius = 0.15 * scale; // rayon basé sur Ball.size
+            const ballRadius = 0.15 * scale;
+            const ballX = state.ballPos.x * scale + offsetX;
+            const ballY = state.ballPos.y * scale + offsetY;
+
+            // Halo néon
+            ctx.save();
+            ctx.shadowColor = "#ffdd00";   // jaune néon
+            ctx.shadowBlur = 15;
+
+            // Cercle principal
             ctx.beginPath();
-            ctx.arc(
-                state.ballPos.x * scale + offsetX,
-                state.ballPos.y * scale + offsetY,
-                ballRadius,
-                0, Math.PI * 2
-            );
-            ctx.fillStyle = "white";
+            ctx.arc(ballX, ballY, ballRadius, 0, Math.PI * 2);
+            ctx.fillStyle = "#ffdd00";
+            ctx.fill();
+            ctx.strokeStyle = "#ffffff";
+            ctx.lineWidth = 2;
+            ctx.stroke();
+            ctx.restore();
+
+            // Petit cœur blanc brillant au centre
+            ctx.beginPath();
+            ctx.arc(ballX, ballY, ballRadius / 2, 0, Math.PI * 2);
+            ctx.fillStyle = "#ffffff";
             ctx.fill();
 
             const paddleWidth = 0.5 * scale;
             const paddleHeight = 2 * scale;
 
-            // Paddle gauche
+            ctx.fillStyle = "#ffdd00";
             ctx.fillRect(
                 state.leftPaddle.x * scale + offsetX,
                 state.leftPaddle.y * scale + offsetY,
@@ -160,7 +186,7 @@ export function getSockets(): [Socket, Socket, Socket] {
                 paddleHeight
             );
 
-            // Paddle droit
+            ctx.fillStyle = "#ffdd00";
             ctx.fillRect(
                 state.rightPaddle.x * scale + offsetX,
                 state.rightPaddle.y * scale + offsetY,
@@ -168,25 +194,24 @@ export function getSockets(): [Socket, Socket, Socket] {
                 paddleHeight
             );
 
-            // Score
-            ctx.fillStyle = "white";
-            ctx.font = "20px Public Pixel";
-            ctx.fillText(`${state.leftScore} - ${state.rightScore}`, canvas.width / 2 - 20, 30);
+            ctx.fillStyle = "#f5f5f5";
+            ctx.font = "20px 'Public Pixel'";
+            ctx.textAlign = "center";
+            ctx.fillText(`${state.leftScore} - ${state.rightScore}`, canvas.width / 2, 40);
 
-            // Paused
+            ctx.fillStyle = "#ffdd00";
+            ctx.font = "16px 'Public Pixel'";
+            ctx.textAlign = "left";
+
             if (state.state === "idling") {
-                ctx.fillStyle = "white";
-                ctx.font = "30px Arial bolder"
-                ctx.fillText(`GAME PAUSED WAITING FOR OPPONENT`, 10 , 70);
+                ctx.fillText(`GAME PAUSED - WAITING FOR OPPONENT`, 25, 70);
             }
 
-            // Resume
-            if (state.state === "resume"){
-                ctx.fillStyle = "white";
-                ctx.font = "30px Arial bolder"
-                ctx.fillText(`GAME RESUMING IN ${state.resumeTimer}`, 30 , 70);
+            if (state.state === "resume") {
+                ctx.fillText(`GAME RESUMING IN ${state.resumeTimer}`, 150, 70);
             }
         });
+
 
         document.addEventListener('keydown', (e) => {
             if (e.key === "ArrowUp" || e.key === "ArrowDown") {
