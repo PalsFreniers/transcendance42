@@ -103,7 +103,7 @@ export function getSockets(): [Socket, Socket, Socket] {
         socketPong.on('in-game', () => {
             const path = window.location.pathname;
             if (path === '/lobby') {
-                history.pushState(null, '', '/game')
+                history.pushState(null, '', '/pong')
                 handleRoute();
             }
         })

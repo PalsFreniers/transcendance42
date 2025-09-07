@@ -94,7 +94,7 @@ export function handleRoute() {
 	if (!app || !chat)
 		return;
 	if (!token && (path != '/' && path != '/login' && path != '/register')) {
-		if (path == '/lobby' || path == '/game' || path == '/2game' || path == '/profil' || path == '/option') {
+		if (path == '/lobby' || path == '/pong' || path == '/2game' || path == '/profil' || path == '/option') {
 			//window.alert('Connectez-vous pour accéder à cette page!');
 			history.pushState(null, '', '/login');
 			handleRoute();
@@ -178,11 +178,11 @@ export function handleRoute() {
 				</div>`;
 			import('./registerClient.js').then((mod) => mod.init?.());
 			break;
-		case '/game':
+		case '/pong':
 			app.innerHTML = `
 			<div id="back-pong">
 				<div class="pong-wrapper">
-    				<h2 class="pong-title">🎮 Game Area</h2>
+    				<h2 class="pong-title">🎮 Pong Area</h2>
 					<div id="pong-controls">
       					<input type="text" id="lobby-name" placeholder="Room name" required />
       					<div class="pong-buttons">
@@ -355,7 +355,7 @@ export function handleRoute() {
 	}
 	if (zone) {
 		zone.addEventListener('click', () => {
-			history.pushState(null, '', '/game');
+			history.pushState(null, '', '/pong');
 			handleRoute();
 		});
 	}
