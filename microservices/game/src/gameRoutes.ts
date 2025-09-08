@@ -39,6 +39,13 @@ export async function awaitForOpponent(app: FastifyInstance) {
     });
 }
 
+export async function specGame(app: FastifyInstance){
+    app.post('/api/game/spec-lobbies', async(req, reply) => {
+        const lobbies = db.prepare(`SELECT * FROM games WHERE status = 'playing'`).all();
+        return reply.send({ success: true, lobbies });
+    })
+}
+
 export async function joinLobby(app: FastifyInstance) {
     app.post('/api/game/join-lobby', async (req, reply) => {
         const user = req.user as { userId: number, username: string };

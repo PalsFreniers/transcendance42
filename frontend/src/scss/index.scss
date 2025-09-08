@@ -549,6 +549,14 @@ input:-webkit-autofill {
 	}
 }
 
+#game-list{
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+	gap: 10px;
+}
+
 .pong-lobby {
 	margin-top: 20px;
 	padding: 12px;

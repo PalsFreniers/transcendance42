@@ -140,7 +140,9 @@ export function socketManagement(io: Server) {
                 const errno = manager.startGame(lobbyName, socket.data.gameId, io);
                 if (errno)
                     throw new Error(`Failed to start game: ${errno}`);
+                db.prepare(`UPDATE games SET status = 'playing' WHERE lobby_name = ?`).run(lobbyName);
                 console.log(`Game started for lobby ${lobbyName}`);
+
             } catch (err) {
                 console.error("start-game error:", err);
                 socket.emit("error", err);

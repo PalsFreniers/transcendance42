@@ -60,7 +60,7 @@ export function createPongSocket(socketPong: Socket | null) {
             history.pushState(null, '', '/pong')
             handleRoute();
         }
-    })
+    });
 
     socketPong.on('game-state', (state) => {
         const canvas = document.getElementById("pong-canvas") as HTMLCanvasElement;

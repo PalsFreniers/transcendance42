@@ -189,8 +189,10 @@ export function handleRoute() {
         					<button id="game-button">Create Game</button>
         					<button id="join-button">Join Game</button>
         					<button id="start-game-btn">Start Game</button>
+							<button id="spectator-btn">Spectate</button>
       					</div>
     				</div>
+					<div id="game-list"></div>
 					<div id="game-salon" class="pong-lobby"></div>
 					<p id="msg-end" class="pong-message"></p>
   				</div>
