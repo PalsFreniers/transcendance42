@@ -1,3 +1,4 @@
+@use "sass:color";
 @import "variables";
 
 /******************************************************************************/
@@ -294,6 +295,7 @@ input:-webkit-autofill {
 
 	#selection1 {
 		position: absolute;
+		z-index: 6;
 		left: 0;
 		top: 0;
 		width: calc(50vw - 20px);
@@ -312,7 +314,7 @@ input:-webkit-autofill {
 			bottom: 0;
 			width: calc(50vw - 20px);
 			height: 100vh;
-			z-index: 7;
+			z-index: 6;
 			box-sizing: border-box;
 			clip-path: polygon(0% 100%, 100% 100%, 100% 23%, 0% 0%);
 			cursor: default;
@@ -346,6 +348,7 @@ input:-webkit-autofill {
 
 	#selection2 {
 		position: absolute;
+		z-index: 6;
 		left: calc(50vw + 20px);
 		top: 0;
 		width: calc(50vw - 20px);
@@ -364,7 +367,7 @@ input:-webkit-autofill {
 			bottom: 0;
 			width: calc(50vw - 20px);
 			height: 100vh;
-			z-index: 7;
+			z-index: 6;
 			box-sizing: border-box;
 			clip-path: polygon(0% 100%, 100% 100%, 100% 0%, 0% 23%);
 			cursor: default;
@@ -401,94 +404,63 @@ input:-webkit-autofill {
 	#profils {
 		background-image: url("https://mir-s3-cdn-cf.behance.net/project_modules/fs/9bc27292880429.5e569ff84e4d0.gif");
 		background-size: contain;
-		position: absolute;
+		position: relative;
+		display: flex;
+		align-items: flex-start;
+		justify-content: center;
+		column-gap: 25px;
 		clip-path: polygon(50% 100%, 0% 0%, 100% 0%);
-		top: 0;
-		left: 0;
 		width: 100%;
 		height: 23vh;
-		z-index: 6;
-
-		#parametre,
-		#return,
-		#friends,
-		#friends2,
-		#offline {
-			position: relative;
-			z-index: 7;
-			filter: $shadow-accent;
-			cursor: pointer;
-			transition: transform $transition-fast;
-
-			&:hover {
-				transform: scale(1.1);
-			}
+		z-index: 7;
+	  
+		.svg-ico {
+		  width: 70px;
+		  height: 70px;
+		  z-index: 7;
+		  filter: $shadow-accent;
+		  cursor: pointer;
+		  transition: transform $transition-fast;
+	  
+		  &:hover {
+			transform: scale(1.1);
+		  }
 		}
-
-		#parametre {
-			top: 5%;
-			left: 60%;
-			width: 5%;
-			height: 5%;
-		}
-
-		#return {
-			top: 3%;
-			left: 65%;
-			width: 5%;
-			height: 5%;
-		}
-
+	  
 		#friends {
-			visibility: visible;
-			top: 3%;
-			left: 35%;
-			width: 5%;
-			height: 5%;
+		  display: block;
 		}
-
+	  
 		#friends2 {
-			visibility: hidden;
-			top: calc(3% - 10px);
-			left: 35%;
-			width: 5%;
-			height: 5%;
+		  visibility: hidden;
 		}
-
-		#offline {
-			top: -5%;
-			left: 70%;
-			width: 4%;
-			height: 4%;
-		}
-
+	  
 		#music-player {
-			position: relative;
-			top: 15%;
-			left: 45%;
-			width: 15%;
-			height: 5%;
-			z-index: 7;
-		}
-
-		#btn-music {
-			width: 60px;
-			height: 60px;
+		  display: flex;
+		  flex-direction: column;
+		  align-items: center;
+		  row-gap: 10px;
+		  z-index: 7;
+	  
+		  #btn-music {
+			width: 45px;
+			height: 45px;
 			cursor: pointer;
-
-			&:hover{
-				filter: $shadow-accent;
+	  
+			&:hover {
+			  filter: $shadow-accent;
 			}
-
-			&:active{
-				stroke: $color-accent-alt;
+	  
+			&:active {
+			  stroke: $color-accent-alt;
 			}
-		}		  
-
-		#volume-music {
-			width: 120px;
+		  }
+	  
+		  #volume-music {
+			width: 100px;
 			accent-color: #e323be;
 			cursor: pointer;
+		  }
 		}
 	}
 }
@@ -742,7 +714,7 @@ input:-webkit-autofill {
 					object-fit: cover;
 					width: 20%;
 					height: 100%;
-					background-color: lighten($color-gray, 10%);
+					background-color: color.adjust($color-gray, $lightness: 10%);
 					border: 1px solid $color-white;
 					border-radius: 50%;
 				}
@@ -753,7 +725,7 @@ input:-webkit-autofill {
 					font-size: 2rem;
 					width: 75%;
 					height: 100%;
-					background-color: darken($color-gray, 30%);
+					background-color: color.adjust($color-gray, $lightness: -30%);
 					border: 1px solid $color-white;
 					color: $color-white;
 				}
@@ -764,7 +736,7 @@ input:-webkit-autofill {
 			position: relative;
 			top: -100%;
 			left: 30%;
-			background-color: lighten($color-accent, 20%);
+			background-color: color.adjust($color-accent, $lightness: 20%);
 			width: 70%;
 			height: 100%;
 			z-index: 31;

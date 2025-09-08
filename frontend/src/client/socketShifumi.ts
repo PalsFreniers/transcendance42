@@ -1,5 +1,5 @@
 import io, { Socket } from 'socket.io-client';
-import { handleRoute} from "./navClient.js";
+import { handleRoute } from "./navClient.js";
 import { getUserIdFromToken } from './socketClient.js';
 import { notify } from './notify.js'
 
