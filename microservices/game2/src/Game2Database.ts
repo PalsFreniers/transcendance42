@@ -148,7 +148,7 @@ export async function saveStats(gameId: number, token: string)
             date : game.gameDate!
         };
         try {
-            const res = await fetch('http://localhost:3001/api/user/add-stats', {
+            const res = await fetch('http://user-service:3001//api/user/add-stats', {
                 method: 'POST',
                 headers: { 
                     'Content-Type': 'application/json',
@@ -160,6 +160,8 @@ export async function saveStats(gameId: number, token: string)
             });
             if (res.ok)
                 console.log(`successful saved stats for game : ${gameId}`);
+            else
+                console.log('fail to save stat ');
         } catch (err) { 
             console.log(`error save stats for game : ${gameId}\n(${err})`);
         }

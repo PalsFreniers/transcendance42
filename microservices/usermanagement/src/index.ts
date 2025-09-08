@@ -30,6 +30,7 @@ const PORT = process.env.USER_MANA_PORT;
 //REQUEST CORS
 await app.register(cors, {
     origin: ['http://localhost:5173', 'http://localhost:3003'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
     credentials: true,
     methods: ['GET', 'POST'],
 });
