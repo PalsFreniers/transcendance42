@@ -56,6 +56,7 @@ button {
 	}
 }
 
+
 /******************************************************************************/
 /*                                                                            */
 /*                                Main screen 42                              */
@@ -460,6 +461,35 @@ input:-webkit-autofill {
 			width: 4%;
 			height: 4%;
 		}
+
+		#music-player {
+			position: relative;
+			top: 15%;
+			left: 45%;
+			width: 15%;
+			height: 5%;
+			z-index: 7;
+		}
+
+		#btn-music {
+			width: 60px;
+			height: 60px;
+			cursor: pointer;
+
+			&:hover{
+				filter: $shadow-accent;
+			}
+
+			&:active{
+				stroke: $color-accent-alt;
+			}
+		}		  
+
+		#volume-music {
+			width: 120px;
+			accent-color: #e323be;
+			cursor: pointer;
+		}
 	}
 }
 
@@ -626,7 +656,7 @@ input:-webkit-autofill {
 			color: $color-accent;
 			background: rgba($color-white, 0.1);
 			text-align: center;
-	
+
 			&:focus {
 				outline: none;
 				border-color: $color-accent-alt;
