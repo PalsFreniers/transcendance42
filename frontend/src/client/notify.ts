@@ -24,6 +24,7 @@ export function notify(msg: string) {
   div.style.boxShadow = "0 2px 6px rgba(0,0,0,0.3)";
   div.style.opacity = "0";
   div.style.transition = "opacity 0.3s ease";
+  div.style.right = "1px";
 
   notifyContainer.appendChild(div);
 

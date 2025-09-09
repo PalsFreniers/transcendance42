@@ -1,6 +1,6 @@
 import { Server, Socket } from "socket.io";
 import { verifTokenSocket } from "./index.js";
-import { createRoom, createRoomSolo, getOpponentName, joinRoom, kickOpponentFromDB, findGame, deleteGameFromDB, saveStats } from './Game2Database.js';
+import { createRoom, createRoomSolo, getOpponentName, joinRoom, kickOpponentFromDB, findGame, findGameByName, deleteGameFromDB, saveStats } from './Game2Database.js';
 import { GameData } from './gameModel.js';
 import { game } from './game.js';
 import { Manager } from './gameManager.js';
@@ -174,8 +174,32 @@ export function socketManagemente(io: Server)
                 io.to(`${gameId.toString()}.2`).emit('opponent-found', 2, getOpponentName(gameId, userId));
             }
         });
-    
-        socket.on('create-room', (userId: number) =>
+
+        socket.on('join-room-name', (userId : number, lobbyname: string) =>
+        {
+            if (!verifTokenSocket(socket))
+                return io.to(socket.id).emit('error', 'error : your token isn\'t valid !');
+            if (!userId)
+                return io.to(socket.id).emit('error', 'error : your user id isn\'t valid !');
+
+            const gameId = findGameByName(lobbyname);
+            if (!gameId || gameId > nextGameId)
+                return io.to(socket.id).emit('roomInfo', `you cannot find game named '${lobbyname}'`);
+            console.log(`gameId = ${gameId}`)
+
+            let name = socket.data.userName;
+
+            if (joinRoom(userId.toString(), name, gameId.toString())) {
+                socket.data.gameId = gameId;
+                socket.data.player = 2;
+                socket.join(`${gameId.toString()}.2`);
+                io.to(socket.id).emit('roomJoined', gameId);
+                io.to(`${gameId.toString()}.1`).emit('opponent-found', 1, name);
+                io.to(`${gameId.toString()}.2`).emit('opponent-found', 2, getOpponentName(gameId, userId));
+            }
+        });
+
+        socket.on('create-room', (userId: number, lobbyName: string) =>
         {
             if (!verifTokenSocket(socket))
                 return io.to(socket.id).emit('error', 'your token is not valid !');
@@ -183,13 +207,17 @@ export function socketManagemente(io: Server)
             if (!userId)
                 return io.to(socket.id).emit('error', 'error : your user id isn\'t valid !');
 
-            const roomId: number = nextGameId++;
-            if (createRoom(userId, socket.data.userName, `game-${roomId.toString()}`))
-                socket.join(`${roomId.toString()}.1`);
+            const roomId = createRoom(userId, socket.data.userName, lobbyName);
+            nextGameId++;
 
-            socket.data.gameId = roomId;
-            socket.data.player = 1;
-            io.to(socket.id).emit('roomJoined', roomId);
+            if (roomId) {
+                socket.join(`${roomId.toString()}.1`);
+                socket.data.gameId = roomId;
+                socket.data.player = 1;
+                io.to(socket.id).emit('roomJoined', roomId);
+            }
+            else
+                io.to(socket.id).emit('roomInfo', `you cannot create a room named '${lobbyName}' because it already exists`);
         });
 
         socket.on('kick-opponent', async () =>
