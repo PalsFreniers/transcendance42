@@ -232,6 +232,13 @@ export function createShifumiSocket(socketShifumi: Socket | null) {
     /*                                                                            */
     /******************************************************************************/
 
+    socketShifumi.on('score', (myPoints: number, opponentPoints: number) => {
+      const pointsText = document.getElementById('points');
+
+      if (pointsText)
+          pointsText.textContent = `${myPoints} - ${opponentPoints}`;
+    });
+
     socketShifumi.on('no-game', () => {
       const path = window.location.pathname;
       if (path === '/shifumi')

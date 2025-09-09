@@ -45,4 +45,17 @@ export function init(){
 			console.log('join button pressed !');
 		})
 	}
+
+	if (solo_button)
+	{
+		solo_button.addEventListener('click', async  (e) => {
+			e.preventDefault();
+			var sock = getSocket(2);
+			if (!sock)
+				return console.error('error 404 : socket not found !');
+			else
+				sock.emit('solo-game', getUserIdFromToken());
+			console.log('solo button pressed !');
+		});
+	}
 }

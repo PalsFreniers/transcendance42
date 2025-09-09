@@ -25,7 +25,7 @@ db.exec(`
     game_score TEXT NOT NULL,
     status TEXT DEFAULT 'waiting',
     start_time TIMESTAMP DEFAULT NULL,
-    end_time TIMESTAMP DEFAULT NULL,
+    game_time INTEGER DEFAULT 0,
     date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
   );
 `);

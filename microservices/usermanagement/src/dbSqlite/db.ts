@@ -39,4 +39,19 @@ db.exec(`
   );
 `);
 
+db.exec(`
+  CREATE TABLE IF NOT EXISTS gameStats (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    game_name VARCHAR(10) NOT NULL,
+    part_name VARCHAR(50) NOT NULL,
+    part_id INTEGER NOT NULL,
+    player_one_id INTEGER NOT NULL,
+    player_two_id INTEGER NOT NULL,
+    final_score TEXT DEFAULT 'playerOneScore - playerTwoScore',
+    round_number INTEGER NOT NULL,
+    game_time TIMESTAMP NOT NULL,
+    date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  );
+`);
+
 export default db;
