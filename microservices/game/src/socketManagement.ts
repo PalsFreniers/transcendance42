@@ -1,4 +1,4 @@
-import { Server, Socket } from "socket.io";
+import { Server } from "socket.io";
 import { GameManager } from "./gameManager.js";
 import { verifTokenSocket } from "./index.js";
 import db from './dbSqlite/db.js';
@@ -31,6 +31,13 @@ function getUsernameFromToken(token: string): string | null {
     }
 }
 
+export async function clearRoom(room: string, io: Server){
+    const sockets = await io.in(room).fetchSockets();
+    sockets.forEach(socket => {
+        socket.leave(room);
+    });
+}
+
 export function socketManagement(io: Server) {
     io.use(async (socket, next) => {
         if (verifTokenSocket(socket)) {
@@ -44,12 +51,24 @@ export function socketManagement(io: Server) {
     });
     // SOCKET LOGIC GAME
     io.on('connection', (socket) => {
-        socket.on('register-socket', (userId: number) => {
+        socket.on('register-socket', () => {
             socket.data.userId = getUserIdFromToken(socket.handshake.auth.token);
             socket.data.userName = getUsernameFromToken(socket.handshake.auth.token);
             manager.registerSocket(socket.data.userId, socket.id);
-            socket.data.gameId = -1;
-            console.log(`User ${userId} registered with socket ${socket.id}`);
+            const game = manager.findGame(socket.data.userId?.toString());
+            if (game) {
+                socket.data.gameId = `game-${game.gameID}`;
+                socket.join(socket.data.gameId);
+                const lobbyname = db.prepare(`
+                    SELECT lobby_name FROM games WHERE id = ?`
+                ).get(socket.data.gameId) as { lobbyname: string };
+                socket.data.lobbyname = lobbyname;
+                console.log(socket.data.lobbyname);
+                socket.emit('in-game');
+            }
+            else
+                socket.data.gameId = -1;
+            console.log(`User ${socket.data.userId} registered with socket ${socket.id}`);
         });
 
         socket.on('create-room', ({ gameId, lobbyName }) => {
@@ -61,7 +80,6 @@ export function socketManagement(io: Server) {
                 manager.joinLobby(lobbyName, socket.data.userId);
 
                 socket.join(socket.data.gameId);
-
                 socket.emit('room-created', {
                     gameId,
                     lobbyName,
@@ -117,11 +135,14 @@ export function socketManagement(io: Server) {
                     socket.emit('error', 'No lobby assigned to this socket');
                     return;
                 }
-                const errno = manager.startGame(lobbyName, socket.data.gameId , io);
-                if (errno) {
+                if (socket.data.gameId === -1)
+                    throw new Error(`Failed to start game, you are already in game`);
+                const errno = manager.startGame(lobbyName, socket.data.gameId, io);
+                if (errno)
                     throw new Error(`Failed to start game: ${errno}`);
-                }
+                db.prepare(`UPDATE games SET status = 'playing' WHERE lobby_name = ?`).run(lobbyName);
                 console.log(`Game started for lobby ${lobbyName}`);
+
             } catch (err) {
                 console.error("start-game error:", err);
                 socket.emit("error", err);
@@ -129,9 +150,8 @@ export function socketManagement(io: Server) {
         });
 
         socket.on('input', ({ key, action }) => {
-            const lobbyName = socket.data.lobbyName;
             const playerId = socket.data.userId;
-            const game = manager.findGame(lobbyName);
+            const game = manager.findGame(playerId.toString());
             if (!game)
                 return console.warn(`No active game for player ${playerId}`);
             const paddle = game.getPaddle(playerId)!;
@@ -139,15 +159,12 @@ export function socketManagement(io: Server) {
             const isPressed = action === 'keydown';
             if (key === 'up')
                 state[0] = isPressed;
-            else if (key === 'down' )
+            else if (key === 'down')
                 state[1] = isPressed;
-            console.log(`Player ${playerId} ->`, state);
         });
 
         socket.on('disconnect', () => {
-            const userId = socket.data.userId;
-            if (userId)
-                manager.unregisterSocket(userId);
+            manager.unregisterSocket(socket.data.userId);
             console.log(`Socket disconnected: ${socket.id}`);
         });
     });

@@ -9,7 +9,9 @@ export function init() {
     const createGameButton = document.getElementById('game-button') as HTMLButtonElement;
     const joinGameButton = document.getElementById('join-button') as HTMLButtonElement;
     const lobbyName = document.getElementById('lobby-name') as HTMLInputElement;
-    const startBtn = document.getElementById("start-game-btn") as HTMLButtonElement;
+    const startBtn = document.getElementById('start-game-btn') as HTMLButtonElement;
+    const specBtn = document.getElementById('spectator-btn') as HTMLButtonElement;
+    const listGame = document.getElementById('game-list') as HTMLElement;
 
     if (createGameButton) {
         createGameButton.addEventListener("click", async (e) => {
@@ -80,6 +82,30 @@ export function init() {
         startBtn.addEventListener("click", () => {
             const socket = getSocket(1);
             socket!.emit("start-game");
+        });
+    }
+    if (specBtn){
+        specBtn.addEventListener('click', async (e) => {
+            e.preventDefault();
+            try{
+                const findLobbiesRes = await fetch("http://localhost:3002/api/game/spec-lobbies", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authorization: `Bearer ${token}`,
+                    },
+                    body: JSON.stringify({}),
+                });
+                const { lobbies } = await findLobbiesRes.json();
+                if (!lobbies || lobbies.length === 0) {
+                    console.log("No game running.");
+                    return;
+                }
+                listGame.innerHTML = lobbies.map(l => `<p>${l.name} - ${l.status}</p>`).join("");
+            }
+            catch(err){
+                console.error("Error spec game:", err)
+            }
         });
     }
 }

@@ -1,11 +1,12 @@
 import * as Vec2D from "vector2d"
-import {Ball} from "./gameObjects/Ball.js"
-import {Collidable, createRectangle} from "./gameObjects/Collidable.js"
-import {Paddle} from "./gameObjects/Paddle.js"
+import { Ball } from "./gameObjects/Ball.js"
+import { Collidable, createRectangle } from "./gameObjects/Collidable.js"
+import { Paddle } from "./gameObjects/Paddle.js"
+import { clamp } from "./utils.js"
 
 export class Game {
 
-// Constructor
+    // Constructor
 
     constructor(
         private _gameID: number,
@@ -16,15 +17,16 @@ export class Game {
             createRectangle(new Vec2D.Vector(-10, 5), new Vec2D.Vector(-20, -10), "mapRight"),
         ],
         private _ball: Ball = new Ball(),
-    ) {}
+    ) { }
     private _leftTeam: Paddle[] = [];
     private _rightTeam: Paddle[] = [];
     private _allTeams: Paddle[] = [];
     private _score: [number, number] = [0, 0];
-    private _tickRate = 1000 / 60; // 60 FPS
     private _state: string = "notStarted";
+    private _resumeTimer: number = 3;
+    private _countdown: boolean = false;
 
-// Accessors
+    // Accessors
 
     public get ball() {
         return this._ball;
@@ -58,13 +60,30 @@ export class Game {
         return this._gameID;
     }
 
-    getPaddle(playerID: number) {
-        const paddleName = "paddle." + playerID;
-        for (const paddle of this._allTeams)
-            if (paddle.hitbox.name === paddleName) return paddle;
+    public get resumeTimer() {
+        return this._resumeTimer;
     }
 
-// Methods
+    public set resumeTimer(timer: number) {
+        this._resumeTimer = timer;
+    }
+
+    public get countdown() {
+        return this._countdown;
+    }
+
+    public set countdown(bool: boolean) {
+        this._countdown = bool;
+    }
+
+    getPaddle(playerID: number) {
+        const paddleName = "paddle." + playerID.toString();
+        for (const paddle of this._allTeams)
+            if (paddle.hitbox.name === paddleName) return paddle;
+        return null;
+    }
+
+    // Methods
 
     joinTeam(player: Paddle, team: string = "auto") {
         if (team === "left")
@@ -84,26 +103,27 @@ export class Game {
     start() {
         this._leftTeam.forEach((paddle) => { this._allTeams.push(paddle); });
         this._rightTeam.forEach((paddle) => { this._allTeams.push(paddle); });
-    
+
         this._ball.pos = new Vec2D.Vector(0, 0);
         this._ball.dir = new Vec2D.Vector(1, 0);
         this._state = "starting";
-    
+
         setTimeout(() => {
             this._state = "running";
         }, 2000);
     }
-    
+
 
     update() {
         this.updatePaddles();
-        //console.log("Paddle states:", this._allTeams.map(p => p.getState()));
         if (this._state == "running")
             this.updateBall();
         else if (this._state == "idling")
             this.idlingBall();
         else if (this._state == "starting")
             this.idlingBall();
+        else if (this._state == "resume")
+            this.inCommingBall();
     }
 
     private updateBall() {
@@ -123,10 +143,10 @@ export class Game {
                 switch (ballCollision.name) {
                     case "mapRight":
                         this.onScore(0);
-                        return ;
+                        return;
                     case "mapLeft":
                         this.onScore(1);
-                        return ;
+                        return;
                     default:
                         this.ball.dir.y = -this.ball.dir.y;
                         this.ball.advance();
@@ -137,30 +157,51 @@ export class Game {
     }
 
     private idlingBall() {
-        return ;
+        return;
     }
 
     private updatePaddles() {
         for (const paddle of this._allTeams) {
-            if (paddle.shouldMove) 
+            if (paddle.shouldMove)
                 paddle.move();
         }
     }
 
-    private onScore(scoringTeam: number) {
-        this._ball.pos = new Vec2D.Vector(0, 0);
-        this._ball.speed = 0;
-        ++this._score[scoringTeam];
-        console.log("goal goal goal goal goal")
-        if (this._score[scoringTeam] == -1) {
-            this._state = "ended";
-        }
-        else
-            this._state = "idling";
-        setTimeout(() => {
-            this._ball.speed = this._ball.baseSpeed;
-            this._ball.dir = new Vec2D.Vector(0.5 - scoringTeam, 0);
-            this._state = "running";
-        }, 2.5 * 1e3);
+    private inCommingBall() {
+        if (this._countdown) // coutdown need to be launch just one time
+            return;
+        this._countdown = true;
+        this._resumeTimer = 3;
+
+        const countdown = setInterval(() => {
+            this._resumeTimer--;
+            if (this._resumeTimer <= 0) {
+                clearInterval(countdown); // CLEAR INTERVAL AND SET RUNNING BECAUSE GAME RESTART
+                this._state = "running";
+                this._countdown = false; // RESET FASLE FOR NEXT PAUSE
+            }
+        }, 1000);
     }
+
+    private onScore(scoringTeam: number) {
+    this._ball.pos = new Vec2D.Vector(0, 0);
+    this._ball.speed = 0;
+    ++this._score[scoringTeam];
+    this._allTeams.forEach(paddle => {
+        let dY = paddle.hitbox.pos.y;
+        paddle.hitbox.pos.y = clamp(paddle.hitbox.pos.y - paddle.hitbox.pos.y, -5 + paddle.length / 2, 5 - paddle.length / 2);
+        dY = paddle.hitbox.pos.y - dY;
+        paddle.hitbox.getPoints().forEach((point) => { point.y += dY });
+    })
+    if (this._score[scoringTeam] == 2) {
+        this._state = "ended";
+        return;
+    }
+    this._state = "idling";
+    setTimeout(() => {
+        this._ball.speed = this._ball.baseSpeed;
+        this._ball.dir = new Vec2D.Vector(0.5 - scoringTeam, 0);
+        this._state = "running";
+    }, 2.5 * 1e3);
+}
 }

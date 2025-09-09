@@ -1,10 +1,10 @@
 import * as Vec2D from "vector2d";
-import {clamp} from "../utils.js";
-import {Collidable, createRectangle} from "./Collidable.js";
+import { clamp } from "../utils.js";
+import { Collidable, createRectangle } from "./Collidable.js";
 
 export class Paddle {
 
-// Const member
+    // Const member
 
     public get length() {
         return 2;
@@ -15,10 +15,10 @@ export class Paddle {
     };
 
     public get speed() {
-        return 0.05; // this is speed per move() call
+        return 0.25; // this is speed per move() call
     };
 
-// Constructor
+    // Constructor
 
     private readonly _hitbox: Collidable;
     constructor(
@@ -29,7 +29,7 @@ export class Paddle {
     }
     private _state = [false, false];
 
-// Accessors
+    // Accessors
 
     public get hitbox() {
         return this._hitbox;
@@ -41,10 +41,6 @@ export class Paddle {
 
     public set pos(newPos: Vec2D.AbstractVector) {
         this._hitbox.pos = newPos;
-    }
-
-    public get midPos() {
-        return new Vec2D.Vector(this._hitbox.pos.x - this.length / 2, this._hitbox.pos.y - this.length / 2);
     }
 
     public get shouldMove(): boolean {
@@ -68,14 +64,12 @@ export class Paddle {
         return this._state;
     }
 
-// Methods
-
+    // Methods
     move() {
         let dY = this._hitbox.pos.y;
-        this.pos.y = clamp(this.pos.y + this.dir.y, - 5, 5);
-        this._hitbox.pos.y = clamp(this._hitbox.pos.y + this.dir.y, - 5, 5);
-        dY = this.pos.y - dY;
-        this._hitbox.getPoints().forEach((point) => {point.y += dY});
+        this._hitbox.pos.y = clamp(this._hitbox.pos.y + this.dir.y, -5 + this.length / 2, 5 - this.length / 2);
+        dY = this._hitbox.pos.y - dY;
+        this._hitbox.getPoints().forEach((point) => { point.y += dY });
     }
 }
 

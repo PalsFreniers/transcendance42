@@ -61,3 +61,14 @@ export async function auth(app: FastifyInstance) {
     });
 }
 
+export async function logOut(app: FastifyInstance) {
+    app.post('/logout', async (request, reply) => {
+        const user = request.user as { userId: number }
+        const userdb = db.prepare('SELECT * FROM users WHERE id = ?').get(user.userId) as {id: number}
+        if (!userdb)
+            return reply.code(401).send({ error: 'User dosen\'t exist'});
+        db.prepare('UPDATE users SET is_online = 0 WHERE id = ?').run(user.userId);
+        return reply.status(200).send({ success:true });
+    });
+}
+

@@ -1,5 +1,5 @@
 import { getSocket } from './socketClient.js';
-import {getUserIdFromToken, getUsernameFromToken} from './loginClient.js'
+import {getUserIdFromToken} from './loginClient.js'
 
 
 export function init(){

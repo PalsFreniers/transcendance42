@@ -7,7 +7,8 @@ import db from './dbSqlite/db.js';
 import { Message } from './chatModel.js'
 import {
     auth,
-    register
+    register,
+    logOut
 } from './authService.js';
 import {
     friendList,
@@ -145,6 +146,7 @@ app.register(deleteProfile, { prefix: '/api/user' });
 app.register(friendAdd, { prefix: '/api/user' });
 app.register(friendDelete, { prefix: '/api/user' });
 app.register(addStatsInDB, { prefix: '/api/user' });
+app.register(logOut, {prefix: '/api/user' });
 // app.register(friendSendMsg, { prefix: '/api/user' });
 
 // Start Fastify server

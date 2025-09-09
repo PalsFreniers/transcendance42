@@ -1,8 +1,7 @@
 import io, { Socket } from 'socket.io-client';
-import { handleRoute} from "./navClient.js";
+import { handleRoute } from "./navClient.js";
 import { getUserIdFromToken } from './socketClient.js';
 import { notify } from './notify.js'
-import * as math from "mathjs";
 
 export let gameIdShifumi: number = -1;
 export let myCard: [number, number][] = [];
@@ -206,7 +205,7 @@ export function createShifumiSocket(socketShifumi: Socket | null) {
     });
 
     socketShifumi.on('end-time', () => {
-      const random:number = math.floor(math.random() * 3);
+      const random:number = Math.floor(Math.random() * 3);
       const card = document.getElementById(`card${random + 1}-button`);
 
       socketShifumi.emit('play-card', gameIdShifumi, {

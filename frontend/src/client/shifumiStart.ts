@@ -1,4 +1,4 @@
-import {getSocket} from "./socketClient";
+import {getSocket} from "./socketClient.js";
 import {myCard, gameIdShifumi} from "./socketShifumi.js"
 import {getUserIdFromToken} from "./loginClient.js";
 import { handleRoute} from "./navClient.js";

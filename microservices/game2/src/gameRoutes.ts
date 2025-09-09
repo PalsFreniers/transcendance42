@@ -1,5 +1,4 @@
 import { FastifyInstance } from 'fastify';
-import { createGameLobby, GameData } from './gameModel.js';
 import db from './dbSqlite/db.js';
 
 // export async function createRoom(app: FastifyInstance) {

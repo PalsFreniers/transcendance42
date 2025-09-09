@@ -7,6 +7,7 @@ import {
     createRoom,
     awaitForOpponent,
     joinLobby,
+    specGame
 } from './gameRoutes.js';
 import { socketManagement } from './socketManagement.js';
 
@@ -65,6 +66,7 @@ app.addHook('onRequest', async (request, reply) => {
 app.register(createRoom);
 app.register(awaitForOpponent);
 app.register(joinLobby);
+app.register(specGame);
 
 app.listen({ port: Number(PORT), host: '0.0.0.0' }, err => {
     if (err) throw err;

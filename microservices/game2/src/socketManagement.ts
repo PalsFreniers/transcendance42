@@ -6,7 +6,6 @@ import { game } from './game.js';
 import { Manager } from './gameManager.js';
 import { playedCard } from "./gameObjects/gameBoard.js";
 import db from './dbSqlite/db.js';
-import { Player } from './game.js';
 
 const manager = Manager.getInstance();
 
