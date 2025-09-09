@@ -32,6 +32,15 @@ export function joinRoom(userId, name,  roomId)
     return true;
 }
 
+export function joinRoomSolo(name,  roomId)
+{
+    const update = db.prepare(`
+        UPDATE games2 SET player_two_name = ? WHERE id = ?
+        `);
+    update.run(name, roomId);
+    return true;
+}
+
 export function getOpponentName(gameId: number, userId:number)
 {
     const game = db.prepare(`
@@ -86,16 +95,34 @@ export function createRoom(userId: number, name :string | null,  lobbyName: stri
     if (!name)
         return ;
     const newGame: GameData = {
-        playerOne: userId,
-        playerOneName: name,
-        playerTwo: null,
-        playerTwoName: null,
-        lobbyName: lobbyName,
-        finalScore: '0-0',
+        player_one_id: userId,
+        player_one_name: name,
+        player_two_id: null,
+        player_two_name: null,
+        lobby_name: lobbyName,
+        game_score: '0-0',
         status: 'waiting',
-        gameDate: new Date().toISOString(),
+        date: new Date().toISOString(),
     };
-    const gameId = createGameLobby(newGame);
+    createGameLobby(newGame);
+    return true;
+}
+
+export function createRoomSolo(userId: number, name :string | null,  lobbyName: string)
+{
+    if (!name)
+        return ;
+    const newGame: GameData = {
+        player_one_id: userId,
+        player_one_name: name,
+        player_two_id: -1,
+        player_two_name: null,
+        lobby_name: lobbyName,
+        game_score: '0-0',
+        status: 'waiting',
+        date: new Date().toISOString(),
+    };
+    createGameLobby(newGame);
     return true;
 }
 
@@ -138,17 +165,17 @@ export async function saveStats(gameId: number, token: string)
         console.log('game found in save Stats');
         const stats : GameStats = {
             game_name : 'shifumi',
-            part_name : game.lobbyName,
+            part_name : game.lobby_name,
             part_id : gameId,
-            player_one_id : game.playerOne,
-            player_two_id : game.playerTwo!,
-            final_score : game.finalScore!,
+            player_one_id : game.player_one_id,
+            player_two_id : game.player_two_id!,
+            final_score : game.game_score!,
             round_number : 0, // a modif
-            game_time : game.gameTime! / 4, // temps en s
-            date : game.gameDate!
+            game_time : game.game_time! / 4, // temps en s
+            date : game.date!
         };
         try {
-            const res = await fetch('http://user-service:3001//api/user/add-stats', {
+            const res = await fetch('http://user-service:3001/api/user/add-stats', {
                 method: 'POST',
                 headers: { 
                     'Content-Type': 'application/json',

@@ -14,9 +14,12 @@ export interface GameStats {
 }
 
 export function addStats(game: GameStats) {
+
+    console.log(game.part_name);
+
     const stmt = db.prepare(`
-    INSERT INTO game2Stats (
-      game_name, part_name, part_id, player_one_id, player_two_id, final_score, round_number, gameTime, date
+    INSERT INTO gameStats (
+      game_name, part_name, part_id, player_one_id, player_two_id, final_score, round_number, game_time, date
       ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
   `);
 

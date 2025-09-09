@@ -1,6 +1,6 @@
 import { Server, Socket } from "socket.io";
 import { verifTokenSocket } from "./index.js";
-import { createRoom, getOpponentName, joinRoom, kickOpponentFromDB, findGame, deleteGameFromDB, saveStats } from './Game2Database.js';
+import { createRoom, createRoomSolo, getOpponentName, joinRoom, kickOpponentFromDB, findGame, deleteGameFromDB, saveStats } from './Game2Database.js';
 import { GameData } from './gameModel.js';
 import { game } from './game.js';
 import { Manager } from './gameManager.js';
@@ -207,11 +207,29 @@ export function socketManagemente(io: Server)
             }
         });
         
-        socket.on('quit-lobby', () => {
+        socket.on('quit-lobby', () =>
+        {
             if (quitLobby(io, socket))
                 return;
             console.error('error : fail to quit lobby !');
             io.to(socket.id).emit('error', 'fail to quit lobby');
+        });
+
+        socket.on('solo-game', (userId) =>
+        {
+            if (!verifTokenSocket(socket))
+                return io.to(socket.id).emit('error', 'your token is not valid !');
+            if (!userId)
+                return io.to(socket.id).emit('error', 'error : your user id isn\'t valid !');
+
+            const roomId: number = nextGameId++;
+            if (createRoomSolo(userId, socket.data.userName, `Anne solo leveling Frank kul ${roomId}`))
+                socket.join(`${roomId.toString()}.1`);
+            socket.data.gameId = roomId;
+            socket.data.player = 1;
+            io.to(socket.id).emit('roomJoined', roomId);
+
+            // cree ia et l'ajouter dans la game, la room ${roomId}-2
         });
 
         // ajouter quit room

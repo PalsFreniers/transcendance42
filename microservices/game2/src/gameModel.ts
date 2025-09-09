@@ -1,16 +1,16 @@
 import db from './dbSqlite/db.js';
 
 export interface GameData {
-    playerOne: number,
-    playerOneName: string,
-    playerTwo?: number | null,         // Optional at first
-    playerTwoName: string | null,
-    lobbyName: string,
-    finalScore?: string,        // Will be set after game ends
+    player_one_id: number,
+    player_one_name: string,
+    player_two_id?: number | null,         // Optional at first
+    player_two_name: string | null,
+    lobby_name: string,
+    game_score?: string,        // Will be set after game ends
     status?: 'waiting' | 'playing' | 'finished',
-    startTime?: string,
-    gameTime?: number,
-    gameDate?: string,
+    start_time?: string,
+    game_time?: number,
+    date?: string,
 }
 
 export function createGameLobby(game: GameData) {
@@ -20,16 +20,16 @@ export function createGameLobby(game: GameData) {
   `);
 
   const result = stmt.run(
-    game.playerOne,
-    game.playerOneName,
-    game.playerTwo ?? null,
-    game.playerTwoName ?? null,
-    game.lobbyName,
-    game.finalScore ?? '0-0',
+    game.player_one_id,
+    game.player_one_name,
+    game.player_two_id ?? null,
+    game.player_two_name ?? null,
+    game.lobby_name,
+    game.game_score ?? '0-0',
     game.status ?? 'waiting',
-    game.startTime ?? null,
-    game.gameTime ?? null,
-    game.gameDate ?? new Date().toISOString()
+    game.start_time ?? null,
+    game.game_time ?? null,
+    game.date ?? new Date().toISOString()
   );
   return result.lastInsertRowid;
 }

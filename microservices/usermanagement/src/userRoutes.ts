@@ -152,6 +152,7 @@ export async function addStatsInDB(app: FastifyInstance) {
             addStats(stats);
             return reply.send({ success: true });
         } catch (err) {
+            console.log(err);
             return reply.code(500).send({ error: 'Failed to add stats in gameStats table'});
         }
     });
