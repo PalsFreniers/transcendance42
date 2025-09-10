@@ -192,7 +192,7 @@ export function handleRoute() {
 							<button id="spectator-btn">Spectate</button>
       					</div>
     				</div>
-					<div id="game-list"></div>
+					<div id="game-list" class="pong-lobby"></div>
 					<div id="game-salon" class="pong-lobby"></div>
 					<p id="msg-end" class="pong-message"></p>
   				</div>
@@ -413,28 +413,31 @@ export function handleRoute() {
 				but_test.style.visibility = "visible";
 		});
 	}
-	document.getElementById("offline")!.addEventListener("click", async () => {
-		const token = localStorage.getItem("token");
-		const res = await fetch("http://localhost:3001/api/user/logout", {
-			method: "POST",
-			headers: {
-				"Content-Type": "application/json",
-				Authorization: `Bearer ${token}`
-			},
-			body: JSON.stringify({}),
+	const offline = document.getElementById("offline");
+	if (offline) {
+		offline.addEventListener("click", async () => {
+			const token = localStorage.getItem("token");
+			const res = await fetch("http://localhost:3001/api/user/logout", {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+					Authorization: `Bearer ${token}`
+				},
+				body: JSON.stringify({}),
+			});
+
+			const data = await res.json();
+			if (data.success) {
+				// remove token from localStorage
+				localStorage.removeItem("token");
+
+				// optional: redirect to login page
+				handleRoute();
+			} else {
+				alert("Logout failed: " + (data.error || "Unknown error"));
+			}
 		});
-
-		const data = await res.json();
-		if (data.success) {
-			// remove token from localStorage
-			localStorage.removeItem("token");
-
-			// optional: redirect to login page
-			handleRoute();
-		} else {
-			alert("Logout failed: " + (data.error || "Unknown error"));
-		}
-	});
+	}
 
 	const music = document.getElementById("music") as HTMLAudioElement;
 	const musicButton = document.getElementById("btn-music") as HTMLButtonElement;
@@ -443,32 +446,33 @@ export function handleRoute() {
 	let currentTrack = 0;
 	let isPlaying = false;
 
-	const playlist = 
-	[
-		"/asset/Nightcore - Love Is Confusing (Lyrics).mp3"
-	]
-
-	music!.src = playlist[currentTrack];
-	music.addEventListener("ended", () => {
-		currentTrack = (currentTrack + 1) % playlist.length;
+	const playlist =
+		[
+			"/asset/Nightcore - Love Is Confusing (Lyrics).mp3"
+		]
+	if (music) {
 		music.src = playlist[currentTrack];
-		music.play();
-	});
-
-	musicButton.addEventListener("click", () => {
-		if (isPlaying){
-			music.pause();
-			musicButton.classList.add("paused");
-		}
-		else{
+		music.addEventListener("ended", () => {
+			currentTrack = (currentTrack + 1) % playlist.length;
+			music.src = playlist[currentTrack];
 			music.play();
-			musicButton.classList.remove("paused");
-		}
-		isPlaying = !isPlaying;
-	});
+		});
 
-	musicVolume?.addEventListener("input", () => {
-		music.volume = Number(musicVolume.value);
-	})
+		musicButton.addEventListener("click", () => {
+			if (isPlaying) {
+				music.pause();
+				musicButton.classList.add("paused");
+			}
+			else {
+				music.play();
+				musicButton.classList.remove("paused");
+			}
+			isPlaying = !isPlaying;
+		});
+
+		musicVolume?.addEventListener("input", () => {
+			music.volume = Number(musicVolume.value);
+		});
+	}
 }
 

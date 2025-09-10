@@ -224,6 +224,7 @@ h2 {
 		border: none;
 		outline: none;
 		font-size: $font-size-xs;
+		font-family: $font-main;
 		color: $color-white;
 
 		&:focus~label,
@@ -547,14 +548,6 @@ input:-webkit-autofill {
 			}
 		}
 	}
-}
-
-#game-list{
-	display: flex;
-	flex-direction: column;
-	justify-content: center;
-	align-items: center;
-	gap: 10px;
 }
 
 .pong-lobby {

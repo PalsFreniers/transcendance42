@@ -30,6 +30,8 @@ export class GameManager {
     }
 
     findGame(info: string): Game | null {
+        console.log("[startGame] Searching for lobby:" , info);
+            console.log("[startGame] Current lobbies in _games:", [...this._games.keys()]);
         const entry = this._games.get(info);
         if (entry)
             return entry[0];
@@ -73,7 +75,9 @@ export class GameManager {
         const [game, [p1, p2]] = this._games.get(lobbyName)!;
         if (!p1 || !p2)
             return 2;
-        game.start();
+        const spec = db.prepare(`SELECT 1 FROM games WHERE id = ? AND status = 'playing'`).get(gameId);
+        if (!spec)
+            game.start();
         const loop = setInterval( () => {
             this.playerIsOffline(p1, p2, io, lobbyName).then(isOffline => {
                 if (isOffline) {

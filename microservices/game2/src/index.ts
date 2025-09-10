@@ -30,7 +30,7 @@ const PORT = process.env.GAME2_PORT;
 
 
 await app.register(cors, {
-    origin: 'http://localhost:5173',
+    origin: true,
     credentials: true,
     methods: ['GET', 'POST'],
 });
@@ -38,7 +38,7 @@ await app.register(cors, {
 export const io = new Server(app.server, {
     path: '/shifumiSocket/',
     cors: {
-        origin: 'http://localhost:5173',
+        origin: true,
         credentials: true,
         methods: ['GET', 'POST'],
     },
