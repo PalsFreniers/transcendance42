@@ -108,9 +108,8 @@ export function init() {
                         const lobbyName = target.dataset.name;
                         console.log("Clicked lobby:", lobbyName);
                         const socket = getSocket(1);
-                        if (lobbyName) {
-                            socket.emit("spec-game", lobbyName);
-                        }
+                        if (lobbyName)
+                            socket.emit("spec-game", { lobbyname : lobbyName });
                     });
                 });
 

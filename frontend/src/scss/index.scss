@@ -568,6 +568,16 @@ input:-webkit-autofill {
 	}
 }
 
+.lobby-item{
+	color: $color-accent;
+
+	&:hover{
+		color: $color-accent-alt;
+		cursor: pointer;
+		font-size: 16px;
+	}
+}
+
 .pong-message {
 	margin-top: 15px;
 	font-size: $font-size-sm;

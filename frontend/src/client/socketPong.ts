@@ -154,6 +154,16 @@ export function createPongSocket(socketPong: Socket | null) {
         ctx.fillText(`${state.leftScore} - ${state.rightScore}`, canvas.width / 2, 40);
 
         ctx.fillStyle = "#ffdd00";
+        ctx.font = "20px 'Public Pixel'";
+        ctx.textAlign = "center";
+        ctx.fillText(`${state.usernameLeftTeam}`, canvas.width / 5, 40);
+
+        ctx.fillStyle = "#ffdd00";
+        ctx.font = "20px 'Public Pixel'";
+        ctx.textAlign = "center";
+        ctx.fillText(`${state.usernameRightTeam}`, canvas.width - canvas.width / 5 , 40);
+
+        ctx.fillStyle = "#ffdd00";
         ctx.font = "16px 'Public Pixel'";
         ctx.textAlign = "left";
 

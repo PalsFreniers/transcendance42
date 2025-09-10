@@ -162,7 +162,6 @@ export function socketManagement(io: Server) {
                 return console.warn(`Game ${lobbyname} not found or finished`);
             console.log(`spec register in room game-${game.gameID}`);
             socket.join(`game-${game.gameID}`);
-            manager.startGame(lobbyname, `game-${game.gameID}` , io)
         })
 
         socket.on('disconnect', () => {

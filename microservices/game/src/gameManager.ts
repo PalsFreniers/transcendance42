@@ -1,5 +1,6 @@
 import { Game } from './game.js'
 import { Paddle } from "./gameObjects/Paddle.js";
+import { Server } from "socket.io";
 import * as Vec2D from "vector2d";
 import db from "./dbSqlite/db.js"
 
@@ -30,8 +31,6 @@ export class GameManager {
     }
 
     findGame(info: string): Game | null {
-        console.log("[startGame] Searching for lobby:" , info);
-            console.log("[startGame] Current lobbies in _games:", [...this._games.keys()]);
         const entry = this._games.get(info);
         if (entry)
             return entry[0];
@@ -75,10 +74,8 @@ export class GameManager {
         const [game, [p1, p2]] = this._games.get(lobbyName)!;
         if (!p1 || !p2)
             return 2;
-        const spec = db.prepare(`SELECT 1 FROM games WHERE id = ? AND status = 'playing'`).get(gameId);
-        if (!spec)
-            game.start();
-        const loop = setInterval( () => {
+        game.start();
+        const loop = setInterval(() => {
             this.playerIsOffline(p1, p2, io, lobbyName).then(isOffline => {
                 if (isOffline) {
                     clearInterval(loop);
@@ -99,7 +96,7 @@ export class GameManager {
                 });
                 this.deleteGame(lobbyName);
             }
-            const state = this.getGameInfo(lobbyName);
+            const state = this.getGameInfo(lobbyName, io);
             io.to(gameId).emit("game-state", state);
         }, 1000 / 60);
     }
@@ -138,12 +135,28 @@ export class GameManager {
         return 0;
     }
 
-    getGameInfo(lobbyName: string) {
+    getGameInfo(lobbyName: string, io: Server) {
         if (!this._games.has(lobbyName))
             return null;
         const [game, [_, __]] = this._games.get(lobbyName)!;
         if (game === undefined)
             return null;
+        let usernameLeftTeam: string | null = null;
+        let usernameRightTeam: string | null = null;
+
+        const socketIdP1 = _ ? this.getSocketId(_) : null;
+        const socketIdP2 = __ ? this.getSocketId(__) : null;
+
+        if (socketIdP1) {
+            const socket = io?.sockets.sockets.get(socketIdP1);
+            usernameLeftTeam = socket?.data?.userName ?? null;
+        }
+
+        if (socketIdP2) {
+            const socket = io?.sockets.sockets.get(socketIdP2);
+            usernameRightTeam = socket?.data?.userName ?? null;
+        }
+
         return {
             ballPos: { x: game.ball.pos.x, y: game.ball.pos.y },
             ballDir: { x: game.ball.dir.x, y: game.ball.dir.y },
@@ -152,7 +165,9 @@ export class GameManager {
             leftScore: game.score[0],
             rightScore: game.score[1],
             state: game.state,
-            resumeTimer: game.resumeTimer
+            resumeTimer: game.resumeTimer,
+            usernameRightTeam,
+            usernameLeftTeam
         };
     }
 
@@ -175,7 +190,7 @@ export class GameManager {
                     if (game.state === 'idling')
                         game.state = 'resume';
                     resolve(false);
-                    return ;
+                    return;
                 }
                 game.state = "idling";
                 if (!p1IsOnline)
