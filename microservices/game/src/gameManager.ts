@@ -30,6 +30,13 @@ export class GameManager {
         return this._userSockets.get(userId) || null;
     }
 
+    getUsernameFromSocket(socketId: string, io: Server): string | null {
+        if (!socketId)
+            return null;
+        const socket = io.sockets.sockets.get(socketId);
+        return socket?.data?.userName ?? null;
+    }
+
     findGame(info: string): Game | null {
         const entry = this._games.get(info);
         if (entry)
@@ -138,24 +145,11 @@ export class GameManager {
     getGameInfo(lobbyName: string, io: Server) {
         if (!this._games.has(lobbyName))
             return null;
-        const [game, [_, __]] = this._games.get(lobbyName)!;
+        const [game, [p1, p2]] = this._games.get(lobbyName)!;
         if (game === undefined)
             return null;
-        let usernameLeftTeam: string | null = null;
-        let usernameRightTeam: string | null = null;
-
-        const socketIdP1 = _ ? this.getSocketId(_) : null;
-        const socketIdP2 = __ ? this.getSocketId(__) : null;
-
-        if (socketIdP1) {
-            const socket = io?.sockets.sockets.get(socketIdP1);
-            usernameLeftTeam = socket?.data?.userName ?? null;
-        }
-
-        if (socketIdP2) {
-            const socket = io?.sockets.sockets.get(socketIdP2);
-            usernameRightTeam = socket?.data?.userName ?? null;
-        }
+        const usernameLeftTeam = this.getUsernameFromSocket(this.getSocketId(p1!)!, io);
+        const usernameRightTeam = this.getUsernameFromSocket(this.getSocketId(p2!)!, io);
 
         return {
             ballPos: { x: game.ball.pos.x, y: game.ball.pos.y },

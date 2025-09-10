@@ -192,8 +192,12 @@ export function handleRoute() {
 							<button id="spectator-btn">Spectate</button>
       					</div>
     				</div>
-					<div id="game-list" class="pong-lobby"></div>
-					<div id="game-salon" class="pong-lobby"></div>
+					<div id="game-list" class="pong-lobby">
+					<h4>List of current games</h4>
+					</div>
+					<div id="game-salon" class="pong-lobby">
+					<h4>Your lobby</h4>
+					</div>
 					<p id="msg-end" class="pong-message"></p>
   				</div>
 				<canvas id="pong-canvas" width="600" height="400"></canvas>
@@ -241,14 +245,19 @@ export function handleRoute() {
 			import('./shifumiStart.js').then((mod) => mod.init());
 			break;
 		case '/profil':
-			app.innerHTML = `<h2>Your Profil</h2>
-				<a href="/lobby" data-link>Lobby</a>
-				<button id="edit-profil">Edit Profil</button>
-				<form id="form-profil"></form>
-				<h3>List of friends</h3>
-				<ul id="friend-list"></ul>
-				<input id="friend-username" type="text" placeholder="Enter friend username" />
-				<button id="add-friend-button">Add Friend</button>`;
+			app.innerHTML = `
+				<div id="back-profil">
+					<div class="profil-wrapper">
+						<h2>Your Profil</h2>
+						<a href="/lobby" data-link>Lobby</a>
+						<button id="edit-profil">Edit Profil</button>
+						<form id="form-profil"></form>
+						<h3>List of friends</h3>
+						<ul id="friend-list"></ul>
+						<input id="friend-username" type="text" placeholder="Enter friend username" />
+						<button id="add-friend-button">Add Friend</button>
+					</div>
+				</div>`;
 			import('./userProfil.js').then((mod) => mod.init?.());
 			break;
 		case '/lobby':
