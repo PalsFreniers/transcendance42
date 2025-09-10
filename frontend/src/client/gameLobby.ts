@@ -109,7 +109,7 @@ export function init() {
                         console.log("Clicked lobby:", lobbyName);
                         const socket = getSocket(1);
                         if (lobbyName)
-                            socket.emit("spec-game", { lobbyname : lobbyName });
+                            socket!.emit("spec-game", { lobbyname : lobbyName });
                     });
                 });
 
