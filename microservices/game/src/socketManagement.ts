@@ -147,6 +147,8 @@ export function socketManagement(io: Server) {
             const game = manager.findGame(playerId.toString());
             if (!game)
                 return console.warn(`No active game for player ${playerId}`);
+            if (game.state !== 'running')
+                return;
             const paddle = game.getPaddle(playerId)!;
             const state = paddle.getState();
             const isPressed = action === 'keydown';

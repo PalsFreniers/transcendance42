@@ -426,7 +426,7 @@ export function handleRoute() {
 	if (offline) {
 		offline.addEventListener("click", async () => {
 			const token = localStorage.getItem("token");
-			const res = await fetch("http://localhost:3001/api/user/logout", {
+			const res = await fetch(`http://${import.meta.env.VITE_LOCAL_ADDRESS}:3001/api/user/logout`, {
 				method: "POST",
 				headers: {
 					"Content-Type": "application/json",

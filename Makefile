@@ -1,5 +1,7 @@
 COMPOSE=docker compose
 COMPOSE_FILE=docker-compose.yml
+CMD_LOCAL_NETWORK_ADDR=ip addr | grep "global eno2" | awk '{print $$2}' | cut -d'/' -f1;
+ENV_FILE=.env
 
 help:
 	@echo "Usage: make [TARGET]"
@@ -17,7 +19,14 @@ help:
 	@echo "  nginx       Run only nginx"
 	@echo "  front       Run only frontend"
 
-all:
+localadress:
+	@if grep -q "^VITE_LOCAL_ADDRESS=" $(ENV_FILE); then \
+		sed -i "/^VITE_LOCAL_ADDRESS=/d" $(ENV_FILE); \
+	fi
+	echo "VITE_LOCAL_ADDRESS=$$($(CMD_LOCAL_NETWORK_ADDR))" >> $(ENV_FILE);
+	@echo "VITE_LOCAL_ADDRESS set to $$($(CMD_LOCAL_NETWORK_ADDR)) in $(ENV_FILE)"
+
+all: localadress
 	$(COMPOSE) -f $(COMPOSE_FILE) up -d
 
 down:

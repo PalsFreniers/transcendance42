@@ -1,7 +1,7 @@
 export async function init() {
 	try {
 		const token = localStorage.getItem('token'); // TOKEN LINK FROM THE USER CONNECTED
-		const res = await fetch('http://localhost:3001/api/user/profil', {
+		const res = await fetch(`http://${import.meta.env.VITE_LOCAL_ADDRESS}:3001/api/user/profil`, {
 			method: 'GET',
 			headers: {
 				'Content-Type': 'application/json',
@@ -23,7 +23,7 @@ export async function init() {
 				</div>
 				<button type="submit">Save</button>`
 		});
-		const resFriends = await fetch('http://localhost:3001/api/user/friend-list', {
+		const resFriends = await fetch(`http://${import.meta.env.VITE_LOCAL_ADDRESS}:3001/api/user/friend-list`, {
 			method: 'GET',
 			headers: {
 				'Content-Type': 'application/json',
@@ -40,7 +40,7 @@ export async function init() {
 				button.textContent = 'Delete';
 				button.addEventListener('click', async (e) => {
 					e.preventDefault();
-					const res = await fetch('http://localhost:3001/api/user/delete-friend', {
+					const res = await fetch(`http://${import.meta.env.VITE_LOCAL_ADDRESS}:3001/api/user/delete-friend`, {
 						method: 'POST',
 						headers: {
 							'Content-Type': 'application/json',
@@ -72,7 +72,7 @@ export async function init() {
 				return;
 			}
 			try {
-				const res = await fetch('http://localhost:3001/api/user/add-friend', {
+				const res = await fetch(`http://${import.meta.env.VITE_LOCAL_ADDRESS}:3001/api/user/add-friend`, {
 					method: 'POST',
 					headers: {
 						'Content-Type': 'application/json',

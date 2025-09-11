@@ -19,7 +19,7 @@ export function getUserIdFromToken(): number {
 export function createPongSocket(socketPong: Socket | null) {
     const token = localStorage.getItem('token');
     const userId = getUserIdFromToken();
-    socketPong = io('http://localhost:3002', {
+    socketPong = io(`http://${import.meta.env.VITE_LOCAL_ADDRESS}:3002`, {
         path: '/pongSocket/',
         auth: { token },
         withCredentials: true,

@@ -83,7 +83,7 @@ app.addHook('onRequest', async (request, reply) => {
     }
 });
 
-app.listen({ port: Number(PORT), host: '0.0.0.0' }, err => {
+app.listen({ port: Number(PORT), host: `0.0.0.0` }, err => {
     if (err) throw err;
     console.log(`Game 2 service running on port ${PORT}`);
 });

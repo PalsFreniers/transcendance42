@@ -150,7 +150,7 @@ app.register(logOut, {prefix: '/api/user' });
 // app.register(friendSendMsg, { prefix: '/api/user' });
 
 // Start Fastify server
-app.listen({ port: Number(PORT), host: '0.0.0.0' }, (err,) => {
+app.listen({ port: Number(PORT), host: `0.0.0.0` }, (err,) => {
     if (err) {
         console.error(err);
     }
