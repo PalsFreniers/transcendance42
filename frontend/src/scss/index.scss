@@ -414,54 +414,54 @@ input:-webkit-autofill {
 		width: 100%;
 		height: 23vh;
 		z-index: 7;
-	  
+
 		.svg-ico {
-		  width: 70px;
-		  height: 70px;
-		  z-index: 7;
-		  filter: $shadow-accent;
-		  cursor: pointer;
-		  transition: transform $transition-fast;
-	  
-		  &:hover {
-			transform: scale(1.1);
-		  }
-		}
-	  
-		#friends {
-		  display: block;
-		}
-	  
-		#friends2 {
-		  visibility: hidden;
-		}
-	  
-		#music-player {
-		  display: flex;
-		  flex-direction: column;
-		  align-items: center;
-		  row-gap: 10px;
-		  z-index: 7;
-	  
-		  #btn-music {
-			width: 45px;
-			height: 45px;
+			width: 70px;
+			height: 70px;
+			z-index: 7;
+			filter: $shadow-accent;
 			cursor: pointer;
-	  
+			transition: transform $transition-fast;
+
 			&:hover {
-			  filter: $shadow-accent;
+				transform: scale(1.1);
 			}
-	  
-			&:active {
-			  stroke: $color-accent-alt;
+		}
+
+		#friends {
+			display: block;
+		}
+
+		#friends2 {
+			visibility: hidden;
+		}
+
+		#music-player {
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			row-gap: 10px;
+			z-index: 7;
+
+			#btn-music {
+				width: 45px;
+				height: 45px;
+				cursor: pointer;
+
+				&:hover {
+					filter: $shadow-accent;
+				}
+
+				&:active {
+					stroke: $color-accent-alt;
+				}
 			}
-		  }
-	  
-		  #volume-music {
-			width: 100px;
-			accent-color: #e323be;
-			cursor: pointer;
-		  }
+
+			#volume-music {
+				width: 100px;
+				accent-color: #e323be;
+				cursor: pointer;
+			}
 		}
 	}
 }
@@ -496,13 +496,16 @@ input:-webkit-autofill {
 	color: $color-white;
 	box-shadow: 0 4px 10px rgba($color-black, 0.6);
 
-	h2, h3 {
+	h2,
+	h3 {
 		font-family: $font-main;
 		margin-bottom: 15px;
 		color: $color-accent-alt;
 		text-shadow: 0 0 5px $color-black;
 	}
 }
+
+
 
 .profil-wrapper a {
 	display: inline-block;
@@ -518,6 +521,48 @@ input:-webkit-autofill {
 	}
 }
 
+.profil-card {
+	display: flex;
+	align-items: center;
+	gap: 20px;
+	padding: 20px 30px;
+	background: rgba($color-black, 0.6);
+	border: 1px solid $color-secondary;
+	border-radius: $radius-lg;
+	box-shadow: 0 4px 12px rgba($color-black, 0.4);
+}
+
+.profil-avatar {
+	width: 80px;
+	height: 80px;
+	border-radius: 50%;
+	border: 2px solid $color-accent-alt;
+	object-fit: cover;
+}
+
+.profil-info {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	gap: 6px;
+
+	.profil-username {
+		font-size: $font-size-sm;
+		color: $color-accent-alt;
+	}
+
+	.profil-email {
+		font-size: $font-size-xs;
+		color: $color-gray;
+	}
+
+	.profil-bio {
+		font-size: $font-size-xs;
+		color: $color-accent;
+		font-style: italic;
+	}
+}
+
 #form-profil {
 	display: flex;
 	flex-direction: column;
@@ -526,12 +571,12 @@ input:-webkit-autofill {
 	align-items: center;
 	justify-content: center;
 
-	input{
+	input {
 		font-family: $font-main;
 	}
 }
 
-#bio{
+#bio {
 	background: transparent;
 	color: $color-white;
 	text-align: center;
@@ -540,7 +585,7 @@ input:-webkit-autofill {
 	width: 100%;
 	padding: 10px;
 
-	&:focus{
+	&:focus {
 		outline: none;
 		border-color: $color-accent;
 		box-shadow: 0 0 5px $color-accent;
@@ -552,6 +597,7 @@ input:-webkit-autofill {
 	flex-direction: column;
 	align-items: center;
 	justify-content: center;
+
 	input[type="file"] {
 		position: absolute;
 		left: 0;
@@ -714,10 +760,12 @@ input:-webkit-autofill {
 	border: 1px solid rgba($color-white, 0.2);
 	font-size: $font-size-xs;
 	text-align: left;
-	h4{
+
+	h4 {
 		text-align: center;
 		text-decoration: underline 2px $bg-light;
 	}
+
 	p {
 		margin: 6px 0;
 
@@ -727,10 +775,10 @@ input:-webkit-autofill {
 	}
 }
 
-.lobby-item{
+.lobby-item {
 	color: $color-accent;
 
-	&:hover{
+	&:hover {
 		color: $color-accent-alt;
 		cursor: pointer;
 		font-size: 16px;

@@ -9,7 +9,16 @@ export async function init() {
 			},
 		});
 		const data = await res.json();
-		console.log(data);
+		const profil = document.getElementById('profil') as HTMLElement;
+		profil.innerHTML = `
+    		<div class="profil-card">
+      			<img src="${data.user.profile_image_url || '/assets/default-avatar.png'}" class="profil-avatar" />
+      			<div class="profil-info">
+        			<h2 class="profil-username">${data.user.username}</h2>
+        			<p class="profil-email">${data.user.email}</p>
+       				<p class="profil-bio">${data.user.bio || 'No bio yet.'}</p>
+      			</div>
+    		</div>`
 		const editProfile = document.getElementById('edit-profil') as HTMLButtonElement;
 		const form = document.getElementById('form-profil') as HTMLFormElement;
 		editProfile.addEventListener('click', async (e) => {

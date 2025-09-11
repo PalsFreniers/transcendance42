@@ -248,7 +248,7 @@ export function handleRoute() {
 			app.innerHTML = `
 				<div id="back-profil">
 					<div class="profil-wrapper">
-						<h2>Your Profil</h2>
+						<h2 id="profil">Your Profil</h2>
 						<a href="/lobby" data-link>Lobby</a>
 						<button id="edit-profil">Edit Profil</button>
 						<form id="form-profil"></form>

@@ -46,6 +46,7 @@ export async function auth(app: FastifyInstance) {
             id: number;
             username: string;
             password_hash: string;
+            is_online: number;
         };
         if (!user)
             return reply.code(401).send({ error: 'Invalid username or password' });
@@ -53,6 +54,11 @@ export async function auth(app: FastifyInstance) {
         const valid = await bcrypt.compare(password, user.password_hash);
         if (!valid)
             return reply.code(401).send({ error: 'Invalid username or password' });
+        if (user.is_online)
+        {
+            console.log('User is already connected');
+            return reply.code(401).send({ error: 'You are already connected on another device'});
+        }
         //SIGN TOKEN FOR THAT SESSION ANOTHER IS GENERATE AT EACH CONNECTION
         const token = app.jwt.sign({ userId: user.id, username: user.username });
         await new Promise(resolve => setTimeout(resolve, 100));
