@@ -1,6 +1,6 @@
 COMPOSE=docker compose
 COMPOSE_FILE=docker-compose.yml
-CMD_LOCAL_NETWORK_ADDR=ip addr | grep "global eno2" | awk '{print $$2}' | cut -d'/' -f1;
+CMD_LOCAL_NETWORK_ADDR=ip addr | grep "/24" | awk '{print $$2}' | cut -d'/' -f1;
 ENV_FILE=.env
 
 help:
@@ -28,6 +28,7 @@ localadress:
 
 all: localadress
 	$(COMPOSE) -f $(COMPOSE_FILE) up -d
+	@echo "The website run at http://$$($(CMD_LOCAL_NETWORK_ADDR)):5173"
 
 down:
 	$(COMPOSE) -f $(COMPOSE_FILE) down

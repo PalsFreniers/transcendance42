@@ -6,7 +6,7 @@ dotenv.config();
 export default defineConfig({
   root: 'public',     // serve /public directly
   server: {
-    host: process.env.VITE_LOCAL_ADDRESS,       // so it works inside Docker
+    host: process.env.VITE_LOCAL_ADDRESS,
     port: 5173
   }
 });
