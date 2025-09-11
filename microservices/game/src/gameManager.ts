@@ -1,5 +1,6 @@
 import { Game } from './game.js'
 import { Paddle } from "./gameObjects/Paddle.js";
+import { Server } from "socket.io";
 import * as Vec2D from "vector2d";
 import db from "./dbSqlite/db.js"
 
@@ -27,6 +28,13 @@ export class GameManager {
 
     getSocketId(userId: number): string | null {
         return this._userSockets.get(userId) || null;
+    }
+
+    getUsernameFromSocket(socketId: string, io: Server): string | null {
+        if (!socketId)
+            return null;
+        const socket = io.sockets.sockets.get(socketId);
+        return socket?.data?.userName ?? null;
     }
 
     findGame(info: string): Game | null {
@@ -74,7 +82,7 @@ export class GameManager {
         if (!p1 || !p2)
             return 2;
         game.start();
-        const loop = setInterval( () => {
+        const loop = setInterval(() => {
             this.playerIsOffline(p1, p2, io, lobbyName).then(isOffline => {
                 if (isOffline) {
                     clearInterval(loop);
@@ -95,7 +103,7 @@ export class GameManager {
                 });
                 this.deleteGame(lobbyName);
             }
-            const state = this.getGameInfo(lobbyName);
+            const state = this.getGameInfo(lobbyName, io);
             io.to(gameId).emit("game-state", state);
         }, 1000 / 60);
     }
@@ -134,12 +142,15 @@ export class GameManager {
         return 0;
     }
 
-    getGameInfo(lobbyName: string) {
+    getGameInfo(lobbyName: string, io: Server) {
         if (!this._games.has(lobbyName))
             return null;
-        const [game, [_, __]] = this._games.get(lobbyName)!;
+        const [game, [p1, p2]] = this._games.get(lobbyName)!;
         if (game === undefined)
             return null;
+        const usernameLeftTeam = this.getUsernameFromSocket(this.getSocketId(p1!)!, io);
+        const usernameRightTeam = this.getUsernameFromSocket(this.getSocketId(p2!)!, io);
+
         return {
             ballPos: { x: game.ball.pos.x, y: game.ball.pos.y },
             ballDir: { x: game.ball.dir.x, y: game.ball.dir.y },
@@ -148,7 +159,9 @@ export class GameManager {
             leftScore: game.score[0],
             rightScore: game.score[1],
             state: game.state,
-            resumeTimer: game.resumeTimer
+            resumeTimer: game.resumeTimer,
+            usernameRightTeam,
+            usernameLeftTeam
         };
     }
 
@@ -171,7 +184,7 @@ export class GameManager {
                     if (game.state === 'idling')
                         game.state = 'resume';
                     resolve(false);
-                    return ;
+                    return;
                 }
                 game.state = "idling";
                 if (!p1IsOnline)

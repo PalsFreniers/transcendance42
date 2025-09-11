@@ -31,13 +31,6 @@ function getUsernameFromToken(token: string): string | null {
     }
 }
 
-export async function clearRoom(room: string, io: Server){
-    const sockets = await io.in(room).fetchSockets();
-    sockets.forEach(socket => {
-        socket.leave(room);
-    });
-}
-
 export function socketManagement(io: Server) {
     io.use(async (socket, next) => {
         if (verifTokenSocket(socket)) {
@@ -162,6 +155,14 @@ export function socketManagement(io: Server) {
             else if (key === 'down')
                 state[1] = isPressed;
         });
+
+        socket.on('spec-game', ({ lobbyname }) => {
+            const game = manager.findGame(lobbyname);
+            if (!game)
+                return console.warn(`Game ${lobbyname} not found or finished`);
+            console.log(`spec register in room game-${game.gameID}`);
+            socket.join(`game-${game.gameID}`);
+        })
 
         socket.on('disconnect', () => {
             manager.unregisterSocket(socket.data.userId);

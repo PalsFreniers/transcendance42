@@ -32,6 +32,7 @@ export async function createRoom(app: FastifyInstance) {
         });
     });
 }
+
 export async function awaitForOpponent(app: FastifyInstance) {
     app.post('/api/game/find-lobbies', async (_req, reply) => {
         const lobbies = db.prepare(`SELECT * FROM games WHERE player_two_id IS NULL`).all();

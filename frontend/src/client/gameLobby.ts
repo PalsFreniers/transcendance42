@@ -84,10 +84,10 @@ export function init() {
             socket!.emit("start-game");
         });
     }
-    if (specBtn){
+    if (specBtn) {
         specBtn.addEventListener('click', async (e) => {
             e.preventDefault();
-            try{
+            try {
                 const findLobbiesRes = await fetch("http://localhost:3002/api/game/spec-lobbies", {
                     method: "POST",
                     headers: {
@@ -101,9 +101,20 @@ export function init() {
                     console.log("No game running.");
                     return;
                 }
-                listGame.innerHTML = lobbies.map(l => `<p>${l.name} - ${l.status}</p>`).join("");
+                listGame.innerHTML = lobbies.map(l => `<p class="lobby-item" data-name="${l.lobby_name}">${l.lobby_name} - ${l.status}</p>`).join("");
+                document.querySelectorAll(".lobby-item").forEach(el => {
+                    el.addEventListener("click", (e) => {
+                        const target = e.currentTarget as HTMLElement;
+                        const lobbyName = target.dataset.name;
+                        console.log("Clicked lobby:", lobbyName);
+                        const socket = getSocket(1);
+                        if (lobbyName)
+                            socket!.emit("spec-game", { lobbyname : lobbyName });
+                    });
+                });
+
             }
-            catch(err){
+            catch (err) {
                 console.error("Error spec game:", err)
             }
         });

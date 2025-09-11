@@ -20,7 +20,7 @@ const PORT = process.env.GAME_PORT;
 
 //REQUEST CORS
 await app.register(cors, {
-    origin: 'http://localhost:5173',
+    origin: true,
     credentials: true,
     methods: ['GET', 'POST'],
 });
@@ -28,7 +28,7 @@ await app.register(cors, {
 export const io = new Server(app.server, {
     path: '/pongSocket/',
     cors: {
-        origin: 'http://localhost:5173',
+        origin: true,
         credentials: true,
     }
 });

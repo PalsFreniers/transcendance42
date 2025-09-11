@@ -192,8 +192,12 @@ export function handleRoute() {
 							<button id="spectator-btn">Spectate</button>
       					</div>
     				</div>
-					<div id="game-list"></div>
-					<div id="game-salon" class="pong-lobby"></div>
+					<div id="game-list" class="pong-lobby">
+					<h4>List of current games</h4>
+					</div>
+					<div id="game-salon" class="pong-lobby">
+					<h4>Your lobby</h4>
+					</div>
 					<p id="msg-end" class="pong-message"></p>
   				</div>
 				<canvas id="pong-canvas" width="600" height="400"></canvas>
@@ -241,14 +245,19 @@ export function handleRoute() {
 			import('./shifumiStart.js').then((mod) => mod.init());
 			break;
 		case '/profil':
-			app.innerHTML = `<h2>Your Profil</h2>
-				<a href="/lobby" data-link>Lobby</a>
-				<button id="edit-profil">Edit Profil</button>
-				<form id="form-profil"></form>
-				<h3>List of friends</h3>
-				<ul id="friend-list"></ul>
-				<input id="friend-username" type="text" placeholder="Enter friend username" />
-				<button id="add-friend-button">Add Friend</button>`;
+			app.innerHTML = `
+				<div id="back-profil">
+					<div class="profil-wrapper">
+						<h2>Your Profil</h2>
+						<a href="/lobby" data-link>Lobby</a>
+						<button id="edit-profil">Edit Profil</button>
+						<form id="form-profil"></form>
+						<h3>List of friends</h3>
+						<ul id="friend-list"></ul>
+						<input id="friend-username" type="text" placeholder="Enter friend username" />
+						<button id="add-friend-button">Add Friend</button>
+					</div>
+				</div>`;
 			import('./userProfil.js').then((mod) => mod.init?.());
 			break;
 		case '/lobby':
@@ -413,31 +422,31 @@ export function handleRoute() {
 				but_test.style.visibility = "visible";
 		});
 	}
-	const but_off = document.getElementById("offline");
-		if (but_off) {
-			but_off.addEventListener("click", async () => {
-				const token = localStorage.getItem("token");
-				const res = await fetch("http://localhost:3001/api/user/logout", {
-					method: "POST",
-					headers: {
-						"Content-Type": "application/json",
-						Authorization: `Bearer ${token}`
-					},
-					body: JSON.stringify({}),
-				});
-
-				const data = await res.json();
-				if (data.success) {
-					// remove token from localStorage
-					localStorage.removeItem("token");
-
-					// optional: redirect to login page
-					handleRoute();
-				} else {
-					alert("Logout failed: " + (data.error || "Unknown error"));
-				}
+	const offline = document.getElementById("offline");
+	if (offline) {
+		offline.addEventListener("click", async () => {
+			const token = localStorage.getItem("token");
+			const res = await fetch("http://localhost:3001/api/user/logout", {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+					Authorization: `Bearer ${token}`
+				},
+				body: JSON.stringify({}),
 			});
-		}
+
+			const data = await res.json();
+			if (data.success) {
+				// remove token from localStorage
+				localStorage.removeItem("token");
+
+				// optional: redirect to login page
+				handleRoute();
+			} else {
+				alert("Logout failed: " + (data.error || "Unknown error"));
+			}
+		});
+	}
 
 	const music = document.getElementById("music") as HTMLAudioElement;
 	const musicButton = document.getElementById("btn-music") as HTMLButtonElement;
@@ -446,11 +455,10 @@ export function handleRoute() {
 	let currentTrack = 0;
 	let isPlaying = false;
 
-	const playlist = 
-	[
-		"/asset/Nightcore - Love Is Confusing (Lyrics).mp3"
-	]
-
+	const playlist =
+		[
+			"/asset/Nightcore - Love Is Confusing (Lyrics).mp3"
+		]
 	if (music) {
 		music.src = playlist[currentTrack];
 		music.addEventListener("ended", () => {
@@ -458,21 +466,22 @@ export function handleRoute() {
 			music.src = playlist[currentTrack];
 			music.play();
 		});
-	}
-	if (musicButton) {
+
 		musicButton.addEventListener("click", () => {
 			if (isPlaying) {
 				music.pause();
 				musicButton.classList.add("paused");
-			} else {
+			}
+			else {
 				music.play();
 				musicButton.classList.remove("paused");
 			}
 			isPlaying = !isPlaying;
 		});
+
+		musicVolume?.addEventListener("input", () => {
+			music.volume = Number(musicVolume.value);
+		});
 	}
-	musicVolume?.addEventListener("input", () => {
-		music.volume = Number(musicVolume.value);
-	})
 }
 

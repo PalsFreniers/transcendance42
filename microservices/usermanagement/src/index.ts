@@ -30,7 +30,7 @@ const PORT = process.env.USER_MANA_PORT;
 
 //REQUEST CORS
 await app.register(cors, {
-    origin: ['http://localhost:5173', 'http://game2-service:3003'],
+    origin: true,
     allowedHeaders: ['Content-Type', 'Authorization'],
     credentials: true,
     methods: ['GET', 'POST'],
@@ -39,7 +39,7 @@ await app.register(cors, {
 export const io = new Server(app.server, {
     path: '/chatSocket/',
     cors: {
-        origin: 'http://localhost:5173', // ALL ORIGIN REQUEST ALLOWED
+        origin: true, // ALL ORIGIN REQUEST ALLOWED
         credentials: true,
     },
 });

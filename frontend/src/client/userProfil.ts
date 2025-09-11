@@ -16,7 +16,11 @@ export async function init() {
 			e.preventDefault();
 			form.innerHTML = `
 				<input id="bio" type="text" bio="bio" placeholder="bio" required />
-				<input id="img-profil" type="file" accept="image/*" required />
+				<div class="file-upload">
+  					<label for="img-profil">📷 Upload profile picture</label>
+					<input id="img-profil" type="file" accept="image/*" required />
+					<span class="file-name">No file chosen</span>
+				</div>
 				<button type="submit">Save</button>`
 		});
 		const resFriends = await fetch('http://localhost:3001/api/user/friend-list', {
