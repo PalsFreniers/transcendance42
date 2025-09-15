@@ -1,6 +1,6 @@
 COMPOSE=docker compose
 COMPOSE_FILE=docker-compose.yml
-CMD_LOCAL_NETWORK_ADDR=ip addr | grep "/24" | awk '{print $$2}' | cut -d'/' -f1;
+CMD_LOCAL_NETWORK_ADDR=ip addr | grep "metric" | awk '{print $$2}' | cut -d'/' -f1;
 ENV_FILE=.env
 
 help:
