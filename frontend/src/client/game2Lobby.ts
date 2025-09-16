@@ -17,6 +17,7 @@ export function init(){
 	const join_button  = document.getElementById("join-button") as HTMLButtonElement;
 	const spec_button  = document.getElementById("spec-button") as HTMLButtonElement;
 	const custom_button  = document.getElementById("custom-button") as HTMLButtonElement;
+	const listGame = document.getElementById("game-list") as HTMLElement;
 
 	if (game_button)
 	{
@@ -81,6 +82,45 @@ export function init(){
 			else
 				sock.emit('solo-game', getUserIdFromToken());
 			console.log('solo button pressed !');
+		});
+	}
+
+	if (spec_button)
+	{
+		spec_button.addEventListener('click', async (e) => {
+			e.preventDefault();
+			var sock = getSocket(2);
+			if (!sock)
+				return console.error('error 404: socket not found !')
+			try {
+				const res = await fetch(`http://${import.meta.env.VITE_LOCAL_ADDRESS}:3003/api/game2/get-games`, {
+					method: "POST",
+					headers: {
+						"Content-Type": "application/json",
+						Authorization: `Bearer ${token}`,
+					},
+					body: JSON.stringify({}),
+				});
+				const { names } = await res.json();
+				if (!names)
+					return console.log("No game running.");
+				listGame.innerHTML = names.map(l => `<p class="lobby-item" data-name="${l}">${l} - ${l.status}</p>`).join("");
+
+				document.querySelectorAll(".lobby-item").forEach(el => {
+					el.addEventListener("click", (e) => {
+						const target = e.currentTarget as HTMLElement;
+						const lobbyName = target.dataset.name;
+						console.log("Clicked lobby:", lobbyName);
+						const socket = getSocket(1);
+						if (lobbyName) {
+							notify(lobbyName);
+							socket!.emit("spec-game", {lobbyname: lobbyName});
+						}
+					});
+				});
+			} catch (err) {
+				console.error(err);
+			}
 		});
 	}
 }

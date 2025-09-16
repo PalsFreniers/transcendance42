@@ -220,6 +220,9 @@ export function handleRoute() {
         					<button id="spec-button">Spectator</button>
         					<button id="custom-button">Customisation</button>
       					</div>
+      					<div id="game-list" class="shifumi-lobby">
+							<h4>List of current games</h4>
+						</div>
     				</div>
   				</div>
 			</div>
