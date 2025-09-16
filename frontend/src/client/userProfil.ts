@@ -92,6 +92,8 @@ export async function init() {
 		});
 		const dataFriend = await resFriends.json();
 		const friendListContainer = document.getElementById('friend-list') as HTMLUListElement;
+		const imgFriend = document.getElementById('friend-img') as HTMLElement;
+		const usernameFriend = document.getElementById('friend-name') as HTMLElement;
 		if (dataFriend && Array.isArray(dataFriend.friends)) {
 			dataFriend.friends.forEach(friend => {
 				const li = document.createElement('li');
@@ -116,6 +118,12 @@ export async function init() {
 				});
 				li.appendChild(button);
 				friendListContainer.appendChild(li);
+				const ppFriend = document.createElement('img');
+				const nameFriend = document.createElement('p');
+				nameFriend.textContent = friend.username;
+				ppFriend.src = friend.profile_image_url;
+				imgFriend.appendChild(ppFriend);
+				usernameFriend.appendChild(nameFriend);
 			});
 		} else {
 			const msg = document.createElement('p');

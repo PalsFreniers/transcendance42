@@ -309,17 +309,17 @@ export function handleRoute() {
 		chat.innerHTML = `
 		<div id="chat-container">
 			<div id="chat-display">
-				<div id="chat-friend">
-					<div id="friend-pp">
-						<div id="friend-img">
-							<img src="friend.jpg" />
+				<div id="chat-box">
+					<div id="chat-friend">
+						<div id="friend-pp">
+							<div id="friend-img">
+
+							</div>
+							<div id="friend-name">
+
+							</div>
 						</div>
 					</div>
-					<div id="friend-name">
-						
-					</div>
-				</div>
-				<div id="chat-msg">
 					<div id="display-msg">
 						<div id="user-msg">
 							<p>Bonjour !</p>
@@ -329,10 +329,10 @@ export function handleRoute() {
 						</div>
 					</div>
 				</div>
-			</div>
-			<div id="chat-input">
-				<input type="text" placeholder="Écrire un message..." style="flex:1; padding:5px;" />
-				<button>Envoyer</button>
+				<div id="chat-input">
+					<input type="text" placeholder="Écrire un message..." />
+					<button>Envoyer</button>
+				</div>
 			</div>
 			<svg id="msg-ico" fill="none" viewBox="0 0 24 24" id="conversation" data-name="Flat Line" xmlns="http://www.w3.org/2000/svg" class="icon flat-line" stroke=""><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round" stroke="#dc143c" stroke-width="0.144"></g><g id="SVGRepo_iconCarrier"><path id="secondary" d="M18,9.5c0,3.59-3.36,6.5-7.5,6.5A8.5,8.5,0,0,1,7,15.27l-.65.28L3,17l1.15-4A5.82,5.82,0,0,1,3,9.5C3,5.91,6.36,3,10.5,3c3.63,0,6.66,2.24,7.35,5.21A5.49,5.49,0,0,1,18,9.5Z" style="fill: #63dac6; stroke-width: 2;"></path><path id="primary" d="M17.85,8.21A6.27,6.27,0,0,1,21,13.5,5.82,5.82,0,0,1,19.85,17L21,21l-4-1.73A8.5,8.5,0,0,1,13.5,20a7.47,7.47,0,0,1-7.11-4.45" style="fill: none; stroke: #dc143c; stroke-linecap: round; stroke-linejoin: round; stroke-width: 2;"></path><path id="primary-2" data-name="primary" d="M18,9.5c0,3.59-3.36,6.5-7.5,6.5A8.5,8.5,0,0,1,7,15.27l-.65.28L3,17l1.15-4A5.82,5.82,0,0,1,3,9.5C3,5.91,6.36,3,10.5,3c3.63,0,6.66,2.24,7.35,5.21A5.49,5.49,0,0,1,18,9.5Z" style="fill: none; stroke: #dc143c; stroke-linecap: round; stroke-linejoin: round; stroke-width: 2;"></path></g></svg>
 		</div>

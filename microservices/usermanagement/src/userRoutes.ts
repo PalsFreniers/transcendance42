@@ -108,7 +108,7 @@ export async function friendList(app: FastifyInstance) {
             const result = db.prepare('SELECT friends FROM users WHERE id = ?').get(user.userId) as { friends: string };
             const friendIds = JSON.parse(result.friends || '[]');
             const friends = friendIds.map((id: number) => {
-                return db.prepare('SELECT id, username, is_online FROM users WHERE id = ?').get(id);
+                return db.prepare('SELECT id, username, is_online, profile_image_url FROM users WHERE id = ?').get(id);
             });
             return { success: true, friends };
         } catch (err) {
