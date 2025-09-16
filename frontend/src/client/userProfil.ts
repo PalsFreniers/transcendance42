@@ -1,3 +1,6 @@
+import { getUserIdFromToken} from "./loginClient.js";
+import { getSocket } from "./socketClient.js";
+
 export async function init() {
 	try {
 		const token = localStorage.getItem('token'); // TOKEN LINK FROM THE USER CONNECTED
@@ -39,7 +42,7 @@ export async function init() {
 			const preview = document.getElementById("preview-profil") as HTMLImageElement;
 			pp.addEventListener('change', () => {
 				const file = pp.files?.[0];
-				if (!file) 
+				if (!file)
 					return;
 				fileName.textContent = file.name;
 				preview.src = URL.createObjectURL(file);
@@ -47,30 +50,30 @@ export async function init() {
 			form.addEventListener('submit', async (e) => {
 				e.preventDefault();
 				console.log('coucou');
-			  
+
 				const formData = new FormData();
 				formData.append("bio", bio.value);
 				if (pp.files?.[0]) {
-				  formData.append("profile_image", pp.files[0]);
+					formData.append("profile_image", pp.files[0]);
 				}
-			  
+
 				const changeProfil = await fetch(
-				  `http://${import.meta.env.VITE_LOCAL_ADDRESS}:3001/api/user/update`,
-				  {
-					method: 'PUT',
-					headers: {
-					  'Authorization': `Bearer ${token}`,
-					},
-					body: formData,
-				  }
+					`http://${import.meta.env.VITE_LOCAL_ADDRESS}:3001/api/user/update`,
+					{
+						method: 'PUT',
+						headers: {
+							'Authorization': `Bearer ${token}`,
+						},
+						body: formData,
+					}
 				);
-			  
+
 				if (!changeProfil.ok) {
-				  const err = await changeProfil.json();
-				  console.error('Failed to update profile:', err);
-				  return;
+					const err = await changeProfil.json();
+					console.error('Failed to update profile:', err);
+					return;
 				}
-			  
+
 				const data = await changeProfil.json();
 				profil.innerHTML = `
 				  <div class="profil-card">
@@ -81,8 +84,8 @@ export async function init() {
 					  <p class="profil-bio">${data.user.bio || 'No bio yet.'}</p>
 					</div>
 				  </div>`;
-				});
 			});
+		});
 		const resFriends = await fetch(`http://${import.meta.env.VITE_LOCAL_ADDRESS}:3001/api/user/friend-list`, {
 			method: 'GET',
 			headers: {
@@ -124,6 +127,38 @@ export async function init() {
 				ppFriend.src = friend.profile_image_url;
 				imgFriend.appendChild(ppFriend);
 				usernameFriend.appendChild(nameFriend);
+				ppFriend.addEventListener('click', async (e) => {
+					e.preventDefault();
+					const messages = await fetch(`http://${import.meta.env.VITE_LOCAL_ADDRESS}:3001/api/user/get-message`, {
+						method: 'POST',
+						headers: {
+							'Content-Type': 'application/json',
+							'Authorization': `Bearer ${token}`
+						},
+						body: JSON.stringify({ target: friend.username })
+					});
+					const data = await messages.json();
+					if (messages.ok){
+						const userMessage = document.getElementById('user-msg') as HTMLElement;
+						const targetMessage = document.getElementById('user-target-msg') as HTMLElement;
+						data.forEach(msg => {
+							if (!msg)
+								return;
+							const msgElement = document.createElement('p');
+							msgElement.textContent = msg.text;
+							if (msg.userId === getUserIdFromToken())
+								userMessage.appendChild(msgElement);
+							else
+								targetMessage.appendChild(msgElement);
+						});
+					}
+				});
+				const formMsg = document.getElementById('chat-input') as HTMLFormElement;
+				formMsg.addEventListener('submit', async (e) => {
+					e.preventDefault();
+					const server = getSocket(0);
+					server.emit('message', (getUserIdFromToken(), formMsg.input.value, friend.username))
+				})
 			});
 		} else {
 			const msg = document.createElement('p');
@@ -158,6 +193,7 @@ export async function init() {
 				console.error('Error:', err);
 			}
 		});
+		
 	} catch (err) {
 		console.error('Error:', err);
 	}
