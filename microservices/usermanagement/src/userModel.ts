@@ -22,7 +22,7 @@ export function createUser(user: User) {
         user.username,
         user.password_hash,
         user.email,
-        user.profile_image_url ?? null,
+        user.profile_image_url ?? 'https://pbs.twimg.com/profile_images/1915701923908329472/4oFAfwiD_400x400.jpg',
         user.friends ?? '[]',
         user.bio ?? '',
         user.is_online ?? 0,

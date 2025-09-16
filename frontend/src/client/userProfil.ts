@@ -1,6 +1,8 @@
 import { getUserIdFromToken} from "./loginClient.js";
 import { getSocket } from "./socketClient.js";
 
+import { handleRoute } from "./navClient.js";
+
 export async function init() {
 	try {
 		const token = localStorage.getItem('token'); // TOKEN LINK FROM THE USER CONNECTED
@@ -27,13 +29,13 @@ export async function init() {
 		editProfile.addEventListener('click', async (e) => {
 			e.preventDefault();
 			form.innerHTML = `
-				<input id="bio" type="text" bio="bio" placeholder="bio" required />
+				<input id="bio" type="text" bio="bio" placeholder="bio" />
 				<div class="file-upload">
 					<label for="img-profil">📷 Upload profile picture</label>
-					<input id="img-profil" type="file" accept="image/*" required />
+					<input id="img-profil" type="file" accept="image/*"/>
 					<span class="file-name">No file chosen</span>
 				</div>
-				<img id="preview-profil" src="/assets/default-avatar.png"/>
+				<img id="preview-profil" src="${data.user.profile_image_url || '/assets/default-avatar.png'}"/>
 				<button type="submit">Save</button>
 			`;
 			const bio = document.getElementById('bio') as HTMLInputElement;
@@ -115,7 +117,10 @@ export async function init() {
 					});
 					const data = await res.json();
 					if (res.ok)
+					{
 						console.log('friend deleted:', data.message);
+						handleRoute();
+					}
 					else
 						console.log('failed to delete friend', data.error);
 				});
@@ -185,7 +190,10 @@ export async function init() {
 				});
 				const data = await res.json();
 				if (res.ok)
+				{
 					console.log('friend added:', data.message);
+					handleRoute();
+				}
 				else
 					console.log('Failed to add friend', data.error);
 			}
