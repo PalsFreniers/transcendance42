@@ -97,7 +97,6 @@ export function createShifumiSocket(socketShifumi: Socket | null) {
         }// desafichier le bouton start et le bouton kick
     });
 
-
     /******************************************************************************/
     /*                                                                            */
     /*                                game  status                                */
@@ -222,6 +221,13 @@ export function createShifumiSocket(socketShifumi: Socket | null) {
       // afficher la carte jouer par l'adversaire;
     });
 
+    socketShifumi.on('score', (myPoints: number, opponentPoints: number) => {
+        const pointsText = document.getElementById('points');
+
+        if (pointsText)
+            pointsText.textContent = `${myPoints} - ${opponentPoints}`;
+    });
+
     // ajouter le lancement/resulta de la piece pour changer une carte
 
     // ajouter le passage de l'information sur la piece utiliser par l'adversaire
@@ -231,13 +237,6 @@ export function createShifumiSocket(socketShifumi: Socket | null) {
     /*                              error management                              */
     /*                                                                            */
     /******************************************************************************/
-
-    socketShifumi.on('score', (myPoints: number, opponentPoints: number) => {
-      const pointsText = document.getElementById('points');
-
-      if (pointsText)
-          pointsText.textContent = `${myPoints} - ${opponentPoints}`;
-    });
 
     socketShifumi.on('no-game', () => {
       const path = window.location.pathname;

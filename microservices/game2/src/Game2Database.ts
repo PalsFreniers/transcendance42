@@ -90,10 +90,21 @@ export function forfeit(gameId: number, player: number, score: number, gameTime:
     return true;
 }
 
+export function checkLobbyName(lobbyName: string): number
+{
+    const game = db.prepare(`SELECT id FROM games2 WHERE lobby_name = ?`).get(lobbyName) as { id: number};
+    if (game)
+        return game.id;
+    else
+        return 0;
+}
+
 export function createRoom(userId: number, name :string | null,  lobbyName: string)
 {
     if (!name)
-        return ;
+        return 0;
+    if (checkLobbyName(lobbyName))
+        return 0;
     const newGame: GameData = {
         player_one_id: userId,
         player_one_name: name,
@@ -104,8 +115,7 @@ export function createRoom(userId: number, name :string | null,  lobbyName: stri
         status: 'waiting',
         date: new Date().toISOString(),
     };
-    createGameLobby(newGame);
-    return true;
+    return createGameLobby(newGame);
 }
 
 export function createRoomSolo(userId: number, name :string | null,  lobbyName: string)
@@ -136,6 +146,15 @@ export function findGame(): number
     console.log(game.id);
     return game.id;
 }
+
+export function findGameByName(lobbyName: string): number
+{
+    const game = checkLobbyName(lobbyName);
+    if (!game)
+        return 0;
+    return game;
+}
+
 
 export function deleteGameFromDB(gameId)
 {
