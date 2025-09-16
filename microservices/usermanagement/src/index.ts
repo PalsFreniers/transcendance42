@@ -4,7 +4,10 @@ import { Server } from 'socket.io';
 import dotenv from 'dotenv';
 import jwt from '@fastify/jwt';
 import db from './dbSqlite/db.js';
+import multipart from '@fastify/multipart';
 import { Message } from './chatModel.js'
+import fastifyStatic from '@fastify/static';
+import path from 'path';
 import {
     auth,
     register,
@@ -33,7 +36,16 @@ await app.register(cors, {
     origin: true,
     allowedHeaders: ['Content-Type', 'Authorization'],
     credentials: true,
-    methods: ['GET', 'POST'],
+    methods: ['GET', 'POST', 'PUT'],
+});
+
+await app.register((multipart as any).default, {
+    attachFieldsToBody: true
+});
+
+await app.register(fastifyStatic, {
+    root: path.join(process.cwd(), 'uploads'), // dossier où tu enregistres les images
+    prefix: '/uploads/',                       // URL publique
 });
 
 export const io = new Server(app.server, {
@@ -121,7 +133,7 @@ io.on('connection', (socket) => {
 // JWT auth hook
 app.addHook('onRequest', async (request, reply) => {
     const url = request.raw.url || '';
-    const publicRoutes = ['/api/user/login', '/api/user/register'];
+    const publicRoutes = ['/api/user/login', '/api/user/register', '/uploads/'];
 
     if (publicRoutes.some(route => url.startsWith(route))) return;
 
@@ -146,11 +158,11 @@ app.register(deleteProfile, { prefix: '/api/user' });
 app.register(friendAdd, { prefix: '/api/user' });
 app.register(friendDelete, { prefix: '/api/user' });
 app.register(addStatsInDB, { prefix: '/api/user' });
-app.register(logOut, {prefix: '/api/user' });
+app.register(logOut, { prefix: '/api/user' });
 // app.register(friendSendMsg, { prefix: '/api/user' });
 
 // Start Fastify server
-app.listen({ port: Number(PORT), host: '0.0.0.0' }, (err,) => {
+app.listen({ port: Number(PORT), host: `0.0.0.0` }, (err,) => {
     if (err) {
         console.error(err);
     }

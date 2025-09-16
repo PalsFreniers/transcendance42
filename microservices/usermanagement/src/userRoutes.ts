@@ -1,6 +1,9 @@
 import { FastifyInstance } from 'fastify';
 import db from './dbSqlite/db.js';
 import { GameStats, addStats } from './gameStatsModel.js';
+import { Buffer } from 'buffer';
+import fs from 'fs';
+import path from 'path';
 //import { ChatMessage, saveMessage } from './userSocket.js';
 //import { io } from './index.js'
 
@@ -116,22 +119,44 @@ export async function updateProfile(app: FastifyInstance) {
     app.put('/update', async (request, reply) => {
         try {
             const user = request.user as { userId: number };
-            const { bio, profile_image_url } = request.body as {
-                bio: string;
-                profile_image_url: string;
-            };
-            const stmt = db.prepare(`
-        UPDATE users
-        SET bio = ?, profile_image_url = ?, updated_at = CURRENT_TIMESTAMP
-        WHERE id = ?
-      `);
-            stmt.run(bio, profile_image_url, user.userId);
-            return reply.send({ success: true });
+            let fileUrl: string | null = null;
+
+            const body = request.body as any; // avec attachFieldsToBody: true
+            const bio = body.bio || '';
+
+            if (body.profile_image) {
+                const file = body.profile_image;
+                const uploadDir = path.join('./', 'uploads');
+                if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
+                const filePath = path.join(uploadDir, file.filename);
+                await file.toBuffer().then(buffer => fs.writeFileSync(filePath, buffer));
+                fileUrl = `http://${process.env.VITE_LOCAL_ADDRESS}:3001/uploads/${file.filename}`;
+                console.log('File saved at:', fileUrl);
+            }
+
+            console.log('bio:', bio);
+            console.log('fileUrl:', fileUrl);
+            console.log('userId:', user.userId);
+
+
+            db.prepare(`
+          UPDATE users
+          SET bio = ?, profile_image_url = ?, updated_at = CURRENT_TIMESTAMP
+          WHERE id = ?
+        `).run(bio.value, fileUrl, user.userId);
+
+            const updatedUser = db
+                .prepare('SELECT id, username, email, bio, profile_image_url FROM users WHERE id = ?')
+                .get(user.userId);
+
+            return reply.send({ success: true, user: updatedUser });
         } catch (err) {
+            console.error(err);
             return reply.code(500).send({ error: 'Failed to update profile' });
         }
     });
 }
+
 
 export async function deleteProfile(app: FastifyInstance) {
     app.delete('/profil-delete', async (request, reply) => {
@@ -150,12 +175,12 @@ export async function addStatsInDB(app: FastifyInstance) {
     app.post('/add-stats', async (request, reply) => {
         console.log(`start save stats`);
         try {
-            const { stats } = request.body as {stats: GameStats};
+            const { stats } = request.body as { stats: GameStats };
             addStats(stats);
             return reply.send({ success: true });
         } catch (err) {
             console.log(err);
-            return reply.code(500).send({ error: 'Failed to add stats in gameStats table'});
+            return reply.code(500).send({ error: 'Failed to add stats in gameStats table' });
         }
     });
 }

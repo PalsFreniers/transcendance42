@@ -17,7 +17,7 @@ export function init() {
         createGameButton.addEventListener("click", async (e) => {
             e.preventDefault();
             try {
-                const res = await fetch("http://localhost:3002/api/game/create-game", {
+                const res = await fetch(`http://${import.meta.env.VITE_LOCAL_ADDRESS}:3002/api/game/create-game`, {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json",
@@ -44,7 +44,7 @@ export function init() {
         joinGameButton.addEventListener("click", async (e) => {
             e.preventDefault();
             try {
-                const findLobbiesRes = await fetch("http://localhost:3002/api/game/find-lobbies", {
+                const findLobbiesRes = await fetch(`http://${import.meta.env.VITE_LOCAL_ADDRESS}:3002/api/game/find-lobbies`, {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json",
@@ -58,7 +58,7 @@ export function init() {
                     return;
                 }
                 const lobby = lobbies[0];
-                const res = await fetch("http://localhost:3002/api/game/join-lobby", {
+                const res = await fetch(`http://${import.meta.env.VITE_LOCAL_ADDRESS}:3002/api/game/join-lobby`, {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json",
@@ -88,7 +88,7 @@ export function init() {
         specBtn.addEventListener('click', async (e) => {
             e.preventDefault();
             try {
-                const findLobbiesRes = await fetch("http://localhost:3002/api/game/spec-lobbies", {
+                const findLobbiesRes = await fetch(`http://${import.meta.env.VITE_LOCAL_ADDRESS}:3002/api/game/spec-lobbies`, {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json",

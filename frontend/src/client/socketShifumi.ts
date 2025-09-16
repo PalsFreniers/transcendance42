@@ -20,7 +20,7 @@ export function createShifumiSocket(socketShifumi: Socket | null) {
     /*                                                                            */
     /******************************************************************************/
 
-    socketShifumi = io('http://localhost:3003', {
+    socketShifumi = io(`http://${import.meta.env.VITE_LOCAL_ADDRESS}:3003`, {
       path: '/shifumiSocket/',
       auth: { token },
       withCredentials: true,

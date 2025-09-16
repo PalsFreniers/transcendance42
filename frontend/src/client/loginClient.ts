@@ -47,7 +47,7 @@ export function init() {
 		const password = (document.getElementById('loginPassword') as HTMLInputElement).value;
 		const remember = (document.getElementById("remember") as HTMLInputElement).checked;
 		try {
-		const res = await fetch('http://localhost:3001/api/user/login', {
+		const res = await fetch(`http://${import.meta.env.VITE_LOCAL_ADDRESS}:3001/api/user/login`, {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json' },
 			body: JSON.stringify({ username, password }),

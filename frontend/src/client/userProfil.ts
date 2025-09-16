@@ -1,7 +1,7 @@
 export async function init() {
 	try {
 		const token = localStorage.getItem('token'); // TOKEN LINK FROM THE USER CONNECTED
-		const res = await fetch('http://localhost:3001/api/user/profil', {
+		const res = await fetch(`http://${import.meta.env.VITE_LOCAL_ADDRESS}:3001/api/user/profil`, {
 			method: 'GET',
 			headers: {
 				'Content-Type': 'application/json',
@@ -9,7 +9,16 @@ export async function init() {
 			},
 		});
 		const data = await res.json();
-		console.log(data);
+		const profil = document.getElementById('profil') as HTMLElement;
+		profil.innerHTML = `
+    		<div class="profil-card">
+      			<img src="${data.user.profile_image_url || '/assets/default-avatar.png'}" class="profil-avatar" />
+      			<div class="profil-info">
+        			<h2 class="profil-username">${data.user.username}</h2>
+        			<p class="profil-email">${data.user.email}</p>
+       				<p class="profil-bio">${data.user.bio || 'No bio yet.'}</p>
+      			</div>
+    		</div>`
 		const editProfile = document.getElementById('edit-profil') as HTMLButtonElement;
 		const form = document.getElementById('form-profil') as HTMLFormElement;
 		editProfile.addEventListener('click', async (e) => {
@@ -17,13 +26,64 @@ export async function init() {
 			form.innerHTML = `
 				<input id="bio" type="text" bio="bio" placeholder="bio" required />
 				<div class="file-upload">
-  					<label for="img-profil">📷 Upload profile picture</label>
+					<label for="img-profil">📷 Upload profile picture</label>
 					<input id="img-profil" type="file" accept="image/*" required />
 					<span class="file-name">No file chosen</span>
 				</div>
-				<button type="submit">Save</button>`
-		});
-		const resFriends = await fetch('http://localhost:3001/api/user/friend-list', {
+				<img id="preview-profil" src="/assets/default-avatar.png"/>
+				<button type="submit">Save</button>
+			`;
+			const bio = document.getElementById('bio') as HTMLInputElement;
+			const pp = document.getElementById('img-profil') as HTMLInputElement;
+			const fileName = document.querySelector(".file-name") as HTMLElement;
+			const preview = document.getElementById("preview-profil") as HTMLImageElement;
+			pp.addEventListener('change', () => {
+				const file = pp.files?.[0];
+				if (!file) 
+					return;
+				fileName.textContent = file.name;
+				preview.src = URL.createObjectURL(file);
+			});
+			form.addEventListener('submit', async (e) => {
+				e.preventDefault();
+				console.log('coucou');
+			  
+				const formData = new FormData();
+				formData.append("bio", bio.value);
+				if (pp.files?.[0]) {
+				  formData.append("profile_image", pp.files[0]);
+				}
+			  
+				const changeProfil = await fetch(
+				  `http://${import.meta.env.VITE_LOCAL_ADDRESS}:3001/api/user/update`,
+				  {
+					method: 'PUT',
+					headers: {
+					  'Authorization': `Bearer ${token}`,
+					},
+					body: formData,
+				  }
+				);
+			  
+				if (!changeProfil.ok) {
+				  const err = await changeProfil.json();
+				  console.error('Failed to update profile:', err);
+				  return;
+				}
+			  
+				const data = await changeProfil.json();
+				profil.innerHTML = `
+				  <div class="profil-card">
+					<img src="${data.user.profile_image_url || '/assets/default-avatar.png'}" class="profil-avatar" />
+					<div class="profil-info">
+					  <h2 class="profil-username">${data.user.username}</h2>
+					  <p class="profil-email">${data.user.email}</p>
+					  <p class="profil-bio">${data.user.bio || 'No bio yet.'}</p>
+					</div>
+				  </div>`;
+				});
+			});
+		const resFriends = await fetch(`http://${import.meta.env.VITE_LOCAL_ADDRESS}:3001/api/user/friend-list`, {
 			method: 'GET',
 			headers: {
 				'Content-Type': 'application/json',
@@ -40,7 +100,7 @@ export async function init() {
 				button.textContent = 'Delete';
 				button.addEventListener('click', async (e) => {
 					e.preventDefault();
-					const res = await fetch('http://localhost:3001/api/user/delete-friend', {
+					const res = await fetch(`http://${import.meta.env.VITE_LOCAL_ADDRESS}:3001/api/user/delete-friend`, {
 						method: 'POST',
 						headers: {
 							'Content-Type': 'application/json',
@@ -72,7 +132,7 @@ export async function init() {
 				return;
 			}
 			try {
-				const res = await fetch('http://localhost:3001/api/user/add-friend', {
+				const res = await fetch(`http://${import.meta.env.VITE_LOCAL_ADDRESS}:3001/api/user/add-friend`, {
 					method: 'POST',
 					headers: {
 						'Content-Type': 'application/json',
