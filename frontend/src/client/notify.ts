@@ -9,6 +9,7 @@ export function notify(msg: string) {
     notifyContainer.style.right = "20px";
     notifyContainer.style.display = "flex";
     notifyContainer.style.flexDirection = "column";
+    notifyContainer.style.alignItems = "flex-end";
     notifyContainer.style.gap = "10px"; // espace entre notifs
     notifyContainer.style.zIndex = "1000";
     document.body.appendChild(notifyContainer);
@@ -18,6 +19,7 @@ export function notify(msg: string) {
   const div = document.createElement("div");
   div.textContent = msg;
   div.style.background = "black";
+  div.style.fontSize = "9px";
   div.style.color = "white";
   div.style.padding = "10px 15px";
   div.style.borderRadius = "8px";
@@ -33,6 +35,6 @@ export function notify(msg: string) {
 
   setTimeout(() => {
     div.style.opacity = "0";
-    setTimeout(() => div.remove(), 300);
+    setTimeout(() => div.remove(), 3000);
   }, 3000);
 }

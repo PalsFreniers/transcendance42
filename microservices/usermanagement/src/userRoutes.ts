@@ -4,7 +4,9 @@ import { GameStats, addStats } from './gameStatsModel.js';
 import { Buffer } from 'buffer';
 import fs from 'fs';
 import path from 'path';
-//import { ChatMessage, saveMessage } from './userSocket.js';
+import { ChatMessage } from './userSocket.js';
+import { Message } from './chatModel.js'
+//import { ChatMessage } from './userSocket.js';
 //import { io } from './index.js'
 
 export async function profil(app: FastifyInstance) {
@@ -183,4 +185,36 @@ export async function addStatsInDB(app: FastifyInstance) {
             return reply.code(500).send({ error: 'Failed to add stats in gameStats table' });
         }
     });
+}
+
+export async function getMessage(app: FastifyInstance)  {
+    app.post('/get-message', async (request, reply) => {
+        const friend = request.body as { target: string };
+        const myId = request.body as { id: string};
+        try {
+            if (friend) {
+                let { id } = db.prepare(`SELECT id FROM users WHERE username = ?`).get(friend) as { id: number};
+                if (!id)
+                    return reply.code(498).send({ error: 'Failed to get user from users'}) ;
+                let msgs = db.prepare(`SELECT * FROM conversation WHERE (targetId = ? AND userId = ?) OR (userId = ? AND targetId = ?)`).all(id, myId, id, myId) as Message[];
+                if (msgs)
+                {
+                    const messages: ChatMessage[] = msgs.map((row) => ({
+                        from: row.username,
+                        userId: row.userId,
+                        target: row.targetId,
+                        text: row.message,
+                        timestamp: row.date,
+                        isRead: row.is_read,
+                    }))
+                    return reply.code(200).send({ success: true,  messages });
+                }
+            }
+            else
+                return reply.code(499).send({ error: 'Failed to get message'});
+        } catch (err) {
+            console.log(err);
+            return reply.code(500).send({ error: 'Failed to get message'})
+        }
+    })
 }

@@ -1,12 +1,12 @@
 import { createMessage, Message } from './chatModel.js'
-
+import db from './dbSqlite/db.js';
 export interface ChatMessage {
     from: string;
     userId: number;
     target: number;
-    for: string;
     text: string;
     timestamp: string;
+    isRead: number;
 }
 
 export async function saveMessage(msg: ChatMessage) {
@@ -22,8 +22,63 @@ export async function saveMessage(msg: ChatMessage) {
         userId,
         targetId,
         message,
-        date
+        date,
+        is_read: 0
     };
     const msgId = createMessage(newMessage);
     console.log(`msgId = ${msgId}`);
+}
+
+export function startServer(io) {
+    io.on('connection', (socket) => {
+        console.log(`USER connected: ${socket.id} on Chat socket`);
+
+        socket.on('register-socket', (userID: number) => {
+            const stmt = db.prepare('UPDATE users SET socket = ?, is_online = 1 WHERE id = ?');
+            stmt.run(socket.id, userID);
+            console.log(`User ${userID} registered with Chat socket ${socket.id}`);
+            const msg = db.prepare(`SELECT * FROM conversation WHERE targetId = ? AND is_read = 0`).all(userID) as Message[];
+            if (msg) {
+                msg.forEach(msg => {
+                    const tmp = {
+                        from: msg.username
+                    };
+                    io.to(socket.id).emit('message', tmp.from);
+                });
+            }
+
+            socket.on('message', (txt, userId, targetUsername) => {
+                const username = db.prepare('SELECT username FROM users WHERE id = ?').get(userId) as { username: string };
+                const targetId = db.prepare('SELECT id FROM users WHERE username = ?').get(targetUsername) as { id: number };
+                const targetSocket = db.prepare('SELECT socket FROM users WHERE username = ?').get(targetUsername) as { socket: string };
+                const targetIsOnline = db.prepare('SELECT is_online FROM users WHERE username = ?').get(targetUsername) as { is_online: number };
+
+                if (!targetSocket)
+                    return io.to(socket.id).emit('error', 'error 404 : target not found !');
+                if (!targetId || !targetId.id)
+                    return io.to(socket.id).emit('error', 'error 404 : target not found !');
+                if (!targetIsOnline || !targetIsOnline.is_online)
+                    return io.to(socket.id).emit('error', 'error 404 : target not found !');
+
+                const msg: ChatMessage = {
+                    from: username.username,
+                    userId: userId,
+                    target: targetId.id,
+                    text: txt,
+                    timestamp: Date.now().toString(),
+                    isRead : 0
+                }
+                saveMessage(msg);
+
+                if (targetIsOnline.is_online)
+                    io.to(targetSocket.socket).emit('message', msg.from);
+            });
+        });
+
+        socket.on('disconnect', () => {
+            const stmt = db.prepare(`UPDATE users SET socket = NULL AND is_online = 0 WHERE socket = ?`);
+            stmt.run(socket.id);
+            console.log(`Socket ${socket.id} disconnected`);
+        });
+    });
 }

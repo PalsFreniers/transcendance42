@@ -34,7 +34,7 @@ export function createShifumiSocket(socketShifumi: Socket | null) {
     });
 
     socketShifumi.on('disconnect', (reason) => {
-      console.warn('Socket disconnected:', reason);
+      notify(`Socket disconnected: ${reason}`);
     });
 
     socketShifumi.on('reconnect', () => {

@@ -1,5 +1,6 @@
-import { getSocket } from './socketClient.js';
+import { getSocket } from './socketClient.js'
 import { getUserIdFromToken } from './loginClient.js'
+import { notify } from './notify.js'
 
 export function init() {
     const token = localStorage.getItem('token');
@@ -7,23 +8,23 @@ export function init() {
 
     if (!chat)
         return;
-    console.log
     const Send = document.getElementById('chat-input') as HTMLFormElement;
+
     Send.addEventListener('submit', async (e) => {
         e.preventDefault();
-        console.log('en attents du message !')
         const msg = (document.getElementById('message') as HTMLInputElement).value;
-        console.log(' message recuperer !')
         try {
             var socket = getSocket(0);
-            if (socket)
+            if (socket) {
                 socket.emit('message', msg, getUserIdFromToken(), 'toma'/* change by targe name */);
+            }
             else
-                console.error(`error 404 : sokcet not found !`);
+                console.error(`error 404 : socket not found !`);
         }
         catch (error) {
-            alert('failed to send message !');
+            notify('failed to send message !');
             console.error('can\'t send message', error);
         }
     });
+    console.log(`ended add event`)
 }

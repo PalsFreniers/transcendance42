@@ -1,6 +1,7 @@
 import io, { Socket } from 'socket.io-client';
 import { createShifumiSocket } from './socketShifumi.js';
 import { createPongSocket } from './socketPong.js';
+import { notify } from './notify.js'
 
 interface ChatMessage {
     from: string;
@@ -42,13 +43,14 @@ export function getSockets(): [Socket, Socket, Socket] {
             transports: ['websocket'],
             // autoConnect is true by default, reconnects automatically on disconnect
         });
+
         socketChat.on('connect', () => {
             console.log(`Socket (${socketChat!.id}) connected!`);
             socketChat!.emit('register-socket', userId);
         });
 
-        socketChat.on('message', (msg: ChatMessage) => {
-            console.log(`${msg.from} (${msg.timestamp}) : ${msg.text}`);
+        socketChat.on('message', (sender) => {
+            notify(`new message from ${sender}`);
         });
 
         socketChat.on('error', (text: string) => {

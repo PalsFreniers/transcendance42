@@ -35,7 +35,8 @@ db.exec(`
     userId INTEGER NOT NULL,
     targetId INTEGER NOT NULL,
     date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    message TEXT DEFAULT ''
+    message TEXT DEFAULT '',
+    is_read INTEGER DEFAULT 0
   );
 `);
 

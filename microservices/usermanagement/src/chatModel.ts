@@ -19,6 +19,7 @@ export interface Message {
     targetId: number;
     message: string;
     date: string;
+    is_read: number;
 }
 
 export function createMessage(message: Message) {

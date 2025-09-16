@@ -87,7 +87,7 @@ export async function postGame(app: FastifyInstance) {
         const { gameId, finalScore } = request.body as { gameId: number; finalScore: string };
         const update = db.prepare(`
     UPDATE games
-    SET game_score = ?, status = 'finished', end_time = CURRENT_TIMESTAMP
+    SET game_score = ?, status = 'finished', game_time = CURRENT_TIMESTAMP
     WHERE id = ?
   `);
         update.run(finalScore, gameId);

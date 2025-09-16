@@ -81,11 +81,11 @@ export function forfeit(gameId: number, player: number, score: number, gameTime:
     console.log(`game ${gameId} is finish by forfeit`);
     let up;
     if (player == 1)
-        up = db.prepare(`UPDATE games2 SET game_score = 'forfeit - ${score}' , end_time = ? , status = 'finished' WHERE id = ?`);
+        up = db.prepare(`UPDATE games2 SET game_score = 'forfeit - ${score}' , game_time = ? , status = 'finished' WHERE id = ?`);
     else if (player == 2)
-        up = db.prepare(`UPDATE games2 SET game_score = '${score} - forfeit' , end_time = ? , status = 'finished' WHERE id = ?`);
+        up = db.prepare(`UPDATE games2 SET game_score = '${score} - forfeit' , game_time = ? , status = 'finished' WHERE id = ?`);
     else
-        up = db.prepare(`UPDATE games2 SET game_score = 'forfeit - forfeit' , end_time = ? , status = 'finished' WHERE id = ?`);
+        up = db.prepare(`UPDATE games2 SET game_score = 'forfeit - forfeit' , game_time = ? , status = 'finished' WHERE id = ?`);
     up.run(gameTime, gameId);
     return true;
 }

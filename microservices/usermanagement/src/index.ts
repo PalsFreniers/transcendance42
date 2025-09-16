@@ -21,9 +21,10 @@ import {
     friendAdd,
     friendDelete,
     addStatsInDB,
+    getMessage,
     // friendSendMsg
 } from './userRoutes.js';
-import { ChatMessage, saveMessage } from './userSocket.js';
+import { startServer } from './userSocket.js';
 
 dotenv.config();
 
@@ -56,6 +57,7 @@ export const io = new Server(app.server, {
     },
 });
 
+startServer(io);
 
 //TOKEN
 await app.register(jwt, { secret: process.env.JWT_SECRET! });
@@ -74,61 +76,7 @@ io.use(async (socket, next) => {
     }
 });
 
-io.on('connection', (socket) => {
-    console.log(`USER connected: ${socket.id} on Chat socket`);
 
-    socket.on('register-socket', (userID: number) => {
-        const stmt = db.prepare('UPDATE users SET socket = ?, is_online = 1 WHERE id = ?');
-        stmt.run(socket.id, userID);
-        console.log(`User ${userID} registered with Chat socket ${socket.id}`);
-        const msg = db.prepare('SELECT * FROM conversation WHERE targetId = ?').all(userID) as Message[];
-        if (msg) {
-            msg.forEach(msg => {
-                const tmp: ChatMessage = {
-                    from: msg.username,
-                    userId: msg.userId,
-                    target: msg.targetId,
-                    for: socket.id,
-                    text: msg.message,
-                    timestamp: msg.date
-                };
-                console.log(`old message send to ${socket.id}`);
-                io.to(socket.id).emit('message', tmp);
-            });
-        }
-
-        socket.on('message', (txt, userId, targetUsername) => {
-            const username = db.prepare('SELECT username FROM users WHERE id = ?').get(userId) as { username: string };
-            const targetId = db.prepare('SELECT id FROM users WHERE username = ?').get(targetUsername) as { id: number };
-            const targetSocket = db.prepare('SELECT socket FROM users WHERE username = ?').get(targetUsername) as { socket: string };
-            const targetIsOnline = db.prepare('SELECT is_online FROM users WHERE username = ?').get(targetUsername) as { is_online: number };
-
-            if (!targetSocket)
-                io.to(socket.id).emit('error', 'error 404 : target not found !');
-
-            const msg: ChatMessage = {
-                from: username.username,
-                userId: userId,
-                target: targetId.id,
-                for: targetSocket.socket,
-                text: txt,
-                timestamp: Date.now().toString()
-            }
-
-            if (!targetIsOnline.is_online)
-                saveMessage(msg);
-            else
-                io.to(msg.for).emit('message', msg);
-
-        });
-    });
-
-    socket.on('disconnect', () => {
-        const stmt = db.prepare('UPDATE users SET is_online = 0 WHERE socket = ?');
-        stmt.run(socket.id);
-        console.log(`Socket ${socket.id} disconnected`);
-    });
-});
 
 // JWT auth hook
 app.addHook('onRequest', async (request, reply) => {
@@ -159,6 +107,7 @@ app.register(friendAdd, { prefix: '/api/user' });
 app.register(friendDelete, { prefix: '/api/user' });
 app.register(addStatsInDB, { prefix: '/api/user' });
 app.register(logOut, { prefix: '/api/user' });
+app.register(getMessage, { prefix: '/api/user' });
 // app.register(friendSendMsg, { prefix: '/api/user' });
 
 // Start Fastify server
