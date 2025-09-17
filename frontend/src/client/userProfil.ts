@@ -1,4 +1,4 @@
-import { getUserIdFromToken} from "./loginClient.js";
+import { getUserIdFromToken } from "./loginClient.js";
 import { getSocket } from "./socketClient.js";
 import { handleRoute } from "./navClient.js";
 
@@ -115,8 +115,7 @@ export async function init() {
 						body: JSON.stringify({ friendUsername: friend.username })
 					});
 					const data = await res.json();
-					if (res.ok)
-					{
+					if (res.ok) {
 						console.log('friend deleted:', data.message);
 						handleRoute();
 					}
@@ -125,12 +124,20 @@ export async function init() {
 				});
 				li.appendChild(button);
 				friendListContainer.appendChild(li);
+				const friendConverstaion = document.getElementById('chat-friend') as HTMLElement;
+				const friendPP = document.createElement('div');
+				friendPP.classList.add('friend-pp');
+				const imgDiv = document.createElement('div');
 				const ppFriend = document.createElement('img');
+				ppFriend.src = friend.profile_image_url;
+				imgDiv.appendChild(ppFriend);
+				const nameDiv = document.createElement('div');
 				const nameFriend = document.createElement('p');
 				nameFriend.textContent = friend.username;
-				ppFriend.src = friend.profile_image_url;
-				imgFriend.appendChild(ppFriend);
-				usernameFriend.appendChild(nameFriend);
+				nameDiv.appendChild(nameFriend);
+				friendPP.appendChild(imgDiv);
+				friendPP.appendChild(nameDiv);
+				friendConverstaion.appendChild(friendPP);
 				ppFriend.dataset.friendusername = friend.username;
 				ppFriend.addEventListener('click', async (e) => {
 					e.preventDefault();
@@ -145,7 +152,7 @@ export async function init() {
 						body: JSON.stringify({ friendUsername: usernameTarget })
 					});
 					const data = await messages.json();
-					if (data.messages){
+					if (data.messages) {
 						const boxMsg = document.getElementById('display-msg') as HTMLElement;
 						boxMsg.innerHTML = ``;
 						data.messages.forEach(msg => {
@@ -195,8 +202,7 @@ export async function init() {
 					body: JSON.stringify({ friendUsername })
 				});
 				const data = await res.json();
-				if (res.ok)
-				{
+				if (res.ok) {
 					console.log('friend added:', data.message);
 					handleRoute();
 				}
@@ -207,7 +213,7 @@ export async function init() {
 				console.error('Error:', err);
 			}
 		});
-		
+
 	} catch (err) {
 		console.error('Error:', err);
 	}

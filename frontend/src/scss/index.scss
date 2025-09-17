@@ -917,7 +917,7 @@ input:-webkit-autofill {
 
 #chat-container {
 	position: absolute;
-	top: 50%;
+	top: 60%;
 	left: 2%;
 
 	#msg-ico {
@@ -947,81 +947,86 @@ input:-webkit-autofill {
 
 			#chat-friend {
 				display: flex;
-				flex-direction: row;
-				width: 30%;
+				flex-direction: column;
+				justify-content: flex-end;
+				row-gap: 7px;
+				width: 28%;
 
-				#friend-pp {
+				.friend-pp {
 					display: flex;
+					padding: 2%;
 					align-items: center;
 					flex-direction: row;
-					width: 100%;
 					column-gap: 10px;
+					border: 1px solid rgba($color-white, 0.3);
+					backdrop-filter: $blur-strong;
+					border-radius: $radius-lg;
+					width: 100%;
 
-
-					#friend-img {
-						img {
-							width: 30px;
-							height: 30px;
-							border-radius: 50%;
-							border: 2px solid $color-accent-alt;
-							object-fit: cover;
-						}
+					img {
+						width: 30px;
+						height: 30px;
+						border-radius: 50%;
+						cursor: pointer;
+						border: 2px solid $color-accent-alt;
+						object-fit: cover;
 					}
 
-					#friend-name {
-						width: 70%;
+					p {
+						margin: 0;
 					}
-				}
-			}
-
-			#display-msg {
-				display: flex;
-				flex-direction: column;
-				flex-wrap: wrap;
-				width: 70%;
-				row-gap: 15px;
-
-				.user-msg {
-					width: fit-content;
-					align-self: flex-end;
-					color: $color-accent;
-					border-radius: $radius-xl;
-					padding: 1.5%;
-					background-color: $bg-dark;
-				}
-
-				.user-target-msg {
-					width: fit-content;
-					color: $color-accent-alt;
-					border-radius: $radius-xl;
-					padding: 1.5%;
-					background-color: $color-white;
 				}
 			}
 		}
 
-		#chat-input {
+		#display-msg {
 			display: flex;
-			justify-content: space-between;
-			width: 100%;
-			flex-direction: row;
+			flex-direction: column;
+			justify-content: flex-end;
+			flex-wrap: wrap;
+			width: 68%;
+			row-gap: 15px;
 
-			input {
-				width: 65%;
-				border-radius: $radius-xl;
-				border: 1px solid $color-secondary;
-				padding: 8px 12px;
-				font-family: $font-main;
-				font-size: $font-size-xs;
+			.user-msg {
+				width: fit-content;
+				align-self: flex-end;
 				color: $color-accent;
-				background: rgba($color-white, 0.1);
+				border-radius: $radius-xl;
+				padding: 1.5%;
+				background-color: $bg-dark;
+			}
 
-				&:focus {
-					outline: none;
-					border-color: $color-accent-alt;
-					box-shadow: 0 0 6px $color-accent-alt;
+			.user-target-msg {
+				width: fit-content;
+				color: $color-accent-alt;
+				border-radius: $radius-xl;
+				padding: 1.5%;
+				background-color: $color-white;
+			}
+
+			#chat-input {
+				display: flex;
+				justify-content: space-between;
+				flex-direction: row;
+				width: 100%;
+
+				input {
+					width: 65%;
+					border-radius: $radius-xl;
+					border: 1px solid $color-secondary;
+					padding: 8px 12px;
+					font-family: $font-main;
+					font-size: $font-size-xs;
+					color: $color-accent;
+					background: rgba($color-white, 0.1);
+
+					&:focus {
+						outline: none;
+						border-color: $color-accent-alt;
+						box-shadow: 0 0 6px $color-accent-alt;
+					}
+
 				}
-
 			}
 		}
 	}
