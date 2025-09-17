@@ -375,22 +375,17 @@ export function handleRoute() {
 							<div id="friend-img">
 
 							</div>
-							<div id="friend-name">
+							<div id="data-friendusername">
 
 							</div>
 						</div>
 					</div>
 					<div id="display-msg">
-						<div id="user-msg">
-							<p>Bonjour !</p>
-						</div>
-						<div id="user-target-msg">
-							<p>Salut, ça va ?</p>
-						</div>
+						
 					</div>
 				</div>
 				<form id="chat-input">
-					<input type="text" placeholder="Écrire un message..." />
+					<input id="msg-send" type="text" placeholder="Écrire un message..." />
 					<button type="submit">Send</button>
 				</form>
 			</div>
@@ -398,7 +393,7 @@ export function handleRoute() {
 		</div>
 
 `;
-		import('./chatClient.js').then((mode) => mode.init?.());
+		//import('./chatClient.js').then((mode) => mode.init?.());
 	}
 	else
 		chat.innerHTML = ``;

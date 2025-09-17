@@ -1,6 +1,5 @@
 import { getUserIdFromToken} from "./loginClient.js";
 import { getSocket } from "./socketClient.js";
-
 import { handleRoute } from "./navClient.js";
 
 export async function init() {
@@ -98,7 +97,7 @@ export async function init() {
 		const dataFriend = await resFriends.json();
 		const friendListContainer = document.getElementById('friend-list') as HTMLUListElement;
 		const imgFriend = document.getElementById('friend-img') as HTMLElement;
-		const usernameFriend = document.getElementById('friend-name') as HTMLElement;
+		const usernameFriend = document.getElementById('data-friendusername') as HTMLElement;
 		if (dataFriend && Array.isArray(dataFriend.friends)) {
 			dataFriend.friends.forEach(friend => {
 				const li = document.createElement('li');
@@ -132,37 +131,43 @@ export async function init() {
 				ppFriend.src = friend.profile_image_url;
 				imgFriend.appendChild(ppFriend);
 				usernameFriend.appendChild(nameFriend);
+				ppFriend.dataset.friendusername = friend.username;
 				ppFriend.addEventListener('click', async (e) => {
 					e.preventDefault();
+					const usernameTarget = (e.currentTarget as HTMLImageElement).dataset.friendusername;
+					console.log("Image cliquée => username:", usernameTarget);
 					const messages = await fetch(`http://${import.meta.env.VITE_LOCAL_ADDRESS}:3001/api/user/get-message`, {
 						method: 'POST',
 						headers: {
 							'Content-Type': 'application/json',
 							'Authorization': `Bearer ${token}`
 						},
-						body: JSON.stringify({ target: friend.username })
+						body: JSON.stringify({ friendUsername: usernameTarget })
 					});
 					const data = await messages.json();
 					if (data.messages){
-						const userMessage = document.getElementById('user-msg') as HTMLElement;
-						const targetMessage = document.getElementById('user-target-msg') as HTMLElement;
+						const boxMsg = document.getElementById('display-msg') as HTMLElement;
+						boxMsg.innerHTML = ``;
 						data.messages.forEach(msg => {
 							if (!msg)
 								return;
 							const msgElement = document.createElement('p');
 							msgElement.textContent = msg.text;
 							if (msg.userId === getUserIdFromToken())
-								userMessage.appendChild(msgElement);
+								msgElement.className = "user-msg";
 							else
-								targetMessage.appendChild(msgElement);
+								msgElement.className = "user-target-msg";
+							boxMsg.appendChild(msgElement);
 						});
 					}
-				});
-				const formMsg = document.getElementById('chat-input') as HTMLFormElement;
-				formMsg.addEventListener('submit', async (e) => {
-					e.preventDefault();
-					const server = getSocket(0);
-					server.emit('message', (getUserIdFromToken(), formMsg.input.value, friend.username))
+					const msgToFriend = document.getElementById('msg-send') as HTMLInputElement;
+					const formMsg = document.getElementById('chat-input') as HTMLFormElement;
+					formMsg.addEventListener('submit', async (e) => {
+						e.preventDefault();
+						const server = getSocket(0);
+						console.log(usernameTarget);
+						server.emit('message', msgToFriend.value, getUserIdFromToken(), usernameTarget);
+					});
 				})
 			});
 		} else {

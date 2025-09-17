@@ -1,7 +1,6 @@
 import { FastifyInstance } from 'fastify';
 import db from './dbSqlite/db.js';
 import { GameStats, addStats } from './gameStatsModel.js';
-import { Buffer } from 'buffer';
 import fs from 'fs';
 import path from 'path';
 import { ChatMessage } from './userSocket.js';
@@ -197,7 +196,7 @@ export async function getMessage(app: FastifyInstance) {
                 const id = db.prepare(`SELECT id FROM users WHERE username = ?`).get(friend.friendUsername) as { id: number };
                 if (!id)
                     return reply.code(498).send({ error: 'Failed to get user from users' });
-                let msgs = db.prepare(`SELECT * FROM conversation WHERE (targetId = ? AND userId = ?) OR (userId = ? AND targetId = ?)`).all(id, user.userId, id, user.userId) as Message[];
+                let msgs = db.prepare(`SELECT * FROM conversation WHERE (targetId = ? AND userId = ?) OR (userId = ? AND targetId = ?)`).all(id.id, user.userId, id.id, user.userId) as Message[];
                 if (msgs) {
                     const messages: ChatMessage[] = msgs.map((row) => ({
                         from: row.username,
