@@ -430,12 +430,14 @@ export function handleRoute() {
 					<div id="chat-friend">
 						
 					</div>
-					<div id="display-msg">
+					<div id="chat-part">
+						<div id="display-msg">
 					
-					<form id="chat-input">
-						<input id="msg-send" type="text" placeholder="Écrire un message..." />
-						<button type="submit">Send</button>
-					</form>
+						</div>
+						<form id="chat-input">
+							<input id="msg-send" type="text" placeholder="Écrire un message..." />
+							<button type="submit">Send</button>
+						</form>
 					</div>
 				</div>
 			</div>

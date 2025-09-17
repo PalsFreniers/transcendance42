@@ -141,7 +141,10 @@ export async function init() {
 				ppFriend.dataset.friendusername = friend.username;
 				ppFriend.addEventListener('click', async (e) => {
 					e.preventDefault();
+					document.querySelectorAll('.friend-pp').forEach(el => el.classList.remove('selected'));
 					const usernameTarget = (e.currentTarget as HTMLImageElement).dataset.friendusername;
+					const friendPPDiv = (e.currentTarget as HTMLElement).closest('.friend-pp');
+					friendPPDiv?.classList.add('selected');
 					console.log("Image cliquée => username:", usernameTarget);
 					const messages = await fetch(`http://${import.meta.env.VITE_LOCAL_ADDRESS}:3001/api/user/get-message`, {
 						method: 'POST',
@@ -169,12 +172,12 @@ export async function init() {
 					}
 				});
 				const formMsg = document.getElementById('chat-input') as HTMLFormElement;
-				if (formMsg)
-				{
+				const msgsend = document.getElementById('msg-send') as HTMLInputElement; 
+				if (formMsg) {
 					formMsg.addEventListener('submit', async (e) => {
 						e.preventDefault();
 						const server = getSocket(0);
-						server.emit('message', (getUserIdFromToken(), formMsg.input.value, friend.username))
+						server.emit('message', msgsend.value, getUserIdFromToken(), friend.username)
 					})
 				}
 			});
