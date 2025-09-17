@@ -12,9 +12,22 @@ export async function profil(app: FastifyInstance) {
     app.get('/profil', async (request, reply) => {
         try {
             const user = request.user as { userId: number };
-            const result = db
-                .prepare('SELECT id, username, email, bio, profile_image_url FROM users WHERE id = ?')
-                .get(user.userId);
+			const { username } = request.query as { username?: string};
+			let result : any;
+			if (username)
+			{
+				result = db
+					.prepare('SELECT id, username, bio, profile_image_url FROM users WHERE username = ?')
+					.get(username) as { username: string };
+			}
+			else
+			{
+				result = db
+					.prepare('SELECT id, username, email, bio, profile_image_url FROM users WHERE id = ?')
+					.get(user.userId);
+			}
+            if (!result)
+				return reply.code(404).send({ error: 'Profil not found' });
             return { success: true, user: result };
         } catch (err) {
             return reply.code(401).send({ error: 'Unauthorized' });

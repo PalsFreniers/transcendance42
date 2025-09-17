@@ -160,15 +160,16 @@ export async function init() {
 							boxMsg.appendChild(msgElement);
 						});
 					}
-					const msgToFriend = document.getElementById('msg-send') as HTMLInputElement;
-					const formMsg = document.getElementById('chat-input') as HTMLFormElement;
+				});
+				const formMsg = document.getElementById('chat-input') as HTMLFormElement;
+				if (formMsg)
+				{
 					formMsg.addEventListener('submit', async (e) => {
 						e.preventDefault();
 						const server = getSocket(0);
-						console.log(usernameTarget);
-						server.emit('message', msgToFriend.value, getUserIdFromToken(), usernameTarget);
-					});
-				})
+						server.emit('message', (getUserIdFromToken(), formMsg.input.value, friend.username))
+					})
+				}
 			});
 		} else {
 			const msg = document.createElement('p');

@@ -60,10 +60,13 @@ async function profil_image(){
 		const data = await profil.json();
 		const pro = document.getElementById('img_perso') as HTMLImageElement;
 		//const url = `${data.user.profile_image_url || '/assets/default-avatar.png'}`;
-		console.log("👉 Réponse API :", data.user);
-		pro.src = data.user.profile_image_url;
+		if (data)
+		{
+			console.log("👉 Réponse API :", data.user);
+			pro.src = data.user.profile_image_url;
+		}
 	} catch (error) {
-		console.error(error)
+		console.error(error);
 	}
 }
 
@@ -116,9 +119,22 @@ async function msg_lobby(event: MouseEvent){
 					friendDiv.appendChild(img);
 					friendDiv.appendChild(p);
 
-					friendDiv.addEventListener("click", () => {
+					p.addEventListener("click", () => {
 						console.log("Tu as cliqué sur :", friend.username);
-						// Ici tu peux ouvrir un chat ou autre
+						if (friends_chat)
+						{
+							friends_chat.innerHTML = `
+							<form id="chat-input">
+								<input type="text" placeholder="Écrire un message..." />
+								<button type="submit">Send</button>
+							</form>`;
+						}
+					});
+					let url: string;
+					url = '/profil/' + friend.username;
+					img.addEventListener("click", () => {
+						history.pushState(null, '', url);
+						handleRoute();
 					});
 
 					friends_lobby.appendChild(friendDiv);
@@ -132,7 +148,7 @@ async function msg_lobby(event: MouseEvent){
 		console.log("On ouvre le chat");
 		function click_event(e: MouseEvent){
 			const target = e.target as Node;
-			if (chat && !chat_boddy?.contains(target)){
+			if (chat && !chat_boddy?.contains(target) ){
 				chat.innerHTML = ``;
 				document.removeEventListener('click', click_event);
 			}
@@ -143,7 +159,46 @@ async function msg_lobby(event: MouseEvent){
 	}
 }
 
+async function profil_name(){
+	const path = window.location.pathname;
+	const app = document.getElementById('app');
+	if (!app)
+		return;
+	const token = localStorage.getItem('token');
+	let	profil_path: string | null = null;
+	const match = path.split('/');
 
+	if (match && !match[3])
+	{
+		profil_path = match[2];
+		try {
+			const url = profil_path
+				? `http://${import.meta.env.VITE_LOCAL_ADDRESS}:3001/api/user/profil?username=${encodeURIComponent(profil_path)}`
+				: `http://${import.meta.env.VITE_LOCAL_ADDRESS}:3001/api/user/profil`;
+			const profil = await fetch(url, {
+				method: "GET",
+				headers: {
+					"Content-Type": "application/json",
+					'Authorization': `Bearer ${token}`
+				},
+			});
+			const data = await profil.json();
+			if (data)
+				console.log("👉 Réponse profil :", data.user.username);
+			/*app.innerHTML = `
+				<div id="back-profil">
+					<img id="preview-profil" src="${data.user.profile_image_url || '/assets/default-avatar.png'}"/>
+					<div class="profil-info">
+        			<h2 class="profil-username">${data.user.username}</h2>
+       				<p class="profil-bio">${data.user.bio || 'No bio yet.'}</p>
+      			</div>
+				</div>
+			`;*/
+		} catch (error) {
+			console.error(error);
+		}
+	}
+}
 
 export function handleRoute() {
 	const path = window.location.pathname;
@@ -165,8 +220,8 @@ export function handleRoute() {
 		handleRoute();
 		return;
 	}
-	switch (path) {
-		case '/':
+	switch (true) {
+		case path == '/':
 			app.innerHTML = `
 			<div id="back">
 				<div id="lien-cercle">
@@ -176,7 +231,7 @@ export function handleRoute() {
 				</div>
 			</div>`
 			break;
-		case '/login':
+		case path == '/login':
 			app.innerHTML = `
 				<div id="back_login">
 					<div class="wrapper">
@@ -206,7 +261,7 @@ export function handleRoute() {
 				</div>`;
 			import('./loginClient.js').then((mod) => mod.init?.());
 			break;
-		case '/register':
+		case path == '/register':
 			app.innerHTML = `
 				<div id="back_login">
 					<div class="wrapper">
@@ -237,7 +292,7 @@ export function handleRoute() {
 				</div>`;
 			import('./registerClient.js').then((mod) => mod.init?.());
 			break;
-		case '/pong':
+		case path == '/pong':
 			app.innerHTML = `
 			<div id="back-pong">
 				<div class="pong-wrapper">
@@ -263,7 +318,7 @@ export function handleRoute() {
 			</div>`;
 			import('./gameLobby.js').then((mod) => mod.init?.());
 			break;
-		case '/2game':
+		case path == '/2game':
 			app.innerHTML = `
 			<div id="back_shifumi">
   				<div class="shifumi-wrapper">
@@ -285,7 +340,7 @@ export function handleRoute() {
 			`;
 			import('./game2Lobby.js').then((mod) => mod.init?.());
 			break;
-		case '/shifumi':
+		case path == '/shifumi':
 			app.innerHTML = `
 			<div id="back_shifumi">
 				<div id="container-button">
@@ -303,7 +358,8 @@ export function handleRoute() {
 			`;
 			import('./shifumiStart.js').then((mod) => mod.init());
 			break;
-		case '/profil':
+		case path.startsWith('/profil'):
+			profil_name();
 			app.innerHTML = `
 				<div id="back-profil">
 					<div class="profil-wrapper">
@@ -319,7 +375,7 @@ export function handleRoute() {
 				</div>`;
 			import('./userProfil.js').then((mod) => mod.init?.());
 			break;
-		case '/lobby':
+		case path == '/lobby':
 			app.innerHTML = `
 			<div id="lobby">
 				<div id="profils">
@@ -361,6 +417,7 @@ export function handleRoute() {
 				</div>
 			</div>
 			`;
+			profil_image();
 			break;
 		default:
 			app.innerHTML = `<h2>404 - Page not found</h2>`;
@@ -526,8 +583,7 @@ export function handleRoute() {
 				alert("Logout failed: " + (data.error || "Unknown error"));
 			}
 		});
-	}
-	profil_image();
+	}		
 	const music = document.getElementById("music") as HTMLAudioElement;
 	const musicButton = document.getElementById("btn-music") as HTMLButtonElement;
 	const musicVolume = document.getElementById("volume-music") as HTMLInputElement;
