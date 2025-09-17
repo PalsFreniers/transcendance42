@@ -190,10 +190,11 @@ export async function addStatsInDB(app: FastifyInstance) {
 export async function getMessage(app: FastifyInstance) {
     app.post('/get-message', async (request, reply) => {
         try {
-            const friend = request.body as { target: string };
+            const friend = request.body as { friendUsername: string };
             const user = request.user as { userId: number };
+            console.log(friend.friendUsername);
             if (friend) {
-                let { id } = db.prepare(`SELECT id FROM users WHERE username = ?`).get(friend) as { id: number };
+                const id = db.prepare(`SELECT id FROM users WHERE username = ?`).get(friend.friendUsername) as { id: number };
                 if (!id)
                     return reply.code(498).send({ error: 'Failed to get user from users' });
                 let msgs = db.prepare(`SELECT * FROM conversation WHERE (targetId = ? AND userId = ?) OR (userId = ? AND targetId = ?)`).all(id, user.userId, id, user.userId) as Message[];
@@ -206,7 +207,7 @@ export async function getMessage(app: FastifyInstance) {
                         timestamp: row.date,
                         isRead: row.is_read,
                     }))
-                    return reply.code(200).send({ success: true, messages });
+                    return reply.code(200).send({ success: true, messages: messages });
                 }
             }
             else

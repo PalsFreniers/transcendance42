@@ -138,10 +138,10 @@ export async function init() {
 						body: JSON.stringify({ target: friend.username })
 					});
 					const data = await messages.json();
-					if (messages.ok){
+					if (data.messages){
 						const userMessage = document.getElementById('user-msg') as HTMLElement;
 						const targetMessage = document.getElementById('user-target-msg') as HTMLElement;
-						data.forEach(msg => {
+						data.messages.forEach(msg => {
 							if (!msg)
 								return;
 							const msgElement = document.createElement('p');
