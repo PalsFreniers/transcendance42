@@ -57,6 +57,24 @@ export function getOpponentName(gameId: number, userId:number)
     return null;
 }
 
+export function getPlayerName(gameId: number)
+{
+    const game = db.prepare(`
+        SELECT player_one_id, player_two_id, player_one_name, player_two_name FROM games2 WHERE id = ? 
+    `);
+    let opponentName = game.get(gameId) as {player_one_id : number, player_two_id : number, player_one_name : string, player_two_name : string};
+    if (opponentName)
+    {
+        return {
+            playerOneId: opponentName.player_one_id,
+            playerTwoId: opponentName.player_two_id,
+            playerOneName: opponentName.player_one_name,
+            playerTwoName: opponentName.player_two_name
+        }
+    }
+    return null;
+}
+
 export function kickOpponentFromDB(gameId: number)
 {
     const opponentId = db.prepare('SELECT player_two_id FROM games2 WHERE id = ?').get(gameId) as {player_two_id: number};

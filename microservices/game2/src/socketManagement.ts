@@ -1,6 +1,17 @@
 import { Server, Socket } from "socket.io";
 import { verifTokenSocket } from "./index.js";
-import { createRoom, createRoomSolo, getOpponentName, joinRoom, kickOpponentFromDB, findGame, findGameByName, deleteGameFromDB, saveStats } from './Game2Database.js';
+import {
+    createRoom,
+    createRoomSolo,
+    getOpponentName,
+    joinRoom,
+    kickOpponentFromDB,
+    findGame,
+    findGameByName,
+    deleteGameFromDB,
+    saveStats,
+    getPlayerName
+} from './Game2Database.js';
 import { GameData } from './gameModel.js';
 import { game } from './game.js';
 import { Manager } from './gameManager.js';
@@ -134,11 +145,9 @@ export function socketManagemente(io: Server)
             {
                 const game = manager.getGame(gameId);
                 if (game)
-                    game.disconnect(playerId);
+                    game.disconnect(playerId, socket);
                 else
-                {
                     quitLobby(io, socket);
-                }
             }
             socket.data.gameId = -1;
             console.log(`Socket Shifumi disconnected: ${socket.id}`);
@@ -170,8 +179,7 @@ export function socketManagemente(io: Server)
                 socket.data.player = 2;
                 socket.join(`${gameId.toString()}.2`);
                 io.to(socket.id).emit('roomJoined', gameId);
-                io.to(`${gameId.toString()}.1`).emit('opponent-found', 1, name);
-                io.to(`${gameId.toString()}.2`).emit('opponent-found', 2, getOpponentName(gameId, userId));
+
             }
         });
 
@@ -185,7 +193,6 @@ export function socketManagemente(io: Server)
             const gameId = findGameByName(lobbyname);
             if (!gameId || gameId > nextGameId)
                 return io.to(socket.id).emit('roomInfo', `you cannot find game named '${lobbyname}'`);
-            console.log(`gameId = ${gameId}`)
 
             let name = socket.data.userName;
 
@@ -257,6 +264,42 @@ export function socketManagemente(io: Server)
             io.to(socket.id).emit('roomJoined', roomId);
 
             // cree ia et l'ajouter dans la game, la room ${roomId}-2
+        });
+
+        socket.on('spec-game', (userId, lobbyName) =>
+        {
+            if (!verifTokenSocket(socket))
+                return io.to(socket.id).emit('error', 'error : your token isn\'t valid !');
+            if (!userId)
+                return io.to(socket.id).emit('error', 'error : your user id isn\'t valid !');
+
+            const gameId = findGameByName(lobbyName.lobbyname);
+            if (!gameId || gameId > nextGameId)
+                return io.to(socket.id).emit('roomInfo', `you cannot find game named '${lobbyName.lobbyname}'`);
+
+                socket.join(`${gameId}.1`)
+                socket.data.player = 3;
+                socket.data.gameId = gameId;
+
+                io.to(socket.id).emit('roomJoined', gameId);
+        });
+
+        socket.on('ready', () =>
+        {
+            const gameId = socket.data.gameId;
+            if (socket.data.player == 2) {
+                io.to(`${gameId.toString()}.1`).emit('opponent-found', 1, socket.data.userName);
+                io.to(`${gameId.toString()}.2`).emit('opponent-found', 2, getOpponentName(gameId, socket.data.userId));
+            }
+            if (socket.data.player == 3) {
+                const players = getPlayerName(gameId);
+                io.to(socket.id).emit('game-spectate', gameId, { name: players?.playerOneName, id: players?.playerOneId}, players?.playerTwoName);
+                const game = manager.getGame(gameId);
+                if (game)
+                    game.spectate(1, socket);
+                else
+                    io.to(`${socket.data.gameId}.1`).to(`${socket.data.gameId}.2`).emit('roomInfo', `${socket.data.userName} spectate`);
+            }
         });
 
         // ajouter quit room

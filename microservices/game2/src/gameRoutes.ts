@@ -98,11 +98,9 @@ export async function postGame(app: FastifyInstance) {
 export async function getAllGame(app: FastifyInstance)
 {
     app.post('/api/game2/get-games', async (request, reply) => {
-        let names: string[];
-
-        names = db.prepare(`
-            SELECT lobby_name FROM games2 WHERE player_two_id = 0 OR player_two_id = -1
-        `).all() as string[];
+        const names = db.prepare(`
+            SELECT lobby_name, status FROM games2 WHERE status='waiting' OR status='playing'
+        `).all();
 
         if (names)
             return reply.code(200).send({ success: true, names });

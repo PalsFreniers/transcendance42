@@ -5,9 +5,21 @@ import { notify } from './notify.js'
 
 export let gameIdShifumi: number = -1;
 export let myCard: [number, number][] = [];
-
 export let opponentName: string | null = null;
 
+export let spectate: {
+    playerName: string | null,
+    playerId: number,
+    playerCard: [number, number][] | null,
+    playedCard: [number, number] | null,
+    spec: boolean
+} = {
+    playerName: null,
+    playerId: 0,
+    playerCard: null,
+    playedCard: null,
+    spec: false
+}
 
 export function createShifumiSocket(socketShifumi: Socket | null) {
     
@@ -56,6 +68,7 @@ export function createShifumiSocket(socketShifumi: Socket | null) {
     socketShifumi.on('roomJoined', (roomId: number) => {
       history.pushState(null, '', '/shifumi');
       handleRoute();
+      socketShifumi.emit('ready');
       console.log(`you join room ${roomId}`)
     });
 
@@ -63,6 +76,9 @@ export function createShifumiSocket(socketShifumi: Socket | null) {
       const button = document.getElementById('start-button');
       const kick = document.getElementById('kick-opponent');
       const opponent = document.getElementById('opponent-name');
+
+      if (spectate.spec)
+          return notify("game full !");
 
       if (opponent)
           opponent.textContent = `your opponent is ${opponentName}`;
@@ -118,23 +134,23 @@ export function createShifumiSocket(socketShifumi: Socket | null) {
         if (pointsText)
             pointsText.textContent = `0 - 0`
         if (quit)
-          quit.hidden = true;
+            quit.hidden = true;
         if (start)
-        start.hidden = true;
+            start.hidden = true;
         if (card1)
-        card1.hidden = false;
+            card1.hidden = false;
         if (card2)
-        card2.hidden = false;
+            card2.hidden = false;
         if (card3)
-        card3.hidden = false;
+            card3.hidden = false;
     });
 
     socketShifumi.on('wait-opponent', () => {
       notify('your opponent as been deconnected\nhe have 15 seconds for rejoined the game');
     });
 
-    socketShifumi.on('opponent-reconnected', () => {
-      notify('your opponent as been reconnected');
+    socketShifumi.on('opponent-reconnected', (name) => {
+      notify(`${name} as been reconnected`);
     });
 
     socketShifumi.on('game-ended', () => {
@@ -144,6 +160,21 @@ export function createShifumiSocket(socketShifumi: Socket | null) {
         handleRoute();
     });
 
+    socketShifumi.on('game-spectate', (gameId, player, opponentName) => {
+        const opponent = document.getElementById('opponent-name')
+
+        gameIdShifumi = gameId;
+        spectate = {
+            playerName: player.name,
+            playerId: player.id,
+            playerCard: null,
+            playedCard: null,
+            spec: true
+        };
+        if (opponent)
+            opponent.textContent = `${player.name} versus ${opponentName}`;
+    });
+
     /******************************************************************************/
     /*                                                                            */
     /*                           round or game win/lose                           */
@@ -151,27 +182,54 @@ export function createShifumiSocket(socketShifumi: Socket | null) {
     /******************************************************************************/
 
     socketShifumi.on('winRound', (myPoints: number, opponentPoints: number) => {
+        const opponentPlayedCard = document.getElementById('opponent-card-played') as HTMLElement;
+        const playedCard = document.getElementById('card-played') as HTMLElement;
         const pointsText = document.getElementById('points');
+
         if (pointsText)
             pointsText.textContent = `${myPoints} - ${opponentPoints}`;
+        if (playedCard)
+            playedCard.textContent = '';
+        if (opponentPlayedCard)
+            opponentPlayedCard.textContent = '';
     });
 
     socketShifumi.on('loseRound', (myPoints: number, opponentPoints: number) => {
-      const pointsText = document.getElementById('points');
-      if (pointsText)
-        pointsText.textContent = `${myPoints} - ${opponentPoints}`;
+        const opponentPlayedCard = document.getElementById('opponent-card-played') as HTMLElement;
+        const playedCard = document.getElementById('card-played') as HTMLElement;
+        const pointsText = document.getElementById('points');
+
+        if (pointsText)
+            pointsText.textContent = `${myPoints} - ${opponentPoints}`;
+        if (playedCard)
+            playedCard.textContent = '';
+        if (opponentPlayedCard)
+            opponentPlayedCard.textContent = '';
     });
 
     socketShifumi.on('drawRound', () => {
+        const opponentPlayedCard = document.getElementById('opponent-card-played') as HTMLElement;
+        const playedCard = document.getElementById('card-played') as HTMLElement;
 
+        if (playedCard)
+            playedCard.textContent = '';
+        if (opponentPlayedCard)
+            opponentPlayedCard.textContent = '';
     }) // a ajouter dans le manager game
 
     socketShifumi.on('equal', () => {
-        console.log('no one win this round');
+        const opponentPlayedCard = document.getElementById('opponent-card-played') as HTMLElement;
+        const playedCard = document.getElementById('card-played') as HTMLElement;
+
+        notify('no one win this round');
+        if (playedCard)
+            playedCard.textContent = '';
+        if (opponentPlayedCard)
+            opponentPlayedCard.textContent = '';
     }); // nom a changer ?
 
     socketShifumi.on('forfeit', (player : string) => {
-      console.log(`player ${player} as declared forfeit`);
+      notify(`${player} as declared forfeit`);
     });
 
     socketShifumi.on('winGame', () => {
@@ -189,7 +247,10 @@ export function createShifumiSocket(socketShifumi: Socket | null) {
     /******************************************************************************/
     
     socketShifumi.on('card', (card: [number, number][]) => {
-      myCard = card;
+        if (spectate.spec)
+            spectate.playerCard = card;
+        else
+            myCard = card;
       // a passer dans un fonction a appeler pour rendre le code plus propre 
       const card1 = document.getElementById('card1-button');
       if (card1)
@@ -217,8 +278,34 @@ export function createShifumiSocket(socketShifumi: Socket | null) {
     });
 
     socketShifumi.on('opponent-played-card', (card: [number, number]) => {
-      console.log(`opponent card received`);
-      // afficher la carte jouer par l'adversaire;
+        const playedCard = document.getElementById('opponent-card-played') as HTMLElement;
+
+        if (playedCard)
+            playedCard.textContent = `[${card[0]}][${card[1]}]`;
+    });
+
+    socketShifumi.on('played-card', ( card: [ number, number ] ) => {
+        const playedCard = document.getElementById('card-played') as HTMLElement;
+
+        if (playedCard)
+            playedCard.textContent = `[${card[0]}][${card[1]}]`;
+
+        if (spectate.spec)
+        {
+            notify('hello');
+            if (card[0] === spectate.playerCard![0][0] && card[1] === spectate.playerCard![0][1]) {
+                const card1 = document.getElementById('card1-button');
+                card1!.textContent = '[][]';
+            }
+            if (card[0] === spectate.playerCard![1][0] && card[1] === spectate.playerCard![1][1]){
+                const card2 = document.getElementById('card2-button');
+                card2!.textContent = '[][]';
+            }
+            if (card[0] === spectate.playerCard![2][0] && card[1] === spectate.playerCard![2][1]){
+                const card3 = document.getElementById('card3-button');
+                card3!.textContent = '[][]';
+            }
+        }
     });
 
     socketShifumi.on('score', (myPoints: number, opponentPoints: number) => {

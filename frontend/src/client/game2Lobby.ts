@@ -102,19 +102,19 @@ export function init(){
 					body: JSON.stringify({}),
 				});
 				const { names } = await res.json();
-				if (!names)
-					return console.log("No game running.");
-				listGame.innerHTML = names.map(l => `<p class="lobby-item" data-name="${l}">${l} - ${l.status}</p>`).join("");
+				if (!names || names.length === 0)
+					return console.log("No game running");
+				listGame.innerHTML = names.map(l => `<p class="lobby-item" data-name="${l.lobby_name}">${l.lobby_name} - ${l.status} </p>`).join("");
 
 				document.querySelectorAll(".lobby-item").forEach(el => {
 					el.addEventListener("click", (e) => {
 						const target = e.currentTarget as HTMLElement;
 						const lobbyName = target.dataset.name;
 						console.log("Clicked lobby:", lobbyName);
-						const socket = getSocket(1);
+						const socket = getSocket(2);
 						if (lobbyName) {
 							notify(lobbyName);
-							socket!.emit("spec-game", {lobbyname: lobbyName});
+							socket!.emit("spec-game", getUserIdFromToken(), {lobbyname: lobbyName});
 						}
 					});
 				});
