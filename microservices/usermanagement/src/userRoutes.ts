@@ -211,6 +211,14 @@ export async function getMessage(app: FastifyInstance) {
                     return reply.code(498).send({ error: 'Failed to get user from users' });
                 let msgs = db.prepare(`SELECT * FROM conversation WHERE (targetId = ? AND userId = ?) OR (userId = ? AND targetId = ?)`).all(id.id, user.userId, id.id, user.userId) as Message[];
                 if (msgs) {
+                    msgs.forEach(msg => {
+                        if (msg.targetId == user.userId) {
+                            db.prepare(`
+                                UPDATE conversation SET is_read = 1 WHERE id = ?
+                                `).run(msg.id);
+                            msg.is_read = 1;
+                        }
+                    });
                     const messages: ChatMessage[] = msgs.map((row) => ({
                         from: row.username,
                         userId: row.userId,

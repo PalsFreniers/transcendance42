@@ -46,12 +46,16 @@ export class GameBoard {
             return ;
         }
         if (player == 1) {
-            this.playerOne.push(this.drawPile[0]);
-            this.drawPile.splice(0, 1);
+            if (this.drawPile.length > 0) {
+                this.playerOne.push(this.drawPile[0]);
+                this.drawPile.splice(0, 1);
+            }
         }
         else if (player == 2) {
-            this.playerTwo.push(this.drawPile[0]);
-            this.drawPile.splice(0, 1);
+            if (this.drawPile.length > 0) {
+                this.playerTwo.push(this.drawPile[0]);
+                this.drawPile.splice(0, 1);
+            }
         }
     }
 
@@ -78,22 +82,14 @@ export class GameBoard {
             }
         }
     }
-    
-    public getPlayerCard(player :number): [number, number][]
-    {
-        if (player == 1)
-            return [
-                [this.playerOne[0].getType(), this.playerOne[0].getNumber()],
-                [this.playerOne[1].getType(), this.playerOne[1].getNumber()],
-                [this.playerOne[2].getType(), this.playerOne[2].getNumber()]
-            ];
-        else
-            return [
-                [this.playerTwo[0].getType(), this.playerTwo[0].getNumber()],
-                [this.playerTwo[1].getType(), this.playerTwo[1].getNumber()],
-                [this.playerTwo[2].getType(), this.playerTwo[2].getNumber()]
-            ];
+
+    public getPlayerCard(player: number): [number, number][] {
+        const cards = player === 1 ? this.playerOne : this.playerTwo;
+
+        // On map seulement les cartes existantes
+        return cards.map(card => [card.getType(), card.getNumber()]);
     }
+
 
     public startGame()
     {

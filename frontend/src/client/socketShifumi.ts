@@ -9,13 +9,13 @@ export let opponentName: string | null = null;
 
 export let spectate: {
     playerName: string | null,
-    playerId: number,
+    player?: number,
     playerCard: [number, number][] | null,
     playedCard: [number, number] | null,
     spec: boolean
 } = {
     playerName: null,
-    playerId: 0,
+    player: 0,
     playerCard: null,
     playedCard: null,
     spec: false
@@ -42,7 +42,7 @@ export function createShifumiSocket(socketShifumi: Socket | null) {
     socketShifumi.on('connect', () => {
       console.log(`Socket (${socketShifumi!.id}) connected!`);
       // On first connect and reconnects, emit register
-      socketShifumi!.emit('register-socket', userId); // peut etre a enlever
+      socketShifumi!.emit('register-socket', userId);
     });
 
     socketShifumi.on('disconnect', (reason) => {
@@ -145,8 +145,8 @@ export function createShifumiSocket(socketShifumi: Socket | null) {
             card3.hidden = false;
     });
 
-    socketShifumi.on('wait-opponent', () => {
-      notify('your opponent as been deconnected\nhe have 15 seconds for rejoined the game');
+    socketShifumi.on('wait-opponent', (name: string) => {
+      notify(`${name} as been disconnected he have 15 seconds for rejoined the game`);
     });
 
     socketShifumi.on('opponent-reconnected', (name) => {
@@ -166,7 +166,7 @@ export function createShifumiSocket(socketShifumi: Socket | null) {
         gameIdShifumi = gameId;
         spectate = {
             playerName: player.name,
-            playerId: player.id,
+            player: player.player,
             playerCard: null,
             playedCard: null,
             spec: true
@@ -232,12 +232,16 @@ export function createShifumiSocket(socketShifumi: Socket | null) {
       notify(`${player} as declared forfeit`);
     });
 
-    socketShifumi.on('winGame', () => {
+    socketShifumi.on('win-game', () => {
       console.log('you win this game !')
     });
 
-    socketShifumi.on('loseGame', () => {
-      console.log('you lose this game !');
+    socketShifumi.on('lose-game', () => {
+        console.log('you lose this game !');
+    });
+
+    socketShifumi.on('draw-game', () => {
+        console.log('you lose this game !');
     });
 
     /******************************************************************************/
@@ -245,27 +249,37 @@ export function createShifumiSocket(socketShifumi: Socket | null) {
     /*                              game  management                              */
     /*                                                                            */
     /******************************************************************************/
-    
-    socketShifumi.on('card', (card: [number, number][]) => {
+
+    socketShifumi.on('card', (cards: [number, number][]) => {
         if (spectate.spec)
-            spectate.playerCard = card;
+            spectate.playerCard = cards;
         else
-            myCard = card;
-      // a passer dans un fonction a appeler pour rendre le code plus propre 
-      const card1 = document.getElementById('card1-button');
-      if (card1)
-        card1.textContent = `[${card[0][0]}][${card[0][1]}]`;
-      const card2 = document.getElementById('card2-button');
-      if (card2)
-        card2.textContent = `[${card[1][0]}][${card[1][1]}]`;
-      const card3 = document.getElementById('card3-button');
-      if (card3)
-        card3.textContent = `[${card[2][0]}][${card[2][1]}]`;
-      console.log('received card !');
+            myCard = cards;
+
+        cards.forEach((card, index) => {
+            const button = document.getElementById(`card${index + 1}-button`);
+            if (button) {
+                button.textContent = `[${card[0]}][${card[1]}]`;
+            }
+        });
+
+        const len = cards.length;
+
+        for (let i = 0; i < 3; i++)
+        {
+            const button = document.getElementById(`card${i + 1}-button`)
+            if (button) {
+                if (i < len)
+                    button.hidden = false;
+                else
+                    button.hidden = true;
+            }
+        }
+        console.log('received card !');
     });
 
     socketShifumi.on('end-time', () => {
-      const random:number = Math.floor(Math.random() * 3);
+      const random:number = Math.floor(Math.random() * myCard.length);
       const card = document.getElementById(`card${random + 1}-button`);
 
       socketShifumi.emit('play-card', gameIdShifumi, {
@@ -284,27 +298,21 @@ export function createShifumiSocket(socketShifumi: Socket | null) {
             playedCard.textContent = `[${card[0]}][${card[1]}]`;
     });
 
-    socketShifumi.on('played-card', ( card: [ number, number ] ) => {
+    socketShifumi.on('played-card', ( cards: [ number, number ] ) => {
         const playedCard = document.getElementById('card-played') as HTMLElement;
 
         if (playedCard)
-            playedCard.textContent = `[${card[0]}][${card[1]}]`;
+            playedCard.textContent = `[${cards[0]}][${cards[1]}]`;
 
         if (spectate.spec)
         {
-            notify('hello');
-            if (card[0] === spectate.playerCard![0][0] && card[1] === spectate.playerCard![0][1]) {
-                const card1 = document.getElementById('card1-button');
-                card1!.textContent = '[][]';
-            }
-            if (card[0] === spectate.playerCard![1][0] && card[1] === spectate.playerCard![1][1]){
-                const card2 = document.getElementById('card2-button');
-                card2!.textContent = '[][]';
-            }
-            if (card[0] === spectate.playerCard![2][0] && card[1] === spectate.playerCard![2][1]){
-                const card3 = document.getElementById('card3-button');
-                card3!.textContent = '[][]';
-            }
+            spectate.playerCard?.forEach((card, index) => {
+                if (card[0] == cards[0] && card[1] == cards[1]) {
+                    const button = document.getElementById(`card${index + 1}-button`);
+                    if (button)
+                        button.textContent = '[][]';
+                }
+            })
         }
     });
 

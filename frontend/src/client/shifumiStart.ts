@@ -2,6 +2,7 @@ import {getSocket} from "./socketClient.js";
 import {myCard, gameIdShifumi, spectate} from "./socketShifumi.js"
 import {getUserIdFromToken} from "./loginClient.js";
 import { handleRoute} from "./navClient.js";
+import { notify } from "./notify.js"
 
 export function init() {
     const token = localStorage.getItem('token');
@@ -11,6 +12,7 @@ export function init() {
     }
     const app = document.getElementById('app');
     const quit = document.getElementById('quit-button');
+    const next = document.getElementById('change-player');
     const start = document.getElementById('start-button');
     const kick = document.getElementById('kick-opponent');
     const card1 = document.getElementById('card1-button');
@@ -31,6 +33,25 @@ export function init() {
             history.pushState(null, '', '/2game');
             handleRoute();
         });
+    }
+    if (next)
+    {
+        if (!spectate.spec)
+            next.hidden = true;
+        next.addEventListener('click', async  (e) => {
+            if (spectate.spec == true)
+            {
+                notify('hello there');
+                next.hidden = false;
+                if (spectate.player == 1)
+                    spectate.player = 2;
+                else
+                    spectate.player = 1;
+                const sock = getSocket(2);
+                if (sock)
+                    sock.emit('change-player-spec', spectate.player, gameIdShifumi)
+            }
+        })
     }
     if (kick)
     {

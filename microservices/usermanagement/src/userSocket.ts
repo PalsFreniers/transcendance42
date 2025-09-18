@@ -39,11 +39,14 @@ export function startServer(io) {
             console.log(`User ${userID} registered with Chat socket ${socket.id}`);
             const msg = db.prepare(`SELECT * FROM conversation WHERE targetId = ? AND is_read = 0`).all(userID) as Message[];
             if (msg) {
+                let username: string[] = [];
                 msg.forEach(msg => {
-                    const tmp = {
-                        from: msg.username
-                    };
-                    io.to(socket.id).emit('message', tmp.from);
+                    if (!username.includes(msg.username))
+                        username.push(msg.username);
+                });
+
+                username.forEach(name => {
+                    io.to(socket.id).emit("message", name);
                 });
             }
 
@@ -57,7 +60,7 @@ export function startServer(io) {
                     return io.to(socket.id).emit('error', 'error 404 : target not found !');
                 if (!targetId || !targetId.id)
                     return io.to(socket.id).emit('error', 'error 404 : target not found !');
-                if (!targetIsOnline || !targetIsOnline.is_online)
+                if (!targetIsOnline)
                     return io.to(socket.id).emit('error', 'error 404 : target not found !');
 
                 const msg: ChatMessage = {

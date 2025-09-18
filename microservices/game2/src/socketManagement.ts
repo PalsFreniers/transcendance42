@@ -34,7 +34,7 @@ function getUserIdFromToken(token: string): number {
   }
 }
 
-function getUsernameFromToken(token: string): string | null {
+export function getUsernameFromToken(token: string): string | null {
     if (!token) return null;
 
     try {
@@ -52,6 +52,16 @@ async function getSocketFromRoom(io, roomName, targetId): Promise<Socket | null>
     const sockets = await io.in(roomName).fetchSockets();
     const target = sockets.find(s => s.data.userId === targetId);
     return target;
+}
+
+async function deleteSocketFromRoom(io, roomName, targetId): Promise<null>
+{
+    const sockets = await io.in(roomName).fetchSockets();
+    sockets.forEach(s => {
+        if (s.data.userId === targetId)
+            s.leave(roomName);
+    });
+    return null;
 }
 
 async function deleteSocketRoom(io, roomId)
@@ -118,6 +128,7 @@ export function socketManagemente(io: Server)
 
         socket.on('register-socket', (userId: number) =>
         {
+            console.log('hello there');
             socket.data.userId = getUserIdFromToken(socket.handshake.auth.token);
             socket.data.userName = getUsernameFromToken(socket.handshake.auth.token);
             socket.data.player = -1;
@@ -284,6 +295,25 @@ export function socketManagemente(io: Server)
                 io.to(socket.id).emit('roomJoined', gameId);
         });
 
+        socket.on('change-player-spec', (player: number, gameId: number) => {
+            const game = manager.getGame(gameId);
+            if (game)
+                game.spectate(player, socket);
+
+            if (player == 1) {
+                deleteSocketFromRoom(io, `${gameId}.2`, socket.data.userId);
+                socket.join(`${gameId}.1`);
+                const players = getPlayerName(gameId);
+                io.to(socket.id).emit('game-spectate', gameId, { name: players?.playerOneName, player: 1}, players?.playerTwoName);
+            }
+            else if (player == 2) {
+                deleteSocketFromRoom(io, `${gameId}.1`, socket.data.userId);
+                socket.join(`${gameId}.2`);
+                const players = getPlayerName(gameId);
+                io.to(socket.id).emit('game-spectate', gameId, { name: players?.playerTwoName, player: 2}, players?.playerOneName);
+            }
+        });
+
         socket.on('ready', () =>
         {
             const gameId = socket.data.gameId;
@@ -293,7 +323,7 @@ export function socketManagemente(io: Server)
             }
             if (socket.data.player == 3) {
                 const players = getPlayerName(gameId);
-                io.to(socket.id).emit('game-spectate', gameId, { name: players?.playerOneName, id: players?.playerOneId}, players?.playerTwoName);
+                io.to(socket.id).emit('game-spectate', gameId, { name: players?.playerOneName, player: 1}, players?.playerTwoName);
                 const game = manager.getGame(gameId);
                 if (game)
                     game.spectate(1, socket);

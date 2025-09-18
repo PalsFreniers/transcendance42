@@ -348,6 +348,7 @@ export function handleRoute() {
 			<div id="back_shifumi">
 				<div id="container-button">
 					<h2>Shifumi</h2>
+					<button id="change-player">next player</button>
 					<p id="opponent-name"></p>
 					<P id="points"></p>
 					<button id="quit-button">quit lobby</button>

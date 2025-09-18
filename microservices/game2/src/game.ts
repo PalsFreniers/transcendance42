@@ -1,9 +1,9 @@
 import { GameBoard } from "./gameObjects/gameBoard.js";
 import { io } from "./index.js"
-import {timeStart, endGame, forfeit, saveStats, deleteGameFromDB} from "./Game2Database.js";
+import {timeStart, endGame, forfeit, saveStats, deleteGameFromDB, getPlayerName} from "./Game2Database.js";
 import { playedCard } from "./gameObjects/gameBoard.js";
 import { Socket } from "socket.io";
-
+import { getUsernameFromToken } from "./socketManagement.js";
 
 export interface Player {
     Id : number;
@@ -40,7 +40,8 @@ export class game
     private gameBoard :GameBoard = new GameBoard();
     private delay = 1000;
 
-    constructor(playerOneInfo :Player, playerTwoInfo :Player, gameId: number) {
+    constructor(playerOneInfo :Player, playerTwoInfo :Player, gameId: number)
+    {
         this.playerOne = playerOneInfo;
         console.log(`player one = ${this.playerOne.Id}`);
 
@@ -53,10 +54,9 @@ export class game
 
     public async spectate(player: number, socket)
     {
-        await this.sleep(this.delay / 10);
+        await this.sleep(this.delay / 20);
         if (player == 1)
         {
-            console.log('here');
             io.to(socket.id).emit('started-game', this.gameId, this.playerTwo.Id);
             await this.sleep(this.delay / 20);
             io.to(socket.id).emit('card', this.gameBoard.getPlayerCard(1));
@@ -128,8 +128,9 @@ export class game
                 this.playerTwo.Card = null;
             }
 
-            if (this.playerOne.Point == 3 || this.playerTwo.Point == 3) // faire une fonction a mettre a cote
+            if (this.playerOne.Point == 3 || this.playerTwo.Point == 3 || !this.gameBoard.getPlayerCard(1).length || !this.gameBoard.getPlayerCard(2).length) // faire une fonction a mettre a cote
             {
+                this.checkWinGame();
                 endGame(this.gameId, this.gameTime, this.playerOne.Point, this.playerTwo.Point);
                 io.to(`${this.gameId}.1`).to(`${this.gameId}.2`).emit('game-ended');
                 await clearRoom(`${this.gameId}.1`);
@@ -154,7 +155,7 @@ export class game
         else
             return io.to(`${this.gameId}.1`).to(`${this.gameId}.2`).emit('roomInfo', `${socket.data.userName} stop spectate`);
 
-        io.to(`${this.gameId}.1`).to(`${this.gameId}.2`).emit('wait-opponent');
+        io.to(`${this.gameId}.1`).to(`${this.gameId}.2`).emit('wait-opponent', getUsernameFromToken(socket.handshake.auth.token));
     }
 
     public async reconnect(userId: number, socket: Socket)
@@ -164,8 +165,7 @@ export class game
             socket.data.player = 1;
             this.playerOne.IsOnline = true;
             socket.join(`${this.gameId}.1`);
-            io.to(`${this.gameId}.1`).emit('reconnect');
-            io.to(`${this.gameId}.2`).emit('opponent-reconnected');
+            io.to(`${this.gameId}.2`).to(`${this.gameId}.1`).emit('opponent-reconnected', getUsernameFromToken(socket.handshake.auth.token));
             await this.sleep(this.delay / 10);
             io.to(`${this.gameId}.1`).emit('started-game', this.gameId);
             await this.sleep(this.delay / 10);
@@ -177,8 +177,7 @@ export class game
             socket.data.player = 2;
             this.playerTwo.IsOnline = true;
             socket.join(`${this.gameId}.2`);
-            io.to(`${this.gameId}.2`).emit('reconnect');
-            io.to(`${this.gameId}.1`).emit('opponent-reconnected');
+            io.to(`${this.gameId}.1`).to(`${this.gameId}.2`).emit('opponent-reconnected', getUsernameFromToken(socket.handshake.auth.token));
             await this.sleep(this.delay / 10);
             io.to(`${this.gameId}.2`).emit('started-game', this.gameId);
             await this.sleep(this.delay / 10);
@@ -213,6 +212,22 @@ export class game
             io.to(`${this.gameId}.1`).emit('loseRound', this.playerOne.Point, this.playerTwo.Point);
             io.to(`${this.gameId}.2`).emit('winRound', this.playerTwo.Point, this.playerOne.Point);
         }
+    }
+
+    private checkWinGame()
+    {
+        if (this.playerOne.Point == 3)
+        {
+            io.to(`${this.gameId}.1`).emit('win-game');
+            io.to(`${this.gameId}.2`).emit('lose-game');
+        }
+        else if (this.playerTwo.Point == 3)
+        {
+            io.to(`${this.gameId}.2`).emit('win-game');
+            io.to(`${this.gameId}.1`).emit('lose-game');
+        }
+        else
+            io.to(`${this.gameId}.1`).to(`${this.gameId}.2`).emit('draw-game');
     }
 
     private playedCards(playerOneCard: playedCard, playerTwoCard: playedCard)
@@ -275,7 +290,7 @@ export class game
 
                 if (this.PlayerOneTime == 0 && this.playerTwo.IsOnline)
                 {
-                    io.to(`${this.gameId}.1`).to(`${this.gameId}.2`).emit('forfeit', this.playerOne.Id);
+                    io.to(`${this.gameId}.1`).to(`${this.gameId}.2`).emit('forfeit', getPlayerName(this.gameId)?.playerOneName);
                     forfeit(this.gameId, 1, this.playerTwo.Point, this.gameTime);
                     clearInterval(interval);
                     this.sleep(5000);
@@ -285,7 +300,7 @@ export class game
                 if (this.PlayerTwoTime == 0 && this.playerOne.IsOnline)
                 {
                     forfeit(this.gameId, 2, this.playerOne.Point, this.gameTime);
-                    io.to(`${this.gameId}.1`).to(`${this.gameId}.2`).emit('forfeit', this.playerTwo.Id);
+                    io.to(`${this.gameId}.1`).to(`${this.gameId}.2`).emit('forfeit', getPlayerName(this.gameId)?.playerTwoName);
                     clearInterval(interval);
                     this.sleep(5000);
                     io.to(`${this.gameId}.1`).to(`${this.gameId}.2`).emit('game-ended');
@@ -305,7 +320,8 @@ export class game
         });
     }
 
-    private sleep(ms: number): Promise<void> {
+    private sleep(ms: number): Promise<void>
+    {
         return new Promise((resolve) => setTimeout(resolve, ms));
     }
 
