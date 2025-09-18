@@ -164,6 +164,13 @@ export function createShifumiSocket(socketShifumi: Socket | null) {
         console.log(`game ended`);
         gameIdShifumi = 0;
         usedCoin = false;
+        spectate = {
+            playerName: null,
+            player: 0,
+            playerCard: null,
+            playedCard: null,
+            spec: false
+        };
         history.pushState(null, '', '/2game');
         handleRoute();
     });

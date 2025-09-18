@@ -12,8 +12,7 @@ let replaceBy: number = -1;
 
 let tmpButtons: HTMLButtonElement[] = [];
 
-function creatTmpButton()
-{
+function creatTmpButton() {
     const app = document.getElementById('container-button');
     if (app)
     {
