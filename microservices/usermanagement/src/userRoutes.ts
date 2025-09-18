@@ -1,7 +1,6 @@
 import { FastifyInstance } from 'fastify';
 import db from './dbSqlite/db.js';
 import { GameStats, addStats } from './gameStatsModel.js';
-import { Buffer } from 'buffer';
 import fs from 'fs';
 import path from 'path';
 import { ChatMessage } from './userSocket.js';
@@ -13,9 +12,22 @@ export async function profil(app: FastifyInstance) {
     app.get('/profil', async (request, reply) => {
         try {
             const user = request.user as { userId: number };
-            const result = db
-                .prepare('SELECT id, username, email, bio, profile_image_url FROM users WHERE id = ?')
-                .get(user.userId);
+			const { username } = request.query as { username?: string};
+			let result : any;
+			if (username)
+			{
+				result = db
+					.prepare('SELECT id, username, bio, profile_image_url FROM users WHERE username = ?')
+					.get(username) as { username: string };
+			}
+			else
+			{
+				result = db
+					.prepare('SELECT id, username, email, bio, profile_image_url FROM users WHERE id = ?')
+					.get(user.userId);
+			}
+            if (!result)
+				return reply.code(404).send({ error: 'Profil not found' });
             return { success: true, user: result };
         } catch (err) {
             return reply.code(401).send({ error: 'Unauthorized' });
@@ -108,7 +120,7 @@ export async function friendList(app: FastifyInstance) {
             const result = db.prepare('SELECT friends FROM users WHERE id = ?').get(user.userId) as { friends: string };
             const friendIds = JSON.parse(result.friends || '[]');
             const friends = friendIds.map((id: number) => {
-                return db.prepare('SELECT id, username, is_online FROM users WHERE id = ?').get(id);
+                return db.prepare('SELECT id, username, is_online, profile_image_url FROM users WHERE id = ?').get(id);
             });
             return { success: true, friends };
         } catch (err) {
@@ -187,18 +199,18 @@ export async function addStatsInDB(app: FastifyInstance) {
     });
 }
 
-export async function getMessage(app: FastifyInstance)  {
+export async function getMessage(app: FastifyInstance) {
     app.post('/get-message', async (request, reply) => {
-        const friend = request.body as { target: string };
-        const myId = request.body as { id: string};
         try {
+            const friend = request.body as { friendUsername: string };
+            const user = request.user as { userId: number };
+            console.log(friend.friendUsername);
             if (friend) {
-                let { id } = db.prepare(`SELECT id FROM users WHERE username = ?`).get(friend) as { id: number};
+                const id = db.prepare(`SELECT id FROM users WHERE username = ?`).get(friend.friendUsername) as { id: number };
                 if (!id)
-                    return reply.code(498).send({ error: 'Failed to get user from users'}) ;
-                let msgs = db.prepare(`SELECT * FROM conversation WHERE (targetId = ? AND userId = ?) OR (userId = ? AND targetId = ?)`).all(id, myId, id, myId) as Message[];
-                if (msgs)
-                {
+                    return reply.code(498).send({ error: 'Failed to get user from users' });
+                let msgs = db.prepare(`SELECT * FROM conversation WHERE (targetId = ? AND userId = ?) OR (userId = ? AND targetId = ?)`).all(id.id, user.userId, id.id, user.userId) as Message[];
+                if (msgs) {
                     const messages: ChatMessage[] = msgs.map((row) => ({
                         from: row.username,
                         userId: row.userId,
@@ -207,14 +219,14 @@ export async function getMessage(app: FastifyInstance)  {
                         timestamp: row.date,
                         isRead: row.is_read,
                     }))
-                    return reply.code(200).send({ success: true,  messages });
+                    return reply.code(200).send({ success: true, messages: messages });
                 }
             }
             else
-                return reply.code(499).send({ error: 'Failed to get message'});
+                return reply.code(499).send({ error: 'Failed to get message' });
         } catch (err) {
             console.log(err);
-            return reply.code(500).send({ error: 'Failed to get message'})
+            return reply.code(500).send({ error: 'Failed to get message' });
         }
     })
 }

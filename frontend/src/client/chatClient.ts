@@ -1,4 +1,4 @@
-import { getSocket } from './socketClient.js'
+/*import { getSocket } from './socketClient.js'
 import { getUserIdFromToken } from './loginClient.js'
 import { notify } from './notify.js'
 
@@ -16,7 +16,7 @@ export function init() {
         try {
             var socket = getSocket(0);
             if (socket) {
-                socket.emit('message', msg, getUserIdFromToken(), 'toma'/* change by targe name */);
+                socket.emit('message', msg, getUserIdFromToken(), 'toma');
             }
             else
                 console.error(`error 404 : socket not found !`);
@@ -27,4 +27,4 @@ export function init() {
         }
     });
     console.log(`ended add event`)
-}
+}*/
