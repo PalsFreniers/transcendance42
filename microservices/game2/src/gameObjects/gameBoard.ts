@@ -11,7 +11,7 @@ export class GameBoard {
 
     private drawPile: Card[] = [];
     private playerOne: Card[] = [];
-    private playerTwo: Card[] = []; // relier aux id du joueur pour plus de securiter
+    private playerTwo: Card[] = [];
     private discardPile: Card[] = [];
 
     constructor() {
@@ -90,9 +90,43 @@ export class GameBoard {
         return cards.map(card => [card.getType(), card.getNumber()]);
     }
 
+    public coinUsed(player: number, target:[number, number], replaceBy: number) {
+        let newNumber: number = 10;
 
-    public startGame()
-    {
+        this.discardPile.forEach((card) => {
+            if (card.getType() == replaceBy && card.getNumber() == newNumber)
+                newNumber++;
+        })
+        this.drawPile.forEach((card) => {
+            if (card.getType() == replaceBy && card.getNumber() == newNumber)
+                newNumber++;
+        })
+        this.playerOne.forEach((card) => {
+            if (card.getType() == replaceBy && card.getNumber() == newNumber)
+                newNumber++;
+        })
+        this.playerTwo.forEach((card) => {
+            if (card.getType() == replaceBy && card.getNumber() == newNumber)
+                newNumber++;
+        })
+
+        if (player == 1)
+        {
+            this.playerOne.forEach((card) => {
+               if (card.getType() == target[0] && card.getNumber() == target[1])
+                    card.changeCard(replaceBy, newNumber);
+            });
+        }
+        if (player == 2)
+        {
+            this.playerTwo.forEach((card) => {
+                if (card.getType() == target[0] && card.getNumber() == target[1])
+                    card.changeCard(replaceBy, newNumber);
+            });
+        }
+    }
+
+    public startGame() {
         for (var i = 0; i < 3; i++)
         {
             this.drawCard(1);

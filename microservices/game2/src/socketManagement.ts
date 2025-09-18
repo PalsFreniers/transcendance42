@@ -47,15 +47,13 @@ export function getUsernameFromToken(token: string): string | null {
     }
 }
 
-async function getSocketFromRoom(io, roomName, targetId): Promise<Socket | null>
-{
+async function getSocketFromRoom(io, roomName, targetId): Promise<Socket | null> {
     const sockets = await io.in(roomName).fetchSockets();
     const target = sockets.find(s => s.data.userId === targetId);
     return target;
 }
 
-async function deleteSocketFromRoom(io, roomName, targetId): Promise<null>
-{
+async function deleteSocketFromRoom(io, roomName, targetId): Promise<null> {
     const sockets = await io.in(roomName).fetchSockets();
     sockets.forEach(s => {
         if (s.data.userId === targetId)
@@ -64,8 +62,7 @@ async function deleteSocketFromRoom(io, roomName, targetId): Promise<null>
     return null;
 }
 
-async function deleteSocketRoom(io, roomId)
-{
+async function deleteSocketRoom(io, roomId) {
     const sockets = await io.in(`${roomId}.1`).fetchSockets();
     const sockets2 = await io.in(`${roomId}.2`).fetchSockets();
     for (const socket of sockets) {
@@ -76,8 +73,7 @@ async function deleteSocketRoom(io, roomId)
     }
 }
 
-function quitLobby(io, socket: Socket): boolean
-{
+function quitLobby(io, socket: Socket): boolean {
     if (socket.data.gameId <= 0)
         return false;
 
@@ -102,8 +98,7 @@ function quitLobby(io, socket: Socket): boolean
     return false;
 }
 
-export function socketManagemente(io: Server)
-{
+export function socketManagemente(io: Server) {
     io.use(async (socket, next) => {
         if (verifTokenSocket(socket)) {
             console.log('verif passed !');
@@ -128,7 +123,6 @@ export function socketManagemente(io: Server)
 
         socket.on('register-socket', (userId: number) =>
         {
-            console.log('hello there');
             socket.data.userId = getUserIdFromToken(socket.handshake.auth.token);
             socket.data.userName = getUsernameFromToken(socket.handshake.auth.token);
             socket.data.player = -1;
@@ -295,7 +289,8 @@ export function socketManagemente(io: Server)
                 io.to(socket.id).emit('roomJoined', gameId);
         });
 
-        socket.on('change-player-spec', (player: number, gameId: number) => {
+        socket.on('change-player-spec', (player: number, gameId: number) =>
+        {
             const game = manager.getGame(gameId);
             if (game)
                 game.spectate(player, socket);
@@ -352,11 +347,13 @@ export function socketManagemente(io: Server)
                     Id: playerId,
                     Point : 0,
                     Card : null,
+                    usedCoin : false,
                     IsOnline : true
                 }, {
                     Id : playerTwo.player_two_id,
                     Point : 0,
                     Card : null,
+                    usedCoin : false,
                     IsOnline : true
                 }, id.id);
                 console.log(`in start-game, id = ${id.id}`);
@@ -384,7 +381,17 @@ export function socketManagemente(io: Server)
                 game.chooseCard(play);
         });
 
-        // ajouter le lancement de la piece
+        socket.on('use-coin', (gameId: number, card: [number, number], replaceBy: number)=>
+        {
+           const game = manager.getGame(gameId);
+           if (game)
+           {
+               game.useCoin(socket.data.player, card, replaceBy, socket);
+               io.to(`${gameId}.1`).to(`${gameId}.2`).emit('used-coin', socket.data.userName);
+           }
+           else
+               io.to(socket.id).emit('error', 'server fail to use your coin !');
+        });
 
     });
 }

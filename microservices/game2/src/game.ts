@@ -3,12 +3,13 @@ import { io } from "./index.js"
 import {timeStart, endGame, forfeit, saveStats, deleteGameFromDB, getPlayerName} from "./Game2Database.js";
 import { playedCard } from "./gameObjects/gameBoard.js";
 import { Socket } from "socket.io";
-import { getUsernameFromToken } from "./socketManagement.js";
+import { getUsernameFromToken } from './socketManagement.js'
 
 export interface Player {
     Id : number;
     Point : number;
     Card : playedCard | null;
+    usedCoin : boolean;
     IsOnline : boolean;
 }
 
@@ -165,6 +166,7 @@ export class game
             socket.data.player = 1;
             this.playerOne.IsOnline = true;
             socket.join(`${this.gameId}.1`);
+            io.to(socket.id).emit('reconnect', this.playerOne.usedCoin);
             io.to(`${this.gameId}.2`).to(`${this.gameId}.1`).emit('opponent-reconnected', getUsernameFromToken(socket.handshake.auth.token));
             await this.sleep(this.delay / 10);
             io.to(`${this.gameId}.1`).emit('started-game', this.gameId);
@@ -177,6 +179,7 @@ export class game
             socket.data.player = 2;
             this.playerTwo.IsOnline = true;
             socket.join(`${this.gameId}.2`);
+            io.to(socket.id).emit('reconnect', this.playerTwo.usedCoin);
             io.to(`${this.gameId}.1`).to(`${this.gameId}.2`).emit('opponent-reconnected', getUsernameFromToken(socket.handshake.auth.token));
             await this.sleep(this.delay / 10);
             io.to(`${this.gameId}.2`).emit('started-game', this.gameId);
@@ -197,6 +200,12 @@ export class game
             card.userId = 2;
             this.playerTwo.Card = card;
         }
+    }
+
+    public useCoin(player:number, card: [number, number], replaceBy: number, socket)
+    {
+        this.gameBoard.coinUsed(player, card, replaceBy);
+        io.to(socket.id).emit('card', this.gameBoard.getPlayerCard(socket.data.player));
     }
 
     private whoWinRound(userIdWinner: number)

@@ -2,10 +2,13 @@ import io, { Socket } from 'socket.io-client';
 import { handleRoute } from "./navClient.js";
 import { getUserIdFromToken } from './socketClient.js';
 import { notify } from './notify.js'
+import {getUsernameFromToken} from "./loginClient.js";
 
 export let gameIdShifumi: number = -1;
 export let myCard: [number, number][] = [];
 export let opponentName: string | null = null;
+
+export let usedCoin: boolean = false;
 
 export let spectate: {
     playerName: string | null,
@@ -49,10 +52,11 @@ export function createShifumiSocket(socketShifumi: Socket | null) {
       notify(`Socket disconnected: ${reason}`);
     });
 
-    socketShifumi.on('reconnect', () => {
+    socketShifumi.on('reconnect', (coinUse: boolean) => {
       history.pushState(null, '', '/shifumi');
       handleRoute();
       console.log('reconnect !');
+      usedCoin = coinUse;
     });
 
     /******************************************************************************/
@@ -130,6 +134,7 @@ export function createShifumiSocket(socketShifumi: Socket | null) {
         const card2 = document.getElementById('card2-button');
         const card3 = document.getElementById('card3-button');
         const pointsText = document.getElementById('points');
+        const coin = document.getElementById('coin-button');
 
         if (pointsText)
             pointsText.textContent = `0 - 0`
@@ -143,6 +148,8 @@ export function createShifumiSocket(socketShifumi: Socket | null) {
             card2.hidden = false;
         if (card3)
             card3.hidden = false;
+        if (coin && !spectate.spec)
+            coin.hidden = false;
     });
 
     socketShifumi.on('wait-opponent', (name: string) => {
@@ -156,6 +163,7 @@ export function createShifumiSocket(socketShifumi: Socket | null) {
     socketShifumi.on('game-ended', () => {
         console.log(`game ended`);
         gameIdShifumi = 0;
+        usedCoin = false;
         history.pushState(null, '', '/2game');
         handleRoute();
     });
@@ -233,15 +241,15 @@ export function createShifumiSocket(socketShifumi: Socket | null) {
     });
 
     socketShifumi.on('win-game', () => {
-      console.log('you win this game !')
+      notify('you win this game !')
     });
 
     socketShifumi.on('lose-game', () => {
-        console.log('you lose this game !');
+        notify('you lose this game !');
     });
 
     socketShifumi.on('draw-game', () => {
-        console.log('you lose this game !');
+        notify('you lose this game !');
     });
 
     /******************************************************************************/
@@ -325,7 +333,12 @@ export function createShifumiSocket(socketShifumi: Socket | null) {
 
     // ajouter le lancement/resulta de la piece pour changer une carte
 
-    // ajouter le passage de l'information sur la piece utiliser par l'adversaire
+    socketShifumi.on('used-coin', (name: string) => {
+        if (name == getUsernameFromToken())
+            usedCoin = true
+        else
+           notify(`${name} used his coin`);
+    });
 
     /******************************************************************************/
     /*                                                                            */
