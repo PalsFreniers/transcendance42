@@ -1,5 +1,5 @@
 import {getSocket} from "./socketClient.js";
-import {myCard, gameIdShifumi} from "./socketShifumi.js"
+import {myCard, gameIdShifumi, spectate} from "./socketShifumi.js"
 import {getUserIdFromToken} from "./loginClient.js";
 import { handleRoute} from "./navClient.js";
 
@@ -22,7 +22,11 @@ export function init() {
         quit.addEventListener('click', async (e) => {
             e.preventDefault();
             const socketShifumi = getSocket(2);
-            if (socketShifumi)
+            if (!socketShifumi)
+                return ;
+            if (spectate.spec)
+                socketShifumi.emit('spec-quit');
+            else
                 socketShifumi.emit('quit-lobby');
             history.pushState(null, '', '/2game');
             handleRoute();
@@ -56,7 +60,10 @@ export function init() {
     }
     if (card1) {
         card1.hidden = true;
+        console.log('here');
         card1.addEventListener('click', async (e) => {
+            if (spectate.spec)
+                return ;
             e.preventDefault();
             const socketShifumi = getSocket(2);
             if (socketShifumi)
@@ -71,6 +78,8 @@ export function init() {
     if (card2) {
         card2.hidden = true;
         card2.addEventListener('click', async (e) => {
+            if (spectate.spec)
+                return ;
             e.preventDefault();
             const socketShifumi = getSocket(2);
             if (socketShifumi)
@@ -85,6 +94,8 @@ export function init() {
     if (card3) {
         card3.hidden = true;
         card3.addEventListener('click', async (e) => {
+            if (spectate.spec)
+                return ;
             e.preventDefault();
             const socketShifumi = getSocket(2);
             if (socketShifumi)

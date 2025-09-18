@@ -94,3 +94,17 @@ export async function postGame(app: FastifyInstance) {
         return { success: true };
     });
 }
+
+export async function getAllGame(app: FastifyInstance)
+{
+    app.post('/api/game2/get-games', async (request, reply) => {
+        const names = db.prepare(`
+            SELECT lobby_name, status FROM games2 WHERE status='waiting' OR status='playing'
+        `).all();
+
+        if (names)
+            return reply.code(200).send({ success: true, names });
+        else
+            return reply.code(489).send({error: "fail to load games"})
+    });
+}

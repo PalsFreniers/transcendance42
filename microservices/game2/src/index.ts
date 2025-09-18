@@ -7,7 +7,8 @@ import {
   inGame,
   awaitforOpponent,
   historyGame,
-  postGame
+  postGame,
+  getAllGame
 } from './gameRoutes.js'; // a enlever
 import { socketManagemente } from './socketManagement.js';
 
@@ -69,6 +70,8 @@ app.register(awaitforOpponent);
 // app.register(joinLobby)
 app.register(historyGame);
 app.register(postGame);
+
+app.register(getAllGame);
 
 // HOOK
 app.addHook('onRequest', async (request, reply) => {

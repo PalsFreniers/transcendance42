@@ -48,7 +48,7 @@ function expandCercle() {
 
 async function profil_image(){
 	const token = localStorage.getItem('token');
-	
+
 	try {
 		const profil = await fetch(`http://${import.meta.env.VITE_LOCAL_ADDRESS}:3001/api/user/profil`, {
 			method: "GET",
@@ -73,7 +73,7 @@ async function profil_image(){
 async function msg_lobby(event: MouseEvent){
 	const token = localStorage.getItem('token');
 	const chat = document.getElementById('chat');
-	
+
 	const target = event?.target as Node;
 	if (chat)
 	{
@@ -334,6 +334,9 @@ export function handleRoute() {
         					<button id="spec-button">Spectator</button>
         					<button id="custom-button">Customisation</button>
       					</div>
+      					<div id="game-list" class="shifumi-lobby">
+							<h4>List of current games</h4>
+						</div>
     				</div>
   				</div>
 			</div>
@@ -353,6 +356,8 @@ export function handleRoute() {
 					<button id="card1-button">card 1</button>
 					<button id="card2-button">card 2</button>
 					<button id="card3-button">card 3</button>
+					<p id="card-played"></p>
+					<p id="opponent-card-played"></p>
 				</div>
 			</div>
 			`;
@@ -456,6 +461,7 @@ export function handleRoute() {
 		if (msg_r)
 			msg_r.addEventListener('click', msg_lobby);
 	}
+
 	const lienCercle = document.getElementById('lien-cercle');
 	if (lienCercle)
 		lienCercle.style.display = (path === '/') ? 'flex' : 'none';
@@ -577,7 +583,7 @@ export function handleRoute() {
 				alert("Logout failed: " + (data.error || "Unknown error"));
 			}
 		});
-	}		
+	}
 	const music = document.getElementById("music") as HTMLAudioElement;
 	const musicButton = document.getElementById("btn-music") as HTMLButtonElement;
 	const musicVolume = document.getElementById("volume-music") as HTMLInputElement;

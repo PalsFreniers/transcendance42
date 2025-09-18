@@ -20,7 +20,7 @@ db.exec(`
     lobby_name TEXT NOT NULL,
     player_one_id INTEGER NOT NULL,
     player_one_name TEXT NOT NULL,
-    player_two_id INTEGER,
+    player_two_id INTEGER DEFAULT 0,
     player_two_name TEXT,
     game_score TEXT NOT NULL,
     status TEXT DEFAULT 'waiting',
