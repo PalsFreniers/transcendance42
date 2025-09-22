@@ -1,11 +1,7 @@
-
-
-const ADDR = import.meta.env.VITE_LOCAL_ADDRESS;
-
 export function init() {
 	
 	console.log('Init running');
-	const form = document.getElementById('registerForm') as HTMLFormElement | null;
+	const form = document.getElementById('registerForm') as HTMLFormElement;
 	if (!form) 
 		return;
 	form.addEventListener('submit', async (e) => {
@@ -14,7 +10,7 @@ export function init() {
 		const password = (document.getElementById('password') as HTMLInputElement).value;
 		const email = (document.getElementById('email') as HTMLInputElement).value;
 		try {
-			const res = await fetch(`http://${ADDR}:3001/api/user/register`, {
+			const res = await fetch(`http://${import.meta.env.VITE_LOCAL_ADDRESS}:3001/api/user/register`, {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({ username, password, email }),

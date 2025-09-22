@@ -177,7 +177,7 @@ export async function init() {
 					formMsg.addEventListener('submit', async (e) => {
 						e.preventDefault();
 						const server = getSocket(0);
-						server.emit('message', msgsend.value, getUserIdFromToken(), friend.username)
+						server!.emit('message', msgsend.value, getUserIdFromToken(), friend.username)
 					})
 				}
 			});
