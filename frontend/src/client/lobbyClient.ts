@@ -166,7 +166,7 @@ export function init(){
 	}
 	if (zone2) {
 		zone2.addEventListener('click', () => {
-			history.pushState(null, '', '/2game');
+			history.pushState(null, '', '/shifumi-lobby');
 			handleRoute();
 		});
 	}

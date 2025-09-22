@@ -1,6 +1,6 @@
 import { getSocket } from './socketClient.js';
-import {getUserIdFromToken} from './loginClient.js'
-import {notify} from "./notify.js";
+import { getUserIdFromToken } from './loginClient.js'
+import { notify } from "./notify.js";
 
 
 export function init(){

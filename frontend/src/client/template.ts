@@ -1,6 +1,6 @@
 
 const templates: Record<string, () => string> = {
-  home: () => `
+	home: () => `
     <div id="back">
       <div id="lien-cercle">
         <div id="moncercle">
@@ -9,7 +9,7 @@ const templates: Record<string, () => string> = {
       </div>
     </div>
   `,
-  login: () => `
+	login: () => `
     <div id="back_login">
 					<div class="wrapper">
 						<h2>Login</h2>
@@ -36,8 +36,8 @@ const templates: Record<string, () => string> = {
 						</form>
 					</div>
 				</div>`
-  ,
-  register: () => `
+	,
+	register: () => `
     <div id="back_login">
 					<div class="wrapper">
 						<h2>Register</h2>
@@ -66,7 +66,28 @@ const templates: Record<string, () => string> = {
 					</div>
 				</div>
   `,
-  lobby: () => `
+  chat: () => `
+  <div id="chat-container">
+	  <div id="chat-display">
+		  <div id="chat-box">
+			  <div id="chat-friend">
+					  
+			  </div>
+			  <div id="chat-part">
+			  <div id="display-msg">
+				  
+			  </div>
+				  <form id="chat-input">
+					  <input id="msg-send" type="text" placeholder="Écrire un message..." />
+					  <button type="submit">Send</button>
+				  </form>
+			  </div>
+		  </div>
+	  </div>
+	  <svg id="msg-ico" fill="none" viewBox="0 0 24 24" id="conversation" data-name="Flat Line" xmlns="http://www.w3.org/2000/svg" class="icon flat-line" stroke=""><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round" stroke="#dc143c" stroke-width="0.144"></g><g id="SVGRepo_iconCarrier"><path id="secondary" d="M18,9.5c0,3.59-3.36,6.5-7.5,6.5A8.5,8.5,0,0,1,7,15.27l-.65.28L3,17l1.15-4A5.82,5.82,0,0,1,3,9.5C3,5.91,6.36,3,10.5,3c3.63,0,6.66,2.24,7.35,5.21A5.49,5.49,0,0,1,18,9.5Z" style="fill: #63dac6; stroke-width: 2;"></path><path id="primary" d="M17.85,8.21A6.27,6.27,0,0,1,21,13.5,5.82,5.82,0,0,1,19.85,17L21,21l-4-1.73A8.5,8.5,0,0,1,13.5,20a7.47,7.47,0,0,1-7.11-4.45" style="fill: none; stroke: #dc143c; stroke-linecap: round; stroke-linejoin: round; stroke-width: 2;"></path><path id="primary-2" data-name="primary" d="M18,9.5c0,3.59-3.36,6.5-7.5,6.5A8.5,8.5,0,0,1,7,15.27l-.65.28L3,17l1.15-4A5.82,5.82,0,0,1,3,9.5C3,5.91,6.36,3,10.5,3c3.63,0,6.66,2.24,7.35,5.21A5.49,5.49,0,0,1,18,9.5Z" style="fill: none; stroke: #dc143c; stroke-linecap: round; stroke-linejoin: round; stroke-width: 2;"></path></g></svg>
+  </div>
+  `,
+	lobby: () => `
 			<div id="lobby">
 				<div id="profils">
 					<div id="music-player">
@@ -107,7 +128,7 @@ const templates: Record<string, () => string> = {
 				</div>
 			</div>
 			`,
-  profil: () => `
+	profil: () => `
 				<div id="back-profil">
 					<div class="profil-wrapper">
 						<h2 id="profil">Your Profil</h2>
@@ -119,8 +140,9 @@ const templates: Record<string, () => string> = {
 						<input id="friend-username" type="text" placeholder="Enter friend username" />
 						<button id="add-friend-button">Add Friend</button>
 					</div>
+					${templates.chat()}
 				</div>`,
-  shifumi: () => `
+	shifumi: () => `
 			<div id="back_shifumi">
 				<div id="container-button">
 					<h2>Shifumi</h2>
@@ -139,7 +161,8 @@ const templates: Record<string, () => string> = {
 				</div>
 			</div>
 			`,
-  pong: () => `<div id="back-pong">
+	pong: () => `
+	<div id="back-pong">
   <div class="pong-wrapper">
       <h2 class="pong-title">🎮 Pong Area</h2>
     <div id="pong-controls">
@@ -161,7 +184,8 @@ const templates: Record<string, () => string> = {
     </div>
   <canvas id="pong-canvas" width="600" height="400"></canvas>
 </div>`,
-  shifumiLobby: () => `<div id="back_shifumi">
+	shifumiLobby: () => `
+	<div id="back_shifumi">
   <div class="shifumi-wrapper">
     <h2 class="shifumi-title">✊ Shifumi</h2>
     <div id="shifumi-controls">
@@ -185,12 +209,12 @@ const templates: Record<string, () => string> = {
 }
 
 export const routes: Record<string, () => string> = {
-  '/': templates.home,
-  '/login': templates.login,
-  '/register': templates.register,
-  '/lobby': templates.lobby,
-  '/profil': templates.profil,
-  '/pong': templates.pong,
-  '/shifumi': templates.shifumi,
-  '/shifumi-lobby': templates.shifumiLobby
+	'/': templates.home,
+	'/login': templates.login,
+	'/register': templates.register,
+	'/lobby': templates.lobby,
+	'/profil': templates.profil,
+	'/pong': templates.pong,
+	'/shifumi': templates.shifumi,
+	'/shifumi-lobby': templates.shifumiLobby,
 };

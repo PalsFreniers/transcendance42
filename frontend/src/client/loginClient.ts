@@ -1,3 +1,5 @@
+import { navigateTo } from "./navClient.js";
+
 export function getUserIdFromToken(): number {
 	const token = localStorage.getItem('token');
 	if (!token) return 0;
@@ -59,7 +61,7 @@ export function init() {
 			else
 				localStorage.removeItem("rememberedUsername");
 			localStorage.setItem('token', data.token);
-			window.location.pathname = "/lobby";
+			navigateTo('/lobby');
 		} else {
 			alert('Login failed.');
 		}

@@ -16,7 +16,6 @@ interface ChatMessage {
 let socketChat: Socket | null = null;
 let socketPong: Socket | null = null;
 let socketShifumi: Socket | null = null;
-let lobbyname: String | null = null;
 
 export function getUserIdFromToken(): number {
     const token = localStorage.getItem('token');
