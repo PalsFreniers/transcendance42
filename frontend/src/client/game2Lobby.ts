@@ -113,7 +113,6 @@ export function init(){
 						console.log("Clicked lobby:", lobbyName);
 						const socket = getSocket(2);
 						if (lobbyName) {
-							notify(lobbyName);
 							socket!.emit("spec-game", getUserIdFromToken(), {lobbyname: lobbyName});
 						}
 					});

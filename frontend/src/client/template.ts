@@ -152,10 +152,10 @@ const templates: Record<string, () => string> = {
 					<button id="quit-button">quit lobby</button>
 					<button id="start-button">Start game</button>
 					<button id="kick-opponent">kick</button>
-					<button id="card1-button">card 1</button>
-					<button id="card2-button">card 2</button>
-					<button id="card3-button">card 3</button>
-					<button id="coin-button">Coin</button>
+					<button class=card id="card1-button">card 1</button>
+					<button class=card id="card2-button">card 2</button>
+					<button class=card id="card3-button">card 3</button>
+					<button class=card id="coin-button">Coin</button>
 					<p id="card-played"></p>
 					<p id="opponent-card-played"></p>
 				</div>

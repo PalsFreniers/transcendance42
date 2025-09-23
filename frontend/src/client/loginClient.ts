@@ -1,4 +1,5 @@
 import { navigateTo } from "./navClient.js";
+import { getSockets } from "./socketClient.js";
 
 export function getUserIdFromToken(): number {
 	const token = localStorage.getItem('token');
@@ -61,6 +62,7 @@ export function init() {
 			else
 				localStorage.removeItem("rememberedUsername");
 			localStorage.setItem('token', data.token);
+			await getSockets();
 			navigateTo('/lobby');
 		} else {
 			alert('Login failed.');

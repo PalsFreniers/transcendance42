@@ -161,32 +161,30 @@ export class game
 
     public async reconnect(userId: number, socket: Socket)
     {
-        if (userId == this.playerOne.Id)
-        {
+        let player: Player;
+        let opponent: Player;
+
+        if (userId == this.playerOne.Id) {
             socket.data.player = 1;
-            this.playerOne.IsOnline = true;
-            socket.join(`${this.gameId}.1`);
-            io.to(socket.id).emit('reconnect', this.playerOne.usedCoin);
-            io.to(`${this.gameId}.2`).to(`${this.gameId}.1`).emit('opponent-reconnected', getUsernameFromToken(socket.handshake.auth.token));
-            await this.sleep(this.delay / 10);
-            io.to(`${this.gameId}.1`).emit('started-game', this.gameId);
-            await this.sleep(this.delay / 10);
-            io.to(`${this.gameId}.1`).emit('card', this.gameBoard.getPlayerCard(1));
-            io.to(socket.id).emit('score', this.playerOne.Point, this.playerTwo.Point);
-        }
-        else if (userId == this.playerTwo.Id)
-        {
+            player = this.playerOne;
+            opponent = this.playerTwo;
+        } else {
             socket.data.player = 2;
-            this.playerTwo.IsOnline = true;
-            socket.join(`${this.gameId}.2`);
-            io.to(socket.id).emit('reconnect', this.playerTwo.usedCoin);
-            io.to(`${this.gameId}.1`).to(`${this.gameId}.2`).emit('opponent-reconnected', getUsernameFromToken(socket.handshake.auth.token));
-            await this.sleep(this.delay / 10);
-            io.to(`${this.gameId}.2`).emit('started-game', this.gameId);
-            await this.sleep(this.delay / 10);
-            io.to(`${this.gameId}.2`).emit('card', this.gameBoard.getPlayerCard(2));
-            io.to(socket.id).emit('score', this.playerTwo.Point, this.playerOne.Point);
+            player = this.playerTwo;
+            opponent = this.playerOne;
         }
+
+        const roomName = `${this.gameId}.${socket.data.player}`;
+
+        player.IsOnline = true;
+        socket.join(roomName);
+        io.to(socket.id).emit('reconnect', player.usedCoin);
+        io.to(`${this.gameId}.1`).to(`${this.gameId}.2`).emit('opponent-reconnected', getUsernameFromToken(socket.handshake.auth.token));
+        await this.sleep(this.delay / 20);
+        io.to(socket.id).emit('started-game', this.gameId);
+        await this.sleep(this.delay / 20);
+        io.to(socket.id).emit('card', this.gameBoard.getPlayerCard(socket.data.player));
+        io.to(socket.id).emit('score', player.Point, opponent.Point);
     }
 
     public chooseCard(card: playedCard)
@@ -205,6 +203,10 @@ export class game
     public useCoin(player:number, card: [number, number], replaceBy: number, socket)
     {
         this.gameBoard.coinUsed(player, card, replaceBy);
+        if (player == 1)
+            this.playerOne.usedCoin = true;
+        else
+            this.playerTwo.usedCoin = true;
         io.to(socket.id).emit('card', this.gameBoard.getPlayerCard(socket.data.player));
     }
 

@@ -16,7 +16,6 @@ function creatTmpButton() {
     const app = document.getElementById('container-button');
     if (app)
     {
-        notify(`app find`);
         for (let i: number = 0; i < 3; i++)
         {
             const btn = document.createElement('button');
@@ -40,6 +39,8 @@ function updateTmpButton(value: string[]) {
                 else {
                     replaceBy = i + 1;
                     deleteTmpButton();
+                    getSocket(2)!.emit('use-coin', gameIdShifumi, myCard[choseCard], replaceBy);
+                    hiddenButtonCard(false);
                 }
             })
         }
@@ -47,9 +48,17 @@ function updateTmpButton(value: string[]) {
 }
 
 function deleteTmpButton() {
+    if (!tmpButtons)
+        return ;
     tmpButtons.forEach(btn => btn.remove());
     tmpButtons = [];
-    getSocket(2)!.emit('use-coin', gameIdShifumi, myCard[choseCard], replaceBy);
+}
+
+function hiddenButtonCard(hidden: boolean) {
+    const butts = document.querySelectorAll<HTMLButtonElement>(".card");
+    butts.forEach((btn) => {
+       btn.hidden = hidden;
+    });
 }
 
 export function init() {
@@ -78,7 +87,7 @@ export function init() {
                 socketShifumi.emit('spec-quit');
             else
                 socketShifumi.emit('quit-lobby');
-            history.pushState(null, '', '/2game');
+            history.pushState(null, '', '/shifumi-lobby');
             handleRoute();
         });
     }
@@ -186,17 +195,21 @@ export function init() {
             e.preventDefault();
             if (spectate.spec || usedCoin)
                 return ;
-
+            choseCard = -1;
+            replaceBy = -1;
             const result = Math.floor(Math.random() * 100) % 2;
+            deleteTmpButton();
             // lancer l'animation
-            if (result == 1)
-            {
-                notify(`result = ${result}`);
+            if (result == 1) {
+                hiddenButtonCard(true);
                 creatTmpButton();
                 updateTmpButton(['card 1', 'card 2', 'card 3']);
             }
-            else
-                notify('pile');
+            else {
+                choseCard = Math.floor(Math.random() * 30) % 3;
+                replaceBy = (Math.floor(Math.random() * 30) % 3) + 1;
+                getSocket(2)!.emit('use-coin', gameIdShifumi, myCard[choseCard], replaceBy);
+            }
         });
     }
 }

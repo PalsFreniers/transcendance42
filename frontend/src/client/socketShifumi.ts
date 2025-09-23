@@ -57,6 +57,7 @@ export function createShifumiSocket(socketShifumi: Socket | null) {
       handleRoute();
       console.log('reconnect !');
       usedCoin = coinUse;
+      notify(coinUse.toString());
     });
 
     /******************************************************************************/
@@ -97,7 +98,7 @@ export function createShifumiSocket(socketShifumi: Socket | null) {
     });
 
     socketShifumi.on('kick', () => {
-        history.pushState(null, '', '/2game');
+        history.pushState(null, '', '/shifumi-lobby');
         handleRoute();
         notify('you have been kick !');
     });
@@ -171,7 +172,7 @@ export function createShifumiSocket(socketShifumi: Socket | null) {
             playedCard: null,
             spec: false
         };
-        history.pushState(null, '', '/2game');
+        history.pushState(null, '', '/shifumi-lobby');
         handleRoute();
     });
 
@@ -357,7 +358,7 @@ export function createShifumiSocket(socketShifumi: Socket | null) {
       const path = window.location.pathname;
       if (path === '/shifumi')
       {
-        history.pushState(null, '', '/2game')
+        history.pushState(null, '', '/shifumi-lobby')
         handleRoute();
       }
     });
