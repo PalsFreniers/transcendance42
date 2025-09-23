@@ -21,8 +21,9 @@ const pageModules: Record<string, any> = {
 
 window.addEventListener('DOMContentLoaded', () => {
 	const token = localStorage.getItem('token');
+	console.log('socket');
 	if (token) {
-		getSockets();  // Connect the socket once on page load if logged in
+		getSockets();
 	}
 	document.body.addEventListener('click', (e) => {
 		const target = e.target as HTMLElement;
@@ -103,7 +104,6 @@ export async function handleRoute() {
 				monCercle.removeEventListener('click', expandCercle);
 		}
 		// --- chargement du module JS correspondant ---
-		const modulePath = pageModules[path];
 		const mod = pageModules[path];
     	if (mod?.init) 
 			mod.init();
