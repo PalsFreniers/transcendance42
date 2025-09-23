@@ -31,7 +31,7 @@ export function getUserIdFromToken(): number {
 }
 
 export function getSockets(): [Socket, Socket, Socket] {
-    if (!socketChat && !socketPong) {
+    if (!socketChat && !socketPong && !socketShifumi) {
         const token = localStorage.getItem('token');
         const userId = getUserIdFromToken();
         // SOCKET CHAT
