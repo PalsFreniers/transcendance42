@@ -178,7 +178,7 @@ export class Game {
             if (this._resumeTimer <= 0) {
                 clearInterval(countdown); // CLEAR INTERVAL AND SET RUNNING BECAUSE GAME RESTART
                 this._state = "running";
-                this._countdown = false; // RESET FASLE FOR NEXT PAUSE
+                this._countdown = false; // RESET FALSE FOR NEXT PAUSE
             }
         }, 1000);
     }

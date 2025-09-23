@@ -1,2 +1,5 @@
+.gitignore
 .env
+.idea
+*/.idea
 */*/.idea

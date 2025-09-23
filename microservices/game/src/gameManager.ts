@@ -50,43 +50,43 @@ export class GameManager {
 
     createLobby(lobbyName: string, gameID: number): number {
         if (this._games.has(lobbyName))
-            return 1;
+            return 1; // lobby already exists
         this._games.set(lobbyName, [new Game(gameID), [null, null]]);
         return 0;
     }
 
     joinLobby(lobbyName: string, playerID: number): number {
         if (!this._games.has(lobbyName))
-            return 1;
+            return 1; // lobby doesnt exists
         this._games.forEach(([_, [p1, p2]]) => {
             if (p1 === playerID || p2 === playerID) {
-                return 4;
+                return 4; // player already in another game
             }
         });
         const [game, [p1, p2]] = this._games.get(lobbyName)!;
         if (p1 === playerID || p2 === playerID)
-            return 2;
+            return 2; // player is already in the lobby
         if (p1 === null)
             this._games.set(lobbyName, [game.joinTeam(new Paddle(playerID, new Vec2D.Vector(-9, 0)), "left"), [playerID, null]]);
         else if (p2 === null)
             this._games.set(lobbyName, [game.joinTeam(new Paddle(playerID, new Vec2D.Vector(9, 0)), "right"), [p1, playerID]]);
         else
-            return 3;
+            return 3; // lobby is full
         return 0;
     }
 
-    startGame(lobbyName: string, gameId: string, io: any) {
+    startGame(lobbyName: string, gameId: string, io: any, autoDelete: boolean = true) {
         if (!this._games.has(lobbyName))
-            return 1;
+            return 1; // lobby doesn't exist
         const [game, [p1, p2]] = this._games.get(lobbyName)!;
         if (!p1 || !p2)
-            return 2;
+            return 2; // lobby isn't full
         game.start();
         const loop = setInterval(() => {
             this.playerIsOffline(p1, p2, io, lobbyName).then(isOffline => {
                 if (isOffline) {
                     clearInterval(loop);
-                    return;
+                    return 0;
                 }
             });
             game.update();
@@ -101,19 +101,21 @@ export class GameManager {
                     msg: score![1] > score![0] ? "You win" : "You loose",
                     score: [score![1], score![0]]
                 });
-                this.deleteGame(lobbyName);
+                if (autoDelete)
+                    this.deleteGame(lobbyName);
             }
             const state = this.getGameInfo(lobbyName, io);
             io.to(gameId).emit("game-state", state);
         }, 1000 / 60);
+        return 0;
     }
 
     forfeit(lobbyName: string, playerID: number): number {
         if (!this._games.has(lobbyName))
-            return 1;
+            return 1; // lobby doesnt exists
         const [game, [p1, p2]] = this._games.get(lobbyName)!;
         if (playerID != p1 && playerID != p2)
-            return 2
+            return 2 // player isn't in the game
         game.state = "ended";
         if (p1 === playerID)
             game.score = [0, 11];
@@ -124,8 +126,8 @@ export class GameManager {
 
     getScore(lobbyName: string): [number, number] | null {
         if (!this._games.has(lobbyName))
-            return null;
-        const [game, [_, __]] = this._games.get(lobbyName)!;
+            return null; // lobby doesnt exists
+        const [game, _] = this._games.get(lobbyName)!;
         if (game.state !== "ended")
             return null;
         return game.score;
@@ -133,8 +135,8 @@ export class GameManager {
 
     deleteGame(lobbyName: string): number {
         if (!this._games.has(lobbyName))
-            return 1;
-        const [game, [_, __]] = this._games.get(lobbyName)!;
+            return 1; // lobby doesnt exist
+        const [game, _] = this._games.get(lobbyName)!;
         if (game.state !== "ended")
             return 2;
         db.prepare(`DELETE FROM games WHERE id = ?`).run(game.gameID);
@@ -144,7 +146,7 @@ export class GameManager {
 
     getGameInfo(lobbyName: string, io: Server) {
         if (!this._games.has(lobbyName))
-            return null;
+            return null; // lobby doesnt exists
         const [game, [p1, p2]] = this._games.get(lobbyName)!;
         if (game === undefined)
             return null;
@@ -160,8 +162,10 @@ export class GameManager {
             rightScore: game.score[1],
             state: game.state,
             resumeTimer: game.resumeTimer,
-            usernameRightTeam,
-            usernameLeftTeam
+            usernameRightTeam: usernameRightTeam,
+            usernameLeftTeam: usernameLeftTeam,
+            playerOneID: p1,
+            playerTwoID: p2
         };
     }
 
