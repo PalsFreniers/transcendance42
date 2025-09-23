@@ -67,10 +67,11 @@ export function socketManagement(io: Server) {
         socket.on('create-room', ({ gameId, lobbyName }) => {
             try {
                 const userName = socket.data.userName;
+                if (manager.createLobby(lobbyName, gameId))
+                    throw new Error(`Couldn't create lobby with name ${lobbyName}`);
+                if (manager.joinLobby(lobbyName, socket.data.userId))
                 socket.data.lobbyName = lobbyName;
                 socket.data.gameId = `game-${gameId}`;
-                manager.createLobby(lobbyName, gameId);
-                manager.joinLobby(lobbyName, socket.data.userId);
 
                 socket.join(socket.data.gameId);
                 socket.emit('room-created', {
@@ -94,7 +95,7 @@ export function socketManagement(io: Server) {
                 const userName = socket.data.userName;
                 const lobby = db.prepare(
                     `SELECT player_one_id, player_two_id, lobby_name 
-             FROM games WHERE id = ?`
+                    FROM games WHERE id = ?`
                 ).get(gameId) as { player_one_id: number; player_two_id: number | null; lobby_name: string };
                 if (!lobby) {
                     throw new Error(`Lobby not found for gameId ${gameId}`);
