@@ -33,7 +33,7 @@ export function getUsernameFromToken(): string | null {
 
 export function init() {
 	const form = document.getElementById('loginForm') as HTMLFormElement | null;
-	if (!form) 
+	if (!form)
 		return;
 	const rememberedUsername = localStorage.getItem("rememberedUsername");
 	if (rememberedUsername) {
@@ -50,25 +50,46 @@ export function init() {
 		const password = (document.getElementById('loginPassword') as HTMLInputElement).value;
 		const remember = (document.getElementById("remember") as HTMLInputElement).checked;
 		try {
-		const res = await fetch(`http://${import.meta.env.VITE_LOCAL_ADDRESS}:3001/api/user/login`, {
-			method: 'POST',
-			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify({ username, password }),
-		});
-		const data = await res.json();
-		if (res.ok && data.token) {
-			if (remember)
-				localStorage.setItem("rememberedUsername", username);
-			else
-				localStorage.removeItem("rememberedUsername");
-			localStorage.setItem('token', data.token);
-			await getSockets();
-			navigateTo('/lobby');
-		} else {
-			alert('Login failed.');
-		}
+			const res = await fetch(`http://${import.meta.env.VITE_LOCAL_ADDRESS}:3001/api/user/login`, {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ username, password }),
+			});
+			const data = await res.json();
+			if (res.ok && data.message === "OTP sent") {
+				// Demander le code OTP à l’utilisateur
+				const otp = prompt("Un code de vérification a été envoyé à votre email. Entrez-le ici :");
+				if (!otp) {
+					alert("Vous devez entrer un code OTP");
+					return;
+				}
+
+				// Vérifier le code OTP
+				const verifyRes = await fetch(`http://${import.meta.env.VITE_LOCAL_ADDRESS}:3001/api/user/verify-email`, {
+					method: 'POST',
+					headers: { 'Content-Type': 'application/json' },
+					body: JSON.stringify({ userId: data.userId, username: data.username, otp: otp }),
+				});
+
+				const verifyData = await verifyRes.json();
+
+				if (verifyRes.ok && verifyData.token) {
+					if (remember) {
+						localStorage.setItem("rememberedUsername", username);
+					} else {
+						localStorage.removeItem("rememberedUsername");
+					}
+					localStorage.setItem('token', verifyData.token);
+					await getSockets();
+					navigateTo('/lobby');
+				} else {
+					alert('Code OTP invalide.');
+				}
+			} else {
+				alert('Login failed.');
+			}
 		} catch (err) {
-		console.error('Login error:', err);
+			console.error('Login error:', err);
 		}
 	});
 }

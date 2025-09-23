@@ -17,6 +17,7 @@ db.exec(`
     username VARCHAR(50) NOT NULL UNIQUE,
     socket VARCHAR(100),
     email VARCHAR(100) NOT NULL UNIQUE,
+    phone_number TEXT DEFAULT NULL,
     password_hash TEXT NOT NULL,
     profile_image_url TEXT DEFAULT NULL,
     friends TEXT DEFAULT '[]',

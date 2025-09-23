@@ -29,6 +29,7 @@ export async function init() {
 			e.preventDefault();
 			form.innerHTML = `
 				<input id="bio" type="text" bio="bio" placeholder="bio" />
+				<input id="phoneNumber" type="text" placeholder="Phone number" />
 				<div class="file-upload">
 					<label for="img-profil">📷 Upload profile picture</label>
 					<input id="img-profil" type="file" accept="image/*"/>
@@ -41,6 +42,7 @@ export async function init() {
 			const pp = document.getElementById('img-profil') as HTMLInputElement;
 			const fileName = document.querySelector(".file-name") as HTMLElement;
 			const preview = document.getElementById("preview-profil") as HTMLImageElement;
+			const phone_number = document.getElementById('phoneNumber') as HTMLInputElement;
 			pp.addEventListener('change', () => {
 				const file = pp.files?.[0];
 				if (!file)
@@ -54,6 +56,7 @@ export async function init() {
 
 				const formData = new FormData();
 				formData.append("bio", bio.value);
+				formData.append("phoneNumber", phone_number.value);
 				if (pp.files?.[0]) {
 					formData.append("profile_image", pp.files[0]);
 				}
@@ -76,6 +79,7 @@ export async function init() {
 				}
 
 				const data = await changeProfil.json();
+				console.log(data.user.phone_number);
 				profil.innerHTML = `
 				  <div class="profil-card">
 					<img src="${data.user.profile_image_url || '/assets/default-avatar.png'}" class="profil-avatar" />
