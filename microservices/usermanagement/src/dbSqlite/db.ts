@@ -12,6 +12,7 @@ if (!fs.existsSync(dbDir)) {
 const db = new Database(dbPath);
 
 db.exec(`
+<<<<<<< HEAD
 	CREATE TABLE IF NOT EXISTS users (
 		id INTEGER PRIMARY KEY AUTOINCREMENT,
 		username VARCHAR(50) NOT NULL UNIQUE,
@@ -28,6 +29,23 @@ db.exec(`
 		pong_mmr INTEGER DEFAULT 50,
 		shifumi_mmr INTEGER DEFAULT 50
 	);
+=======
+  CREATE TABLE IF NOT EXISTS users (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    username VARCHAR(50) NOT NULL UNIQUE,
+    socket VARCHAR(100),
+    email VARCHAR(100) NOT NULL UNIQUE,
+    phone_number TEXT DEFAULT NULL,
+    password_hash TEXT NOT NULL,
+    profile_image_url TEXT DEFAULT NULL,
+    friends TEXT DEFAULT '[]',
+    bio TEXT DEFAULT '',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    is_online INTEGER DEFAULT 0,
+    is_admin INTEGER DEFAULT 0
+  );
+>>>>>>> 0626271 (2fa)
 `);
 
 db.exec(`

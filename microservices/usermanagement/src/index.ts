@@ -3,9 +3,7 @@ import cors from '@fastify/cors';
 import { Server } from 'socket.io';
 import dotenv from 'dotenv';
 import jwt from '@fastify/jwt';
-import db from './dbSqlite/db.js';
 import multipart from '@fastify/multipart';
-import { Message } from './chatModel.js'
 import fastifyStatic from '@fastify/static';
 import path from 'path';
 import {

@@ -593,6 +593,22 @@ input:-webkit-autofill {
 	}
 }
 
+#phoneNumber{
+	background: transparent;
+	color: $color-white;
+	text-align: center;
+	border: 1px solid rgba($color-white, 0.2);
+	font-size: $font-size-xs;
+	width: 100%;
+	padding: 10px;
+
+	&:focus {
+		outline: none;
+		border-color: $color-accent;
+		box-shadow: 0 0 5px $color-accent;
+	}
+}
+
 #bio {
 	background: transparent;
 	color: $color-white;

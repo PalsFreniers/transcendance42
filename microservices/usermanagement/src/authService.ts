@@ -1,7 +1,20 @@
 import { FastifyInstance } from 'fastify';
 import { createUser, User } from './userModel.js';
 import bcrypt from 'bcrypt';
+import nodemailer from 'nodemailer'
 import db from './dbSqlite/db.js';
+
+const otpStore = new Map<number, { otp: number; expires: number }>();
+
+const transporter = nodemailer.createTransport({
+  host: 'smtp.gmail.com', // ou le SMTP de ton fournisseur
+  port: 465,
+  secure: true,
+  auth: {
+    user: 'transendance42@gmail.com',
+    pass: process.env.EMAIL_APP_PASSWORD // App Password
+  }
+});
 
 export async function register(app: FastifyInstance) {
     app.post('/register', async (request, reply) => {
@@ -45,7 +58,9 @@ export async function auth(app: FastifyInstance) {
         const user = db.prepare('SELECT * FROM users WHERE username = ?').get(username) as {
             id: number;
             username: string;
+            email: string;
             password_hash: string;
+            phone_number?: string | null;
             is_online: number;
         };
         if (!user)
@@ -60,10 +75,31 @@ export async function auth(app: FastifyInstance) {
             return reply.code(401).send({ error: 'You are already connected on another device'});
         }
         //SIGN TOKEN FOR THAT SESSION ANOTHER IS GENERATE AT EACH CONNECTION
-        const token = app.jwt.sign({ userId: user.id, username: user.username });
+        const otp = Math.floor(100000 + Math.random() * 900000);
+        otpStore.set(user.id, { otp, expires: Date.now() + 5 * 60 * 1000 });
+        await transporter.sendMail({
+            from: 'transendance42@gmail.com',
+            to: user.email,
+            subject: 'Votre code de vérification',
+            text: `Votre code pour terminer la connexion est : ${otp}`
+        });
+
         await new Promise(resolve => setTimeout(resolve, 100));
         // RETURN IT FOR OTHERS SERVICES CAN BE USED IT!
-        return reply.send({ token });
+        return reply.send({ message: 'OTP sent. Please verify with /verify-email', userId: user.id, username: user.username });
+    });
+    app.post('/verify-email', async (request, reply) => {
+        const { userId, otp, username } = request.body as { userId: number; otp: number, username: string };
+        const record = otpStore.get(userId);
+
+        if (!record || record.expires < Date.now() || record.otp !== otp) {
+            return reply.code(401).send({ error: 'Invalid or expired otp' });
+        }
+        otpStore.delete(userId);
+        const user = db.prepare('SELECT * FROM users WHERE id = ?').get(userId);
+        const token = app.jwt.sign({ userId: userId, username: username });
+
+        return reply.send({ token: token });
     });
 }
 
