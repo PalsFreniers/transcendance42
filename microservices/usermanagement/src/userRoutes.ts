@@ -199,6 +199,32 @@ export async function addStatsInDB(app: FastifyInstance) {
     });
 }
 
+export async function getMmrShifumi(app: FastifyInstance)  {
+    app.post('/get-mmr-shifumi', async (request, reply) => {
+        try {
+            const { id } = request.body as {id: number};
+            const mmr = db.prepare(`SELECT shifumi_mmr FROM users WHERE id = ?`).get(id) as { shifumi_mmr: number};
+            reply.code(200).send({ success: true, mmr: ( mmr ? mmr.shifumi_mmr : 0 ) })
+        } catch (err) {
+            reply.code(399).send({ success: false})
+        }
+    })
+}
+
+export async function setMmrShifumi(app: FastifyInstance)  {
+    app.post('/set-mmr-shifumi', async (request, reply) => {
+        try {
+            const { id, newMmr } = request.body as {id: number; newMmr: number};
+
+            db.prepare(`UPDATE users SET shifumi_mmr = ? WHERE id = ?`).run(newMmr, id);
+
+            reply.code(200).send({ success: true})
+        } catch (err) {
+            reply.code(370).send({ success: false})
+        }
+    })
+}
+
 export async function getMessage(app: FastifyInstance) {
     app.post('/get-message', async (request, reply) => {
         try {

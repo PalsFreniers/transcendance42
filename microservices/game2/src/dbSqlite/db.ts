@@ -26,6 +26,7 @@ db.exec(`
     status TEXT DEFAULT 'waiting',
     start_time TIMESTAMP DEFAULT NULL,
     game_time INTEGER DEFAULT 0,
+    round_nmb INTEGER DEFAULT 0,
     date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
   );
 `);

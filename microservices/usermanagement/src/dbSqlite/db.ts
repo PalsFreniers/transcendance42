@@ -24,7 +24,9 @@ db.exec(`
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     is_online INTEGER DEFAULT 0,
-    is_admin INTEGER DEFAULT 0
+    is_admin INTEGER DEFAULT 0,
+    pong_mmr INTEGER DEFAULT 50,
+    shifumi_mmr INTEGER DEFAULT 50
   );
 `);
 
@@ -51,6 +53,8 @@ db.exec(`
     final_score TEXT DEFAULT 'playerOneScore - playerTwoScore',
     round_number INTEGER NOT NULL,
     game_time TIMESTAMP NOT NULL,
+    mmr_gain_player_one TEXT DEFAULT '+0',
+    mmr_gain_player_two TEXT DEFAULT '+0',
     date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
   );
 `);

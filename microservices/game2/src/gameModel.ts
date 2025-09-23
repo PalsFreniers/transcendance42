@@ -10,13 +10,14 @@ export interface GameData {
     status?: 'waiting' | 'playing' | 'finished',
     start_time?: string,
     game_time?: number,
+    round_nmb: number,
     date?: string,
 }
 
 export function createGameLobby(game: GameData) {
   const stmt = db.prepare(`
-    INSERT INTO games2 (player_one_id, player_one_name, player_two_id, player_two_name, lobby_name, game_score, status, start_time, game_time, date)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    INSERT INTO games2 (player_one_id, player_one_name, player_two_id, player_two_name, lobby_name, game_score, status, start_time, game_time, round_nmb, date)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `);
 
   const result = stmt.run(
@@ -29,6 +30,7 @@ export function createGameLobby(game: GameData) {
     game.status ?? 'waiting',
     game.start_time ?? null,
     game.game_time ?? null,
+    game.round_nmb,
     game.date ?? new Date().toISOString()
   );
   return result.lastInsertRowid;

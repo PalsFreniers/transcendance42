@@ -11,6 +11,8 @@ interface GameStats {
     final_score: string,
     round_number: number,
     game_time: number,
+    mmr_gain_player_one : string,
+    mmr_gain_player_two : string,
     date: string
 }
 
@@ -85,12 +87,11 @@ export function kickOpponentFromDB(gameId: number)
     return opponentId.player_two_id;
 }
 
-export function endGame(gameId: number, gameTime: number, playerOne: number, playerTwo: number)
+export function endGame(gameId: number, gameTime: number, playerOne: number, playerTwo: number, round_nmb: number)
 {
-    const update = db.prepare(`UPDATE games2 SET game_time = ? , status = 'finished', game_score = ? WHERE id = ?`);
+    const update = db.prepare(`UPDATE games2 SET game_time = ? , status = 'finished', game_score = ?, round_nmb = ? WHERE id = ?`);
     if (update)
-        update.run(gameTime, `${playerOne} - ${playerTwo}`, gameId);
-    // ajouter une supretion de la game dans la base de donner et evoyer les stat a usermanagement
+        update.run(gameTime, `${playerOne} - ${playerTwo}`, round_nmb, gameId);
     return true
 }
 
@@ -131,6 +132,7 @@ export function createRoom(userId: number, name :string | null,  lobbyName: stri
         lobby_name: lobbyName,
         game_score: '0-0',
         status: 'waiting',
+        round_nmb: 0,
         date: new Date().toISOString(),
     };
     return createGameLobby(newGame);
@@ -148,6 +150,7 @@ export function createRoomSolo(userId: number, name :string | null,  lobbyName: 
         lobby_name: lobbyName,
         game_score: '0-0',
         status: 'waiting',
+        round_nmb: 0,
         date: new Date().toISOString(),
     };
     createGameLobby(newGame);
@@ -194,7 +197,7 @@ export function checkReconnect(io, socket, userId)
     }
 }
 
-export async function saveStats(gameId: number, token: string)
+export async function saveStats(gameId: number, token: string, mmrPlayerOne, mmrPlayerTwo)
 {
     const game = db.prepare(`SELECT * FROM games2 WHERE id = ?`).get(gameId) as GameData | undefined;
     if (game)
@@ -207,10 +210,13 @@ export async function saveStats(gameId: number, token: string)
             player_one_id : game.player_one_id,
             player_two_id : game.player_two_id!,
             final_score : game.game_score!,
-            round_number : 0, // a modif
+            round_number : game.round_nmb, // a modif
             game_time : game.game_time! / 4, // temps en s
+            mmr_gain_player_one : mmrPlayerOne.toString(),
+            mmr_gain_player_two : mmrPlayerTwo.toString(),
             date : game.date!
         };
+        // ajouter une fonction qui fetch pour modif le mmr de chaque joueurs
         try {
             const res = await fetch('http://user-service:3001/api/user/add-stats', {
                 method: 'POST',

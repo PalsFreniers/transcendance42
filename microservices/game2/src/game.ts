@@ -4,6 +4,7 @@ import {timeStart, endGame, forfeit, saveStats, deleteGameFromDB, getPlayerName}
 import { playedCard } from "./gameObjects/gameBoard.js";
 import { Socket } from "socket.io";
 import { getUsernameFromToken } from './socketManagement.js'
+import { calculMmr } from './mmr.js'
 
 export interface Player {
     Id : number;
@@ -37,6 +38,7 @@ export class game
 
     private gameTime : number = 0; // temp total de la partie
     private playTime : number = 0; // temps pour un round
+    private round_nmb : number = 0; // nombre de round
 
     private gameBoard :GameBoard = new GameBoard();
     private delay = 1000;
@@ -89,13 +91,12 @@ export class game
         
             if (!this.playerOne.IsOnline || !this.playerTwo.IsOnline) {
                 if (await this.playerIsOffline()) {
-                    saveStats(this.gameId, token);
+                    saveStats(this.gameId, token, calculMmr(this.playerOne, this.playerTwo, token), calculMmr(this.playerTwo, this.playerOne, token));
                     return deleteGameFromDB(this.gameId);
                 }
             }
 
-            if (this.playTime == 120)
-            {
+            if (this.playTime == 120) {
                 io.to(`${this.gameId}.1`).to(`${this.gameId}.2`).emit('end-time');
             }
 
@@ -112,7 +113,8 @@ export class game
 
                 this.gameTime += 10; // ajout des 2.5s au temps de jeu
                 this.playTime = 0;
-                
+                this.round_nmb ++ ;
+
                 this.playedCards(this.playerOne.Card, this.playerTwo.Card);
                 
                 this.gameBoard.discardCard(this.playerOne.Card);
@@ -132,12 +134,13 @@ export class game
             if (this.playerOne.Point == 3 || this.playerTwo.Point == 3 || !this.gameBoard.getPlayerCard(1).length || !this.gameBoard.getPlayerCard(2).length) // faire une fonction a mettre a cote
             {
                 this.checkWinGame();
-                endGame(this.gameId, this.gameTime, this.playerOne.Point, this.playerTwo.Point);
+                endGame(this.gameId, this.gameTime, this.playerOne.Point, this.playerTwo.Point, this.round_nmb);
                 io.to(`${this.gameId}.1`).to(`${this.gameId}.2`).emit('game-ended');
                 await clearRoom(`${this.gameId}.1`);
                 await clearRoom(`${this.gameId}.2`);
-                saveStats(this.gameId, token);
+                saveStats(this.gameId, token, await calculMmr(this.playerOne, this.playerTwo, token), await calculMmr(this.playerTwo, this.playerOne, token));
                 deleteGameFromDB(this.gameId);
+                return ;
             }
 
             this.playTime++;
@@ -289,7 +292,6 @@ export class game
                 {
                     this.PlayerOneTime = 15;
                     this.PlayerTwoTime = 15;
-                    console.log('all on line');
                     clearInterval(interval);
                     playerOffline(false);
                 }

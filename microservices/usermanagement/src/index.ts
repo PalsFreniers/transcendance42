@@ -22,6 +22,8 @@ import {
     friendDelete,
     addStatsInDB,
     getMessage,
+    getMmrShifumi,
+    setMmrShifumi,
     // friendSendMsg
 } from './userRoutes.js';
 import { startServer } from './userSocket.js';
@@ -108,6 +110,8 @@ app.register(friendDelete, { prefix: '/api/user' });
 app.register(addStatsInDB, { prefix: '/api/user' });
 app.register(logOut, { prefix: '/api/user' });
 app.register(getMessage, { prefix: '/api/user' });
+app.register(getMmrShifumi, {prefix: '/api/user'});
+app.register(setMmrShifumi, {prefix: '/api/user'});
 // app.register(friendSendMsg, { prefix: '/api/user' });
 
 // Start Fastify server

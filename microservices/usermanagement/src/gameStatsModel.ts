@@ -10,6 +10,8 @@ export interface GameStats {
     final_score: string,
     round_number: number,
     game_time: number,
+    mmr_gain_player_one : string,
+    mmr_gain_player_two : string,
     date: string
 }
 
@@ -19,8 +21,8 @@ export function addStats(game: GameStats) {
 
     const stmt = db.prepare(`
     INSERT INTO gameStats (
-      game_name, part_name, part_id, player_one_id, player_two_id, final_score, round_number, game_time, date
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+      game_name, part_name, part_id, player_one_id, player_two_id, final_score, round_number, game_time, mmr_gain_player_one, mmr_gain_player_two, date
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `);
 
     const result = stmt.run(
@@ -32,6 +34,8 @@ export function addStats(game: GameStats) {
         game.final_score,
         game.round_number,
         game.game_time,
+        game.mmr_gain_player_one,
+        game.mmr_gain_player_two,
         game.date
     );
     return result.lastInsertRowid;
