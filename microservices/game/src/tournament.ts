@@ -20,6 +20,7 @@ class Tournament {
     constructor(
         private _name: string,
         private _maxPlayers: number,
+        private _associatedServer: Server
     ) {}
 
     // Methods
@@ -198,16 +199,16 @@ class Tournament {
         let round: [player_type, player_type] = bracket.splice(0, 1)[0];
         if (round[1][0] === -1)
             return round;
-        let name = `tournament_${roundName}_Round${this._roundNum}-${Math.floor(this._loserBracket.length / 2)}`;
+        let name: string = `tournament_${roundName}_Round${this._roundNum}-${Math.floor(this._loserBracket.length / 2)}`;
         // Create the associated game
         const gameManager = GameManager.getInstance();
         const gameID = createGameLobby({
-          playerOne: round[0],
-          playerTwo: null,
-          name,
-          finalScore: "0-0",
-          status: "waiting",
-          gameDate: new Date().toISOString(),
+            playerOne: round[0][0],
+            playerTwo: null,
+            lobbyName: name,
+            finalScore: "0-0",
+            status: "waiting",
+            gameDate: new Date().toISOString(),
         });
         gameManager.createLobby(name, gameID);
         gameManager.joinLobby(name, round[0][0]);
@@ -215,11 +216,11 @@ class Tournament {
         gameManager.registerSocket(round[0][0], round[0][1]);
         gameManager.registerSocket(round[1][0], round[1][1]);
         // Starts, and wait until game is finished
-        gameManager.startGame(name, gameID, this._associatedServer, false);
+        gameManager.startGame(name, gameID.toString(), this._associatedServer, false);
 
         const score = await new Promise<[number, number]>((resolve) => {
           const waitForGame = setInterval(() => {
-            const game = gameManager.findGame(gameName);
+            const game = gameManager.findGame(name);
             if (game && game.state === "finished") {
               clearInterval(waitForGame);
               resolve(game.score as [number, number]);
