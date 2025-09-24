@@ -12,51 +12,66 @@ if (!fs.existsSync(dbDir)) {
 const db = new Database(dbPath);
 
 db.exec(`
-  CREATE TABLE IF NOT EXISTS users (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    username VARCHAR(50) NOT NULL UNIQUE,
-    socket VARCHAR(100),
-    email VARCHAR(100) NOT NULL UNIQUE,
-    password_hash TEXT NOT NULL,
-    profile_image_url TEXT DEFAULT NULL,
-    friends TEXT DEFAULT '[]',
-    bio TEXT DEFAULT '',
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    is_online INTEGER DEFAULT 0,
-    is_admin INTEGER DEFAULT 0,
-    pong_mmr INTEGER DEFAULT 50,
-    shifumi_mmr INTEGER DEFAULT 50
-  );
+	CREATE TABLE IF NOT EXISTS users (
+		id INTEGER PRIMARY KEY AUTOINCREMENT,
+		username VARCHAR(50) NOT NULL UNIQUE,
+		socket VARCHAR(100),
+		email VARCHAR(100) NOT NULL UNIQUE,
+		password_hash TEXT NOT NULL,
+		profile_image_url TEXT DEFAULT NULL,
+		friends TEXT DEFAULT '[]',
+		bio TEXT DEFAULT '',
+		created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+		updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+		is_online INTEGER DEFAULT 0,
+		is_admin INTEGER DEFAULT 0,
+		pong_mmr INTEGER DEFAULT 50,
+		shifumi_mmr INTEGER DEFAULT 50
+	);
 `);
 
 db.exec(`
-  CREATE TABLE IF NOT EXISTS conversation (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    username VARCHAR(50) NOT NULL,
-    userId INTEGER NOT NULL,
-    targetId INTEGER NOT NULL,
-    date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    message TEXT DEFAULT '',
-    is_read INTEGER DEFAULT 0
-  );
+	CREATE TABLE IF NOT EXISTS friend_requests (
+		id INTEGER PRIMARY KEY AUTOINCREMENT,
+		sender_id INTEGER NOT NULL,
+		receiver_id INTEGER NOT NULL,
+		status TEXT CHECK(status IN ('pending', 'accepted', 'rejected')) DEFAULT 'pending',
+		created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+		updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+		FOREIGN KEY(sender_id) REFERENCES users(id) ON DELETE CASCADE,
+		FOREIGN KEY(receiver_id) REFERENCES users(id) ON DELETE CASCADE,
+		UNIQUE(sender_id, receiver_id)
+	);
+`);
+
+
+db.exec(`
+	CREATE TABLE IF NOT EXISTS conversation (
+		id INTEGER PRIMARY KEY AUTOINCREMENT,
+		username VARCHAR(50) NOT NULL,
+		userId INTEGER NOT NULL,
+		targetId INTEGER NOT NULL,
+		date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+		message TEXT DEFAULT '',
+		is_read INTEGER DEFAULT 0
+	);
 `);
 
 db.exec(`
-  CREATE TABLE IF NOT EXISTS gameStats (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    game_name VARCHAR(10) NOT NULL,
-    part_name VARCHAR(50) NOT NULL,
-    part_id INTEGER NOT NULL,
-    player_one_id INTEGER NOT NULL,
-    player_two_id INTEGER NOT NULL,
-    final_score TEXT DEFAULT 'playerOneScore - playerTwoScore',
-    round_number INTEGER NOT NULL,
-    game_time TIMESTAMP NOT NULL,
-    mmr_gain_player_one TEXT DEFAULT '+0',
-    mmr_gain_player_two TEXT DEFAULT '+0',
-    date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-  );
+	CREATE TABLE IF NOT EXISTS gameStats (
+		id INTEGER PRIMARY KEY AUTOINCREMENT,
+		game_name VARCHAR(10) NOT NULL,
+		part_name VARCHAR(50) NOT NULL,
+		part_id INTEGER NOT NULL,
+		player_one_id INTEGER NOT NULL,
+		player_two_id INTEGER NOT NULL,
+		final_score TEXT DEFAULT 'playerOneScore - playerTwoScore',
+		round_number INTEGER NOT NULL,
+		game_time TIMESTAMP NOT NULL,
+		mmr_gain_player_one TEXT DEFAULT '+0',
+		mmr_gain_player_two TEXT DEFAULT '+0',
+		date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+	);
 `);
 
 export default db;

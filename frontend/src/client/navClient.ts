@@ -66,6 +66,13 @@ function expandCercle() {
 	}
 }
 
+function getClient(path: string) {
+	if (path.startsWith("/profil"))
+		return profilClient;
+	return pageModules[path] ?? null;
+}
+
+
 export async function handleRoute() {
 	const path = window.location.pathname;
 	const token = localStorage.getItem('token');
@@ -83,7 +90,9 @@ export async function handleRoute() {
 	const app = document.getElementById('app');
 	if (!app)
 		return;
-	const templateFn = routes[path];
+	let templateFn = routes[path];
+	if (path.startsWith("/profil"))
+		templateFn = routes["/profil"];
 	if (templateFn) {
 		app.innerHTML = templateFn();
 		// --- loader ---
@@ -104,8 +113,8 @@ export async function handleRoute() {
 				monCercle.removeEventListener('click', expandCercle);
 		}
 		// --- chargement du module JS correspondant ---
-		const mod = pageModules[path];
-    	if (mod?.init) 
+		const mod = getClient(path);
+		if (mod?.init)
 			mod.init();
 	} else
 		app.innerHTML = `<h1>404 - Page not found</h1>`;

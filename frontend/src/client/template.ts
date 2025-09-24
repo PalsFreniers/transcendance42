@@ -74,9 +74,9 @@ const templates: Record<string, () => string> = {
 					  
 			  </div>
 			  <div id="chat-part">
-			  <div id="display-msg">
-				  
-			  </div>
+				<div id="display-msg">
+					
+				</div>
 				  <form id="chat-input">
 					  <input id="msg-send" type="text" placeholder="Écrire un message..." />
 					  <button type="submit">Send</button>

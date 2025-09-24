@@ -5,7 +5,12 @@ import { handleRoute } from "./navClient.js";
 export async function init() {
 	try {
 		const token = localStorage.getItem('token'); // TOKEN LINK FROM THE USER CONNECTED
-		const res = await fetch(`http://${import.meta.env.VITE_LOCAL_ADDRESS}:3001/api/user/profil`, {
+		const path = window.location.pathname;
+		const profil_path = path.startsWith("/profil/") ? path.slice("/profil/".length) : null;
+		const url = profil_path
+			? `http://${import.meta.env.VITE_LOCAL_ADDRESS}:3001/api/user/profil?username=${encodeURIComponent(profil_path)}`
+			: `http://${import.meta.env.VITE_LOCAL_ADDRESS}:3001/api/user/profil`;
+		const res = await fetch(url, {
 			method: 'GET',
 			headers: {
 				'Content-Type': 'application/json',
@@ -169,17 +174,23 @@ export async function init() {
 								msgElement.className = "user-target-msg";
 							boxMsg.appendChild(msgElement);
 						});
+						boxMsg.scrollTop = boxMsg.scrollHeight;
+					}
+					const formMsg = document.getElementById('chat-input') as HTMLFormElement;
+					const msgsend = document.getElementById('msg-send') as HTMLInputElement; 
+					if (formMsg) {
+						formMsg.addEventListener('submit', async (e) => {
+							e.preventDefault();
+							const server = getSocket(0);
+							if (msgsend.value.length != 0)
+							{
+								server!.emit('message', msgsend.value, getUserIdFromToken(), friend.username)
+								msgsend.value = '';
+							}
+						})
 					}
 				});
-				const formMsg = document.getElementById('chat-input') as HTMLFormElement;
-				const msgsend = document.getElementById('msg-send') as HTMLInputElement; 
-				if (formMsg) {
-					formMsg.addEventListener('submit', async (e) => {
-						e.preventDefault();
-						const server = getSocket(0);
-						server!.emit('message', msgsend.value, getUserIdFromToken(), friend.username)
-					})
-				}
+				
 			});
 		} else {
 			const msg = document.createElement('p');

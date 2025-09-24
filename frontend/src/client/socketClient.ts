@@ -2,6 +2,7 @@ import io, { Socket } from 'socket.io-client';
 import { createShifumiSocket } from './socketShifumi.js';
 import { createPongSocket } from './socketPong.js';
 import { notify } from './notify.js'
+import { friend_select, msg_friend } from './lobbyClient.js'
 
 interface ChatMessage {
     from: string;
@@ -49,7 +50,10 @@ export function getSockets(): [Socket, Socket, Socket] {
         });
 
         socketChat.on('message', (sender) => {
-            notify(`new message from ${sender}`);
+			if (sender == friend_select)
+				msg_friend();
+			else
+            	notify(`new message from ${sender}`);
         });
 
         socketChat.on('error', (text: string) => {

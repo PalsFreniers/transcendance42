@@ -1092,6 +1092,7 @@ input:-webkit-autofill {
 	display: flex;
 	flex-direction: row;
 	z-index: 29;
+	
 
 	#page_chat {
 		position: absolute;
@@ -1113,7 +1114,6 @@ input:-webkit-autofill {
 
 		#lobby_friends {
 			position: relative;
-			background-color: $color-gray;
 			width: 30%;
 			height: 100%;
 			z-index: 31;
@@ -1126,6 +1126,25 @@ input:-webkit-autofill {
 			border-top-left-radius: $radius-xl;
 			border-bottom-left-radius: $radius-xl;
 
+			#friend-username {
+				display: flex;
+				padding: 10px;
+				margin-bottom: 10px;
+				width: calc(100% - 20px);
+				border: 1px solid rgba($color-white, 0.2);
+				border-radius: $radius-sm;
+				color: $color-white;
+				background: transparent;
+				text-align: center;
+				font-size: $font-size-xs;
+				font-family: $font-main;
+
+				&:focus {
+					outline: none;
+					border-color: $color-accent;
+					box-shadow: 0 0 5px $color-accent;
+				}
+			}
 			#flex_friends {
 				border: 1px solid rgba($color-white, 0.3);
 				width: 100%;
@@ -1150,6 +1169,7 @@ input:-webkit-autofill {
 					text-align: center;
 					font-size: 2rem;
 					width: 75%;
+					padding: 1%;
 
 					color: $color-white;
 				}
@@ -1157,24 +1177,26 @@ input:-webkit-autofill {
 		}
 
 		#lobby_friends::-webkit-scrollbar-track {
-			-webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
-			border-radius: 10px;
-			background-color: #F5F5F5;
+			background: transparent;
 		}
 
 		#lobby_friends::-webkit-scrollbar {
-			width: 8px;
+			width: 6px;
 			background-color: transparent;
 		}
 
 		#lobby_friends::-webkit-scrollbar-thumb {
 			border-radius: 10px;
-			-webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, .3);
 			background-color: #555;
 		}
 
 		#lobby_chat {
-			background-color: color.adjust($color-accent, $lightness: 20%);
+			display: flex;
+			flex-direction: column;
+			justify-content: flex-end;
+			border: 1px solid rgba($color-white, 0.3);
+			backdrop-filter: $blur-strong;
+			border-radius: $radius-lg;
 			width: 70%;
 			height: 100%;
 			z-index: 31;
@@ -1182,11 +1204,53 @@ input:-webkit-autofill {
 			border-bottom-right-radius: $radius-xl;
 			border: 1px solid $color-secondary;
 
+			#display-msg {
+				display: flex;
+				flex-direction: column;
+				padding: 1.5%;
+				row-gap: 5px;
+				backdrop-filter: $blur-strong;
+				overflow-y: auto;
+				-webkit-overflow-scrolling: touch;
+				scroll-behavior: smooth;
+				scrollbar-width: thin;
+				scrollbar-color: $color-secondary transparent;
+
+				&::-webkit-scrollbar {
+					width: 6px;
+				}
+
+				&::-webkit-scrollbar-thumb {
+					background-color: $color-secondary;
+					border-radius: 10px;
+				}
+
+				&::-webkit-scrollbar-track {
+					background: transparent;
+				}
+
+				.user-msg {
+					width: fit-content;
+					align-self: flex-end;
+					color: $color-accent;
+					border-radius: $radius-xl;
+					padding: 1.5%;
+					background-color: $bg-dark;
+				}
+
+				.user-target-msg {
+					width: fit-content;
+					color: $color-accent-alt;
+					border-radius: $radius-xl;
+					padding: 1.5%;
+					background-color: $color-white;
+				}
+			}
 			#chat-input {
 				display: flex;
 				justify-content: space-between;
-				width: 100%;
 				flex-direction: row;
+				width: 100%;
 
 				input {
 					width: 65%;
@@ -1196,7 +1260,7 @@ input:-webkit-autofill {
 					font-family: $font-main;
 					font-size: $font-size-xs;
 					color: $color-accent;
-					background: rgba($color-white, 0.1);
+					background: rgba($color-black, 0.6);
 
 					&:focus {
 						outline: none;

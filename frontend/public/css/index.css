@@ -1,0 +1,585 @@
+* {
+  padding: 0;
+  margin: 0;
+}
+
+body {
+  user-select: none;
+  background-color: rgb(3, 1, 8);
+  overflow-x: hidden;
+  overflow-y: hidden;
+}
+body #img {
+  position: absolute;
+}
+
+a:visited {
+  color: #fff;
+}
+
+p {
+  color: #fff;
+}
+
+#back {
+  background-image: url("https://mir-s3-cdn-cf.behance.net/project_modules/fs/9bc27292880429.5e569ff84e4d0.gif");
+  background-position: center;
+  background-size: cover;
+  height: 100vh;
+  width: 100vw;
+}
+
+#moncercle {
+  background-color: #000000;
+  border-radius: 50%;
+  width: 300px;
+  height: 300px;
+  filter: drop-shadow(0 0 0 rgb(99, 218, 198)) drop-shadow(0 0 5px rgb(99, 218, 198));
+  top: 50%;
+  left: 50%;
+  position: absolute;
+  transform: translate(-50%, -50%);
+  animation: pulse 2s infinite ease-in-out;
+  transition: transform 0.2s;
+  transition: transform 0.6s ease-in-out, height 0.6s ease-in-out, width 0.6s ease-in-out, padding 0.6s ease-in-out, box-sizing 0.6s ease-in-out, border-radius 0.6s ease-in-out, border 0.6s ease-in-out, filter 0.6s ease-in-out;
+  cursor: pointer;
+}
+#moncercle.expand {
+  background: transparent;
+  height: 400px;
+  width: 360px;
+  border-radius: 8px;
+  padding: 30px;
+  filter: none;
+  transform: translate(-50%, -50%);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  box-sizing: border-box;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+#moncercle.expandlobby {
+  background: transparent;
+  height: 100%;
+  width: 100%;
+  border-radius: 8px;
+  padding: 30px;
+  filter: none;
+  transform: translate(-50%, -50%);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  box-sizing: border-box;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+#moncercle #img {
+  width: 200px;
+  height: 200px;
+  top: 51%;
+  left: 49%;
+  transform: translate(-50%, -50%);
+  transition: opacity 0.3s ease-in-out;
+  filter: drop-shadow(0 0 0 rgb(99, 218, 198)) drop-shadow(0 0 5px rgb(99, 218, 198));
+}
+#moncercle.expand #img {
+  opacity: 0;
+}
+
+@keyframes pulse {
+  0% {
+    transform: translate(-50%, -50%) scale(1);
+  }
+  50% {
+    transform: translate(-50%, -50%) scale(1.1);
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+#back_login {
+  margin: 0;
+  box-sizing: border-box;
+  font-family: "Open Sans", sans-serif;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  width: 100%;
+  padding: 0 10px;
+}
+
+#back_login::before {
+  content: "";
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background: url("https://mir-s3-cdn-cf.behance.net/project_modules/fs/9bc27292880429.5e569ff84e4d0.gif"), #000;
+  background-position: center;
+  background-size: cover;
+}
+
+.wrapper {
+  box-sizing: border-box;
+  font-family: "Open Sans", sans-serif;
+  width: 400px;
+  border-radius: 8px;
+  padding: 30px;
+  text-align: center;
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+}
+
+h2 {
+  font-size: 2rem;
+  margin-bottom: 20px;
+  color: #fff;
+}
+
+.input-field {
+  position: relative;
+  border-bottom: 2px solid #ccc;
+  margin: 15px 0;
+}
+
+.input-field label {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  transform: translateY(-50%);
+  color: #fff;
+  font-size: 16px;
+  pointer-events: none;
+  transition: 0.15s ease;
+}
+
+.input-field input {
+  width: 100%;
+  height: 40px;
+  background: transparent;
+  border: none;
+  outline: none;
+  font-size: 16px;
+  color: #fff;
+}
+
+.input-field input:focus ~ label,
+.input-field input:not(:placeholder-shown) ~ label {
+  font-size: 0.8rem;
+  top: 10px;
+  transform: translateY(-120%);
+}
+
+.forget {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 25px 0 35px 0;
+  color: #fff;
+}
+
+#remember {
+  accent-color: #fff;
+}
+
+.forget label {
+  display: flex;
+  align-items: center;
+}
+
+.forget label p {
+  margin-left: 8px;
+}
+
+.wrapper a {
+  color: #efefef;
+  text-decoration: none;
+}
+
+.wrapper a:hover {
+  text-decoration: underline;
+}
+
+button {
+  background: #fff;
+  color: #000;
+  font-weight: 600;
+  border: none;
+  padding: 12px 20px;
+  cursor: pointer;
+  border-radius: 3px;
+  font-size: 16px;
+  border: 2px solid transparent;
+  transition: 0.3s ease;
+}
+
+button:hover {
+  color: #fff;
+  border-color: #fff;
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.register, .login {
+  text-align: center;
+  margin-top: 30px;
+  color: #fff;
+}
+
+input:-webkit-autofill {
+  -webkit-box-shadow: 0 0 0 1000px transparent inset;
+  -webkit-text-fill-color: white;
+  caret-color: white;
+  background-color: transparent;
+  transition: background-color 9999s ease-out, color 9999s ease-out;
+}
+
+#lobby {
+  background: none;
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+}
+#lobby #selection1 {
+  position: absolute;
+  left: 0;
+  top: 0px;
+  width: calc(50vw - 20px);
+  height: 100vh;
+  transition: all 0.3s ease;
+}
+#lobby #selection1 .game1 {
+  position: absolute;
+  background-image: url("https://sdmntprukwest.oaiusercontent.com/files/00000000-db24-6243-95e8-5e2eeef08827/raw?se=2025-08-08T15%3A29%3A56Z&sp=r&sv=2024-08-04&sr=b&scid=34d866a2-2b91-52b4-b1e2-13fe0d4ac65f&skoid=82a3371f-2f6c-4f81-8a78-2701b362559b&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2025-08-08T08%3A01%3A58Z&ske=2025-08-09T08%3A01%3A58Z&sks=b&skv=2024-08-04&sig=QBAuuHADff54ewZ4jQOhZCWXnFoZ87VxZvAu2lOpfJc%3D");
+  background-repeat: no-repeat;
+  background-size: 50%;
+  background-position: center;
+  top: 20px;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: calc(50vw - 20px);
+  height: 100vh;
+  z-index: 7;
+  box-sizing: border-box;
+  clip-path: polygon(0% 100%, 100% 100%, 100% 23%, 0% 0%);
+  cursor: default;
+  transition: all 0.3s ease;
+}
+#lobby #selection1 .game1 h2 {
+  position: absolute;
+  left: 25%;
+  top: 50%;
+  transform: translate(-25%, -50%);
+  font-size: 42px;
+  color: #000000;
+  z-index: 10;
+}
+#lobby #selection1 .game1:hover {
+  width: 50vw;
+  top: 0;
+}
+#lobby #selection1 .game1:hover h2 {
+  color: #ccc;
+}
+#lobby #selection1.active {
+  height: 100%;
+  width: 50vw;
+}
+#lobby #selection2 {
+  position: absolute;
+  left: calc(50vw + 20px);
+  top: 0px;
+  width: calc(50vw - 20px);
+  height: 100vh;
+  transition: all 0.3s ease;
+}
+#lobby #selection2 .game2 {
+  background: none;
+}
+#lobby #selection2 .game2 {
+  position: absolute;
+  background-image: url("https://img.freepik.com/photos-gratuite/vaisseau-spatial-brillant-orbite-autour-planete-dans-galaxie-etoilee-generee-par-ia_188544-9655.jpg?t=st=1753794048~exp=1753797648~hmac=fe305c37f43ac01c59fb83924bbf212cfdb9610230e69db1e6892f967c4846f8&w=1380");
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: bottom right;
+  top: 20px;
+  left: 0px;
+  right: 0;
+  bottom: 0;
+  width: calc(50vw - 20px);
+  height: 100vh;
+  z-index: 7;
+  box-sizing: border-box;
+  clip-path: polygon(0% 100%, 100% 100%, 100% 0%, 0% 23%);
+  cursor: default;
+  transition: all 0.3s ease;
+}
+#lobby #selection2 .game2 h2 {
+  position: absolute;
+  left: 25%;
+  top: 50%;
+  transform: translate(-25%, -50%);
+  font-size: 42px;
+  color: #000000;
+  z-index: 10;
+}
+#lobby #selection2 .game2:hover {
+  top: 0;
+  height: 100%;
+  width: 50vw;
+}
+#lobby #selection2 .game2:hover h2 {
+  color: #ccc;
+}
+#lobby #selection2.active {
+  left: 50vw;
+  height: 100%;
+  width: 50vw;
+}
+#lobby #profils {
+  background-image: url("https://mir-s3-cdn-cf.behance.net/project_modules/fs/9bc27292880429.5e569ff84e4d0.gif");
+  background-size: contain;
+  position: absolute;
+  clip-path: polygon(50% 100%, 0% 0%, 100% 0%);
+  top: 0%;
+  left: 0%;
+  width: 100%;
+  height: 23vh;
+  z-index: 6;
+  /*svg{
+  	box-sizing: border-box;
+  	border: 2px solid transparent;
+  	background-color: transparent;
+  	backdrop-filter: blur(0.2rem);
+  	border-radius:50%;
+  }*/
+}
+#lobby #profils #parametre {
+  position: relative;
+  top: 5%;
+  left: 60%;
+  width: 5%;
+  height: 5%;
+  z-index: 7;
+  filter: drop-shadow(4px 4px 10px crimson);
+}
+#lobby #profils #parametre:hover {
+  scale: 1.1;
+}
+#lobby #profils #return {
+  position: relative;
+  top: 3%;
+  left: 65%;
+  width: 5%;
+  height: 5%;
+  z-index: 7;
+  filter: drop-shadow(4px 4px 10px crimson);
+}
+#lobby #profils #return:hover {
+  scale: 1.1;
+}
+#lobby #profils #friends {
+  visibility: visible;
+  position: relative;
+  top: 3%;
+  left: 35%;
+  width: 5%;
+  height: 5%;
+  z-index: 7;
+  filter: drop-shadow(4px 4px 10px crimson);
+}
+#lobby #profils #friends:hover {
+  scale: 1.1;
+}
+#lobby #profils #friends2 {
+  visibility: hidden;
+  position: relative;
+  top: calc(3% - 10px);
+  left: 35%;
+  width: 5%;
+  height: 5%;
+  z-index: 7;
+  filter: drop-shadow(4px 4px 10px crimson);
+}
+#lobby #profils #friends2:hover {
+  scale: 1.1;
+}
+#chat-container {
+  position: absolute;
+  top: 87%;
+  left: 10px;
+}
+
+#back_shifumi {
+  padding: 0;
+  margin: 0;
+  display: flex;
+  gap: 10px;
+  margin-top: 20px;
+  min-height: 300px;
+  /* .pong-scene {
+     perspective: 1000px;
+     display: flex;
+     justify-content: center;
+     align-items: center;
+     padding: 20px;
+     width: 50%; // ou une taille fixe selon ton layout
+
+     .pong-court {
+       width: 400px;
+       height: 600px;
+       border: 2px solid $pong-white;
+       transform: rotateX(60deg) rotateZ(45deg);
+       position: relative;
+       transform-style: preserve-3d;
+       box-sizing: border-box;
+
+       .paddle {
+         width: 60px;
+         height: 4px;
+         background: $pong-white;
+         position: absolute;
+
+         &.left {
+           top: 10px;
+           left: 5%;
+  		animation: paddleMoveLeft 2s ease-in-out infinite alternate;
+         }
+
+         &.right {
+           bottom: 10px;
+           right: 5%;
+  	  animation: paddleMoveRight 2s ease-in-out infinite alternate;
+         }
+       }
+
+       .ball {
+         width: 8px;
+         height: 8px;
+         background: $pong-white;
+         border-radius: 50%;
+         position: absolute;
+         top: 50%;
+         left: 50%;
+         transform: translate(-50%, -50%);
+  	animation: ballMove 4s linear infinite alternate;
+       }
+     }
+   }*/
+}
+#back_shifumi #container-button {
+  display: flex;
+  left: 15vw;
+  flex-direction: column;
+  gap: 4vh;
+  align-items: flex-start;
+}
+
+/*
+@keyframes paddleMoveLeft {
+  0%   { left: 80%; }
+  100% { left: 5%; }
+}
+
+@keyframes paddleMoveRight {
+  0%   { right: 5%; }
+  100% { right: 80%; }
+}
+
+@keyframes ballMove {
+	0% {
+		top: 3%;
+		left: 80%;
+		transform: translate(-50%, -50%);
+	}
+	25% {
+		top: 50%;
+		left: 3%;
+		transform: translate(-50%, -50%);
+	}
+	50% {
+		top: 98%;
+		left: 10%;
+		transform: translate(-50%, -50%);
+	}
+	75% {
+		top: 50%;
+		left: 98%;
+		transform: translate(-50%, -50%);
+	}
+	100% {
+		top: 2%;
+		left: 80%;
+		transform: translate(-50%, -50%);
+	}
+}
+*/
+#boddy_chat {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 29;
+}
+#boddy_chat #page_chat {
+  position: absolute;
+  border: #fff 1px;
+  background-color: #fff;
+  border-radius: 2px;
+  width: 60%;
+  height: 80%;
+  left: 20%;
+  top: 10%;
+  z-index: 30;
+}
+#boddy_chat #page_chat #lobby_friends {
+  position: relative;
+  background-color: #727272;
+  width: 30%;
+  height: 100%;
+  z-index: 31;
+  display: flex;
+  flex-direction: column;
+}
+#boddy_chat #page_chat #lobby_friends #flex_friends {
+  height: 10%;
+  border: #fff 1px;
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  background-color: #684949;
+}
+#boddy_chat #page_chat #lobby_friends #flex_friends img {
+  object-fit: cover;
+  width: 20%;
+  height: 100%;
+  background-color: #5a4f4f;
+  border: #fff 1px;
+  border-radius: 50%;
+}
+#boddy_chat #page_chat #lobby_friends #flex_friends p {
+  align-items: center;
+  text-align: center;
+  font-size: 2rem;
+  width: 75%;
+  height: 100%;
+  background-color: #242121;
+  border: #fff 1px;
+}
+#boddy_chat #page_chat #lobby_chat {
+  position: relative;
+  top: -100%;
+  left: 30%;
+  background-color: #ca8181;
+  width: 70%;
+  height: 100%;
+  z-index: 31;
+}
+
+/*# sourceMappingURL=index.css.map */

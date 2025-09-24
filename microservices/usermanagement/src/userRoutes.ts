@@ -43,6 +43,8 @@ export async function friendAdd(app: FastifyInstance) {
             const friend = db.prepare('SELECT id FROM users WHERE username = ?').get(friendUsername) as { id: number };
             if (!friend)
                 return reply.code(404).send({ error: 'Friend not found' });
+			if(user.userId == friend.id)
+				return reply.code(403).send({ error: 'Unable to be friend with yourself'});
             const currentUser = db.prepare('SELECT friends FROM users WHERE id = ?').get(user.userId) as { friends: string };
             let friends = JSON.parse(currentUser.friends || '[]');
             if (friends.includes(friend.id))
