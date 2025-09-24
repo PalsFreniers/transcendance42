@@ -34,7 +34,7 @@ export function joinRoom(userId, name,  roomId)
     return true;
 }
 
-export function joinRoomSolo(name,  roomId)
+export function joinRoomSolo(name,  roomId) // a utiliser pour register l'ia
 {
     const update = db.prepare(`
         UPDATE games2 SET player_two_name = ? WHERE id = ?
@@ -118,7 +118,7 @@ export function checkLobbyName(lobbyName: string): number
         return 0;
 }
 
-export function createRoom(userId: number, name :string | null,  lobbyName: string)
+export function createRoom(userId: number, name :string | null,  lobbyName: string, isPrivate: number)
 {
     if (!name)
         return 0;
@@ -133,6 +133,7 @@ export function createRoom(userId: number, name :string | null,  lobbyName: stri
         game_score: '0-0',
         status: 'waiting',
         round_nmb: 0,
+        is_private: isPrivate,
         date: new Date().toISOString(),
     };
     return createGameLobby(newGame);
@@ -151,6 +152,7 @@ export function createRoomSolo(userId: number, name :string | null,  lobbyName: 
         game_score: '0-0',
         status: 'waiting',
         round_nmb: 0,
+        is_private: 1,
         date: new Date().toISOString(),
     };
     createGameLobby(newGame);
@@ -176,7 +178,6 @@ export function findGameByName(lobbyName: string): number
     return game;
 }
 
-
 export function deleteGameFromDB(gameId)
 {
     db.prepare(`DELETE FROM games2 WHERE id = ?`).run(gameId);
@@ -190,8 +191,7 @@ export function checkReconnect(io, socket, userId)
     if (!id)
         return io.to(socket.id).emit('no-game');
     let game = manager.getGame(id.id);
-    if (game)
-    {
+    if (game) {
         socket.data.gameId = id.id;
         game.reconnect(userId, socket);
     }
@@ -212,8 +212,8 @@ export async function saveStats(gameId: number, token: string, mmrPlayerOne, mmr
             final_score : game.game_score!,
             round_number : game.round_nmb, // a modif
             game_time : game.game_time! / 4, // temps en s
-            mmr_gain_player_one : mmrPlayerOne.toString(),
-            mmr_gain_player_two : mmrPlayerTwo.toString(),
+            mmr_gain_player_one : ((mmrPlayerOne < 0 ? 'private' : mmrPlayerOne.toString())),
+            mmr_gain_player_two : ((mmrPlayerTwo < 0 ? 'private' : mmrPlayerTwo.toString())),
             date : game.date!
         };
         // ajouter une fonction qui fetch pour modif le mmr de chaque joueurs
@@ -238,4 +238,22 @@ export async function saveStats(gameId: number, token: string, mmrPlayerOne, mmr
     }
     else
         console.log(`can't find game : ${gameId}`);
+}
+
+export function gameIsPrivate(gameId: number): number
+{
+    const { is_private } = db.prepare(`
+        SELECT is_private FROM games2 WHERE id = ? 
+    `).get(gameId) as {is_private: number};
+
+    return is_private;
+}
+
+export function getAllGame() {
+    type Ga = { id: number; player_one_id: number }
+    const allGame: Ga[] = db.prepare(`
+        SELECT id, player_one_id FROM games2 WHERE player_two_id IS NULL AND is_private = 0
+    `).all() as Ga[];
+
+    return allGame;
 }

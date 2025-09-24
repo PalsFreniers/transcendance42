@@ -91,7 +91,7 @@ export class game
         
             if (!this.playerOne.IsOnline || !this.playerTwo.IsOnline) {
                 if (await this.playerIsOffline()) {
-                    saveStats(this.gameId, token, calculMmr(this.playerOne, this.playerTwo, token), calculMmr(this.playerTwo, this.playerOne, token));
+                    saveStats(this.gameId, token, calculMmr(this.gameId, this.playerOne, this.playerTwo, token), calculMmr(this.gameId, this.playerTwo, this.playerOne, token));
                     return deleteGameFromDB(this.gameId);
                 }
             }
@@ -138,7 +138,7 @@ export class game
                 io.to(`${this.gameId}.1`).to(`${this.gameId}.2`).emit('game-ended');
                 await clearRoom(`${this.gameId}.1`);
                 await clearRoom(`${this.gameId}.2`);
-                saveStats(this.gameId, token, await calculMmr(this.playerOne, this.playerTwo, token), await calculMmr(this.playerTwo, this.playerOne, token));
+                saveStats(this.gameId, token, await calculMmr(this.gameId, this.playerOne, this.playerTwo, token), await calculMmr(this.gameId, this.playerTwo, this.playerOne, token));
                 deleteGameFromDB(this.gameId);
                 return ;
             }

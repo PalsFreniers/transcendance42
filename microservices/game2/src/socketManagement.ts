@@ -10,13 +10,14 @@ import {
     findGameByName,
     deleteGameFromDB,
     saveStats,
-    getPlayerName
+    getPlayerName, checkReconnect
 } from './Game2Database.js';
 import { GameData } from './gameModel.js';
 import { game } from './game.js';
 import { Manager } from './gameManager.js';
 import { playedCard } from "./gameObjects/gameBoard.js";
 import db from './dbSqlite/db.js';
+import {matchmaking} from "./mmr.js";
 
 const manager = Manager.getInstance();
 
@@ -129,16 +130,17 @@ export function socketManagemente(io: Server) {
             socket.data.gameId = -1;
             console.log(`User ${userId} registered with Shifumi socket ${socket.id}`);
 
-            // a metre dans une fonction pour la lisibiliter du code
-            const id = db.prepare(`SELECT id FROM games2 WHERE status = 'playing' AND (player_one_id = ? OR player_two_id = ?)`).get(userId, userId) as { id : number } | undefined;
-            if (!id)
-                return io.to(socket.id).emit('no-game');
-            let game = manager.getGame(id.id);
-            if (game)
-            {
-                socket.data.gameId = id.id;
-                game.reconnect(userId, socket);
-            }
+            checkReconnect(io, socket, userId); // a tester
+
+            // const id = db.prepare(`SELECT id FROM games2 WHERE status = 'playing' AND (player_one_id = ? OR player_two_id = ?)`).get(userId, userId) as { id : number } | undefined;
+            // if (!id)
+            //     return io.to(socket.id).emit('no-game');
+            // let game = manager.getGame(id.id);
+            // if (game)
+            // {
+            //     socket.data.gameId = id.id;
+            //     game.reconnect(userId, socket);
+            // }
         });
 
         socket.on('disconnect', () =>
@@ -165,16 +167,15 @@ export function socketManagemente(io: Server) {
         /*                                                                            */
         /******************************************************************************/
 
-        socket.on('join-room', (userId : number) =>
+        socket.on('join-room', async (userId : number) =>
         {
             if (!verifTokenSocket(socket))
                 return io.to(socket.id).emit('error', 'error : your token isn\'t valid !');
             if (!userId)
                 return io.to(socket.id).emit('error', 'error : your user id isn\'t valid !');
 
-            const gameId = findGame();
-            console.log(`gameId = ${gameId}`)
-            if (!gameId || gameId > nextGameId)
+            const gameId = await matchmaking(userId, socket.handshake.auth.token);
+            if (!gameId || gameId > nextGameId || gameId < 1)
                 return io.to(socket.id).emit('error', 'error : a game cannot be found !');
 
             let name = socket.data.userName;
@@ -211,7 +212,7 @@ export function socketManagemente(io: Server) {
             }
         });
 
-        socket.on('create-room', (userId: number, lobbyName: string) =>
+        socket.on('create-room', (userId: number, lobbyName: string, isPrivate: number = 0) =>
         {
             if (!verifTokenSocket(socket))
                 return io.to(socket.id).emit('error', 'your token is not valid !');
@@ -219,7 +220,7 @@ export function socketManagemente(io: Server) {
             if (!userId)
                 return io.to(socket.id).emit('error', 'error : your user id isn\'t valid !');
 
-            const roomId = createRoom(userId, socket.data.userName, lobbyName);
+            const roomId = createRoom(userId, socket.data.userName, lobbyName, isPrivate);
             nextGameId++;
 
             if (roomId) {
@@ -262,7 +263,7 @@ export function socketManagemente(io: Server) {
                 return io.to(socket.id).emit('error', 'error : your user id isn\'t valid !');
 
             const roomId: number = nextGameId++;
-            if (createRoomSolo(userId, socket.data.userName, `Anne solo leveling Frank kul ${roomId}`))
+            if (createRoomSolo(userId, socket.data.userName, `solo ${roomId}`))
                 socket.join(`${roomId.toString()}.1`);
             socket.data.gameId = roomId;
             socket.data.player = 1;

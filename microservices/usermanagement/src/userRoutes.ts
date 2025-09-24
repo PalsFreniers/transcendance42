@@ -225,6 +225,28 @@ export async function setMmrShifumi(app: FastifyInstance)  {
     })
 }
 
+export async function getPlayerFromList(app: FastifyInstance)  {
+    type Player = { id: number; mmr: number };
+    app.post('/get-list-player', async (request, reply) => {
+        try {
+            const { playerIds } = request.body as { playerIds: number[] }
+
+            const placeholders = playerIds.map(() => "?").join(",");
+            const players: Player[] = db.prepare(`
+                SELECT id, shifumi_mmr
+                FROM users
+                WHERE id IN (${placeholders})
+            `).all(...playerIds) as Player[];
+
+            reply.code(200).send({ success: true, players });
+        } catch (err) {
+            reply.code(400).send({error: `fail to load players mmr !`});
+        }
+    })
+}
+
+
+
 export async function getMessage(app: FastifyInstance) {
     app.post('/get-message', async (request, reply) => {
         try {

@@ -103,7 +103,7 @@ export function init(){
 				});
 				const { names } = await res.json();
 				if (!names || names.length === 0)
-					return console.log("No game running");
+					return notify("No game running !");
 				listGame.innerHTML = names.map(l => `<p class="lobby-item" data-name="${l.lobby_name}">${l.lobby_name} - ${l.status} </p>`).join("");
 
 				document.querySelectorAll(".lobby-item").forEach(el => {
