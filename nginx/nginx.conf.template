@@ -20,7 +20,10 @@ http {
     # Server
     # ------------------------
     server {
-        listen 80;
+        listen 8443 ssl;
+        ssl_certificate /etc/nginx/ssl/selfsigned.crt;
+        ssl_certificate_key /etc/nginx/ssl/selfsigned.key;
+        ssl_protocols TLSv1.2 TLSv1.3;
         server_name ${VITE_LOCAL_ADDRESS};
 
         # -------- Frontend --------

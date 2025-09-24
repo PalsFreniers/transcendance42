@@ -27,7 +27,7 @@ services:
     container_name: nginx
     restart: always
     ports:
-      - "8080:${NGINX_HTTP_PORT}"
+      #- "8080:${NGINX_HTTP_PORT}"
       - "8443:${NGINX_HTTPS_PORT}"
     depends_on:
       - frontend
@@ -178,4 +178,5 @@ volumes:
 # Networks
 networks:
   app-network:
+    driver: bridge
   observability:

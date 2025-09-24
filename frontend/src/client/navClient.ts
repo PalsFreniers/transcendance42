@@ -103,7 +103,7 @@ export async function handleRoute() {
 			else
 				monCercle.removeEventListener('click', expandCercle);
 		}
-		// --- chargement du module JS correspondant ---
+		// --- load module JS for the current DOM ---
 		const mod = pageModules[path];
     	if (mod?.init) 
 			mod.init();
