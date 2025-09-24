@@ -72,7 +72,7 @@ export function init() {
 				});
 
 				const verifyData = await verifyRes.json();
-
+				console.log('slt');
 				if (verifyRes.ok && verifyData.token) {
 					if (remember) {
 						localStorage.setItem("rememberedUsername", username);

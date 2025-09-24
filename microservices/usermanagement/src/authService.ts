@@ -77,26 +77,29 @@ export async function auth(app: FastifyInstance) {
         //SIGN TOKEN FOR THAT SESSION ANOTHER IS GENERATE AT EACH CONNECTION
         const otp = Math.floor(100000 + Math.random() * 900000);
         otpStore.set(user.id, { otp, expires: Date.now() + 5 * 60 * 1000 });
+        console.log(otpStore);
+        console.log(user.email);
         await transporter.sendMail({
             from: 'transendance42@gmail.com',
             to: user.email,
             subject: 'Votre code de vérification',
             text: `Votre code pour terminer la connexion est : ${otp}`
         });
-
+        console.log('pass transporter')
         await new Promise(resolve => setTimeout(resolve, 100));
         // RETURN IT FOR OTHERS SERVICES CAN BE USED IT!
-        return reply.send({ message: 'OTP sent. Please verify with /verify-email', userId: user.id, username: user.username });
+        return reply.send({ message: 'OTP sent', userId: user.id, username: user.username });
     });
     app.post('/verify-email', async (request, reply) => {
-        const { userId, otp, username } = request.body as { userId: number; otp: number, username: string };
+        const { userId, otp, username } = request.body as { userId: number; otp: string, username: string };
         const record = otpStore.get(userId);
 
-        if (!record || record.expires < Date.now() || record.otp !== otp) {
+        if (!record || record.expires < Date.now() || record.otp !== parseInt(otp))
+        {
+            console.log(typeof(otp));
             return reply.code(401).send({ error: 'Invalid or expired otp' });
         }
         otpStore.delete(userId);
-        const user = db.prepare('SELECT * FROM users WHERE id = ?').get(userId);
         const token = app.jwt.sign({ userId: userId, username: username });
 
         return reply.send({ token: token });
