@@ -55,12 +55,11 @@ export async function init() {
 			});
 			form.addEventListener('submit', async (e) => {
 				e.preventDefault();
-				console.log('coucou');
 
 				const formData = new FormData();
 				formData.append("bio", bio.value);
 				if (pp.files?.[0]) {
-					formData.append("profile_image", pp.files[0]);
+					formData.append("profile_image_url", pp.files[0]);
 				}
 
 				const changeProfil = await fetch(
@@ -81,7 +80,6 @@ export async function init() {
 				}
 
 				const data = await changeProfil.json();
-				console.log(data.user.phone_number);
 				profil.innerHTML = `
 				  <div class="profil-card">
 					<img src="${data.user.profile_image_url || '/assets/default-avatar.png'}" class="profil-avatar" />

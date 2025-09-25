@@ -139,13 +139,13 @@ export async function updateProfile(app: FastifyInstance) {
 
             const body = request.body as any; // avec attachFieldsToBody: true
             const bio = body.bio || '';
-            if (body.profile_image) {
-                const file = body.profile_image;
+            if (body.profile_image_url) {
+                const file = body.profile_image_url;
                 const uploadDir = path.join('./', 'uploads');
                 if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
                 const filePath = path.join(uploadDir, file.filename);
                 await file.toBuffer().then(buffer => fs.writeFileSync(filePath, buffer));
-                fileUrl = `http://${process.env.VITE_LOCAL_ADDRESS}:3001/uploads/${file.filename}`;
+                fileUrl = `/uploads/${file.filename}`;
                 console.log('File saved at:', fileUrl);
             }
 

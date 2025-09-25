@@ -57,6 +57,7 @@ export function init() {
 				body: JSON.stringify({ username, password, twofaCheckBox }),
 			});
 			const data = await res.json();
+			console.log(data);
 			if (res.ok && twofaCheckBox) {
 				if (res.ok && data.message === "OTP sent") {
 					const otp = prompt("Un code de vérification a été envoyé à votre email. Entrez-le ici :");
@@ -87,9 +88,13 @@ export function init() {
 				}
 			}
 			else {
-				localStorage.setItem('token', data.token);
-				await getSockets();
-				navigateTo('/lobby');
+				if (data.token) {
+					localStorage.setItem('token', data.token);
+					await getSockets();
+					navigateTo('/lobby');
+				}
+				else
+					return;
 			}
 		} catch (err) {
 			console.error('Login error:', err);
