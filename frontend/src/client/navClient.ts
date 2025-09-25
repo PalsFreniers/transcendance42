@@ -112,15 +112,9 @@ export async function handleRoute() {
 			else
 				monCercle.removeEventListener('click', expandCercle);
 		}
-<<<<<<< HEAD
 		// --- chargement du module JS correspondant ---
 		const mod = getClient(path);
 		if (mod?.init)
-=======
-		// --- load module JS for the current DOM ---
-		const mod = pageModules[path];
-    	if (mod?.init) 
->>>>>>> f1b7dc3 (2fa work + ssl in progress)
 			mod.init();
 	} else
 		app.innerHTML = `<h1>404 - Page not found</h1>`;
