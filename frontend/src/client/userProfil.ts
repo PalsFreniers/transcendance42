@@ -5,7 +5,7 @@ import { handleRoute } from "./navClient.js";
 export async function init() {
 	try {
 		const token = localStorage.getItem('token'); // TOKEN LINK FROM THE USER CONNECTED
-		const res = await fetch(`http://${import.meta.env.VITE_LOCAL_ADDRESS}:3001/api/user/profil`, {
+		const res = await fetch(`/api/user/profil`, {
 			method: 'GET',
 			headers: {
 				'Content-Type': 'application/json',
@@ -29,7 +29,6 @@ export async function init() {
 			e.preventDefault();
 			form.innerHTML = `
 				<input id="bio" type="text" bio="bio" placeholder="bio" />
-				<input id="phoneNumber" type="text" placeholder="Phone number" />
 				<div class="file-upload">
 					<label for="img-profil">📷 Upload profile picture</label>
 					<input id="img-profil" type="file" accept="image/*"/>
@@ -42,7 +41,6 @@ export async function init() {
 			const pp = document.getElementById('img-profil') as HTMLInputElement;
 			const fileName = document.querySelector(".file-name") as HTMLElement;
 			const preview = document.getElementById("preview-profil") as HTMLImageElement;
-			const phone_number = document.getElementById('phoneNumber') as HTMLInputElement;
 			pp.addEventListener('change', () => {
 				const file = pp.files?.[0];
 				if (!file)
@@ -56,13 +54,12 @@ export async function init() {
 
 				const formData = new FormData();
 				formData.append("bio", bio.value);
-				formData.append("phoneNumber", phone_number.value);
 				if (pp.files?.[0]) {
 					formData.append("profile_image", pp.files[0]);
 				}
 
 				const changeProfil = await fetch(
-					`http://${import.meta.env.VITE_LOCAL_ADDRESS}:3001/api/user/update`,
+					`/api/user/update`,
 					{
 						method: 'PUT',
 						headers: {
@@ -91,7 +88,7 @@ export async function init() {
 				  </div>`;
 			});
 		});
-		const resFriends = await fetch(`http://${import.meta.env.VITE_LOCAL_ADDRESS}:3001/api/user/friend-list`, {
+		const resFriends = await fetch(`/api/user/friend-list`, {
 			method: 'GET',
 			headers: {
 				'Content-Type': 'application/json',
@@ -110,7 +107,7 @@ export async function init() {
 				button.textContent = 'Delete';
 				button.addEventListener('click', async (e) => {
 					e.preventDefault();
-					const res = await fetch(`http://${import.meta.env.VITE_LOCAL_ADDRESS}:3001/api/user/delete-friend`, {
+					const res = await fetch(`/api/user/delete-friend`, {
 						method: 'POST',
 						headers: {
 							'Content-Type': 'application/json',
@@ -150,7 +147,7 @@ export async function init() {
 					const friendPPDiv = (e.currentTarget as HTMLElement).closest('.friend-pp');
 					friendPPDiv?.classList.add('selected');
 					console.log("Image cliquée => username:", usernameTarget);
-					const messages = await fetch(`http://${import.meta.env.VITE_LOCAL_ADDRESS}:3001/api/user/get-message`, {
+					const messages = await fetch(`/api/user/get-message`, {
 						method: 'POST',
 						headers: {
 							'Content-Type': 'application/json',
@@ -200,7 +197,7 @@ export async function init() {
 				return;
 			}
 			try {
-				const res = await fetch(`http://${import.meta.env.VITE_LOCAL_ADDRESS}:3001/api/user/add-friend`, {
+				const res = await fetch(`/api/user/add-friend`, {
 					method: 'POST',
 					headers: {
 						'Content-Type': 'application/json',

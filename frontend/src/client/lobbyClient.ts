@@ -24,7 +24,7 @@ async function msg_lobby(event: MouseEvent){
         if (friends_lobby && token)
         {
             try {
-                const findfriend = await fetch(`http://${import.meta.env.VITE_LOCAL_ADDRESS}:3001/api/user/friend-list`, {
+                const findfriend = await fetch(`/api/user/friend-list`, {
                     method: "GET",
                     headers: {
                         "Content-Type": "application/json",
@@ -93,7 +93,7 @@ async function profil_image(){
 	const token = localStorage.getItem('token');
 
 	try {
-		const profil = await fetch(`http://${import.meta.env.VITE_LOCAL_ADDRESS}:3001/api/user/profil`, {
+		const profil = await fetch(`/api/user/profil`, {
 			method: "GET",
 			headers: {
 				"Content-Type": "application/json",
@@ -210,7 +210,7 @@ export function init(){
 	if (offline) {
 		offline.addEventListener("click", async () => {
 			const token = localStorage.getItem("token");
-			const res = await fetch(`http://${import.meta.env.VITE_LOCAL_ADDRESS}:3001/api/user/logout`, {
+			const res = await fetch(`/api/user/logout`, {
 				method: "POST",
 				headers: {
 					"Content-Type": "application/json",

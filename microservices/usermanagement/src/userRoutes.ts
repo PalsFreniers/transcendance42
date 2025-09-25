@@ -137,7 +137,6 @@ export async function updateProfile(app: FastifyInstance) {
 
             const body = request.body as any; // avec attachFieldsToBody: true
             const bio = body.bio || '';
-            const phone = body.phoneNumber || '';
             if (body.profile_image) {
                 const file = body.profile_image;
                 const uploadDir = path.join('./', 'uploads');
@@ -148,19 +147,14 @@ export async function updateProfile(app: FastifyInstance) {
                 console.log('File saved at:', fileUrl);
             }
 
-            console.log('bio:', bio);
-            console.log('fileUrl:', fileUrl);
-            console.log('userId:', user.userId);
-
-
             db.prepare(`
           UPDATE users
-          SET bio = ?, phone_number = ?, profile_image_url = ?, updated_at = CURRENT_TIMESTAMP
+          SET bio = ?, profile_image_url = ?, updated_at = CURRENT_TIMESTAMP
           WHERE id = ?
-        `).run(bio.value, phone.value, fileUrl, user.userId);
+        `).run(bio.value, fileUrl, user.userId);
 
             const updatedUser = db
-                .prepare('SELECT id, username, email, phone_number, bio, profile_image_url FROM users WHERE id = ?')
+                .prepare('SELECT id, username, email, bio, profile_image_url FROM users WHERE id = ?')
                 .get(user.userId);
 
             return reply.send({ success: true, user: updatedUser });

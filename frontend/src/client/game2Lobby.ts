@@ -93,7 +93,7 @@ export function init(){
 			if (!sock)
 				return console.error('error 404: socket not found !')
 			try {
-				const res = await fetch(`http://${import.meta.env.VITE_LOCAL_ADDRESS}:3003/api/game2/get-games`, {
+				const res = await fetch(`/api/game2/get-games`, {
 					method: "POST",
 					headers: {
 						"Content-Type": "application/json",
