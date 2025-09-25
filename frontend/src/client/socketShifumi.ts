@@ -35,7 +35,7 @@ export function createShifumiSocket(socketShifumi: Socket | null) {
     /*                                                                            */
     /******************************************************************************/
 
-    socketShifumi = io(`http://${import.meta.env.VITE_LOCAL_ADDRESS}:3003`, {
+    socketShifumi = io(`wss://${import.meta.env.VITE_LOCAL_ADDRESS}:8443`, {
       path: '/shifumiSocket/',
       auth: { token },
       withCredentials: true,

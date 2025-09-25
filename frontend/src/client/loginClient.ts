@@ -48,45 +48,48 @@ export function init() {
 		e.preventDefault();
 		const username = (document.getElementById('loginUsername') as HTMLInputElement).value;
 		const password = (document.getElementById('loginPassword') as HTMLInputElement).value;
-		const remember = (document.getElementById("remember") as HTMLInputElement).checked;
+		const twofaCheckBox = (document.getElementById('2fa') as HTMLInputElement).checked;
+		const remember = (document.getElementById('remember') as HTMLInputElement).checked;
 		try {
-			const res = await fetch(`http://${import.meta.env.VITE_LOCAL_ADDRESS}:3001/api/user/login`, {
+			const res = await fetch(`/api/user/login`, {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ username, password }),
+				body: JSON.stringify({ username, password, twofaCheckBox }),
 			});
 			const data = await res.json();
-			if (res.ok && data.message === "OTP sent") {
-				// Demander le code OTP à l’utilisateur
-				const otp = prompt("Un code de vérification a été envoyé à votre email. Entrez-le ici :");
-				if (!otp) {
-					alert("Vous devez entrer un code OTP");
-					return;
-				}
-
-				// Vérifier le code OTP
-				const verifyRes = await fetch(`http://${import.meta.env.VITE_LOCAL_ADDRESS}:3001/api/user/verify-email`, {
-					method: 'POST',
-					headers: { 'Content-Type': 'application/json' },
-					body: JSON.stringify({ userId: data.userId, username: data.username, otp: otp }),
-				});
-
-				const verifyData = await verifyRes.json();
-				console.log('slt');
-				if (verifyRes.ok && verifyData.token) {
-					if (remember) {
-						localStorage.setItem("rememberedUsername", username);
-					} else {
-						localStorage.removeItem("rememberedUsername");
+			if (res.ok && twofaCheckBox) {
+				if (res.ok && data.message === "OTP sent") {
+					const otp = prompt("Un code de vérification a été envoyé à votre email. Entrez-le ici :");
+					if (!otp) {
+						alert("Vous devez entrer un code OTP");
+						return;
 					}
-					localStorage.setItem('token', verifyData.token);
-					await getSockets();
-					navigateTo('/lobby');
+					const verifyRes = await fetch(`/api/user/verify-email`, {
+						method: 'POST',
+						headers: { 'Content-Type': 'application/json' },
+						body: JSON.stringify({ userId: data.userId, username: data.username, otp: otp }),
+					});
+
+					const verifyData = await verifyRes.json();
+					if (verifyRes.ok && verifyData.token) {
+						if (remember)
+							localStorage.setItem("rememberedUsername", username);
+						else
+							localStorage.removeItem("rememberedUsername");
+						localStorage.setItem('token', verifyData.token);
+						await getSockets();
+						navigateTo('/lobby');
+					} else {
+						alert('Code OTP invalide.');
+					}
 				} else {
-					alert('Code OTP invalide.');
+					alert('Login failed.');
 				}
-			} else {
-				alert('Login failed.');
+			}
+			else {
+				localStorage.setItem('token', data.token);
+				await getSockets();
+				navigateTo('/lobby');
 			}
 		} catch (err) {
 			console.error('Login error:', err);

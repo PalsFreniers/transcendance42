@@ -36,7 +36,7 @@ export function getSockets(): [Socket, Socket, Socket] {
         const token = localStorage.getItem('token');
         const userId = getUserIdFromToken();
         // SOCKET CHAT
-        socketChat = io(`http://${import.meta.env.VITE_LOCAL_ADDRESS}:3001`, {
+        socketChat = io(`wss://${import.meta.env.VITE_LOCAL_ADDRESS}:8443`, {
             path: '/chatSocket/',
             auth: { token },
             withCredentials: true,

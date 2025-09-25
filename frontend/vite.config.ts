@@ -6,7 +6,7 @@ dotenv.config();
 export default defineConfig({
   root: 'public',     // serve /public directly
   server: {
-    host: process.env.VITE_LOCAL_ADDRESS,
+    host: '0.0.0.0',
     port: 5173
   }
 });

@@ -7,18 +7,17 @@ import db from './dbSqlite/db.js';
 const otpStore = new Map<number, { otp: number; expires: number }>();
 
 const transporter = nodemailer.createTransport({
-  host: 'smtp.gmail.com', // ou le SMTP de ton fournisseur
-  port: 465,
-  secure: true,
-  auth: {
-    user: 'transendance42@gmail.com',
-    pass: process.env.EMAIL_APP_PASSWORD // App Password
-  }
+    host: 'smtp.gmail.com', // ou le SMTP de ton fournisseur
+    port: 465,
+    secure: true,
+    auth: {
+        user: 'transendance42@gmail.com',
+        pass: process.env.EMAIL_APP_PASSWORD // App Password
+    }
 });
 
 export async function register(app: FastifyInstance) {
     app.post('/register', async (request, reply) => {
-        console.log("register reach");
         const { username, email, password } = request.body as {
             username: string;
             password: string;
@@ -50,9 +49,10 @@ export async function register(app: FastifyInstance) {
 
 export async function auth(app: FastifyInstance) {
     app.post('/login', async (request, reply) => {
-        const { username, password } = request.body as {
+        const { username, password, twofaCheckBox } = request.body as {
             username: string;
             password: string;
+            twofaCheckBox: boolean;
         };
         //GET USER FROM DB
         const user = db.prepare('SELECT * FROM users WHERE username = ?').get(username) as {
@@ -60,7 +60,6 @@ export async function auth(app: FastifyInstance) {
             username: string;
             email: string;
             password_hash: string;
-            phone_number?: string | null;
             is_online: number;
         };
         if (!user)
@@ -69,36 +68,33 @@ export async function auth(app: FastifyInstance) {
         const valid = await bcrypt.compare(password, user.password_hash);
         if (!valid)
             return reply.code(401).send({ error: 'Invalid username or password' });
-        if (user.is_online)
-        {
+        if (user.is_online) {
             console.log('User is already connected');
-            return reply.code(401).send({ error: 'You are already connected on another device'});
+            return reply.code(401).send({ error: 'You are already connected on another device' });
         }
         //SIGN TOKEN FOR THAT SESSION ANOTHER IS GENERATE AT EACH CONNECTION
-        const otp = Math.floor(100000 + Math.random() * 900000);
-        otpStore.set(user.id, { otp, expires: Date.now() + 5 * 60 * 1000 });
-        console.log(otpStore);
-        console.log(user.email);
-        await transporter.sendMail({
-            from: 'transendance42@gmail.com',
-            to: user.email,
-            subject: 'Votre code de vérification',
-            text: `Votre code pour terminer la connexion est : ${otp}`
-        });
-        console.log('pass transporter')
-        await new Promise(resolve => setTimeout(resolve, 100));
-        // RETURN IT FOR OTHERS SERVICES CAN BE USED IT!
-        return reply.send({ message: 'OTP sent', userId: user.id, username: user.username });
+        if (twofaCheckBox) {
+            const otp = Math.floor(100000 + Math.random() * 900000);
+            otpStore.set(user.id, { otp, expires: Date.now() + 5 * 60 * 1000 });
+            await transporter.sendMail({
+                from: 'transendance42@gmail.com',
+                to: user.email,
+                subject: 'Votre code de vérification',
+                text: `Votre code pour terminer la connexion est : ${otp}`
+            });
+            await new Promise(resolve => setTimeout(resolve, 100));
+            // RETURN IT FOR OTHERS SERVICES CAN BE USED IT!
+            return reply.send({ message: 'OTP sent', userId: user.id, username: user.username });
+        }
+        const token = app.jwt.sign({ userId: user.id, username: user.username });
+        return reply.send({ token: token });
     });
     app.post('/verify-email', async (request, reply) => {
         const { userId, otp, username } = request.body as { userId: number; otp: string, username: string };
         const record = otpStore.get(userId);
 
         if (!record || record.expires < Date.now() || record.otp !== parseInt(otp))
-        {
-            console.log(typeof(otp));
             return reply.code(401).send({ error: 'Invalid or expired otp' });
-        }
         otpStore.delete(userId);
         const token = app.jwt.sign({ userId: userId, username: username });
 
@@ -109,11 +105,11 @@ export async function auth(app: FastifyInstance) {
 export async function logOut(app: FastifyInstance) {
     app.post('/logout', async (request, reply) => {
         const user = request.user as { userId: number }
-        const userdb = db.prepare('SELECT * FROM users WHERE id = ?').get(user.userId) as {id: number}
+        const userdb = db.prepare('SELECT * FROM users WHERE id = ?').get(user.userId) as { id: number }
         if (!userdb)
-            return reply.code(401).send({ error: 'User dosen\'t exist'});
+            return reply.code(401).send({ error: 'User dosen\'t exist' });
         db.prepare('UPDATE users SET is_online = 0 WHERE id = ?').run(user.userId);
-        return reply.status(200).send({ success:true });
+        return reply.status(200).send({ success: true });
     });
 }
 

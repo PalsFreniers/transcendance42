@@ -28,7 +28,7 @@ localadress:
 
 all: localadress
 	$(COMPOSE) -f $(COMPOSE_FILE) up -d
-	@echo "The website run at http://$$($(CMD_LOCAL_NETWORK_ADDR)):5173"
+	@echo "The website run at https://$$($(CMD_LOCAL_NETWORK_ADDR)):8443"
 
 down:
 	$(COMPOSE) -f $(COMPOSE_FILE) down
