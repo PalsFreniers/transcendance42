@@ -84,98 +84,14 @@ services:
     networks:
       - app-network
 
-  #redis:
-  #  image: redis:7-alpine
-  #  container_name: redis
-  #  restart: always
-  #  ports:
-  #    - "6380:${REDIS_PORT}"
-  #  networks:
-  #    - app-network
-  
-  # ELK Stack - Logging
-#  elasticsearch:
-#    build: ./log/elasticsearch
-#    env_file:
-#      - .env
-#    container_name: elasticsearch
-#    environment:
-#      - discovery.type=single-node
-#    volumes:
-#      - esdata:/usr/share/elasticsearch/data
-#    ports:
-#      - "${ELASTICSEARCH_PORT}:${ELASTICSEARCH_PORT}"
-#    networks:
-#      - observability
-
-  # Prometheus & Grafana
-  prometheus:
-    build: ./metrics/prometheus
-    env_file:
-      - .env
-    container_name: prometheus
-    ports:
-      - "${PROMETHEUS_PORT}:${PROMETHEUS_PORT}"
-    networks:
-      - observability
-
-  grafana:
-    build: ./metrics/grafana
-    env_file:
-      - .env
-    container_name: grafana
-    ports:
-      - "${GRAFANA_PORT}:${GRAFANA_PORT}"
-    volumes:
-      - grafana_data:/var/lib/grafana
-    networks:
-      - observability
-    depends_on:
-      - prometheus
-
-#  kibana:
-#    build: ./log/kibana
-#    env_file:
-#      - .env
-#    container_name: kibana
-#    environment:
-#      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
-#    ports:
-#      - "${KIBANA_PORT}:${KIBANA_PORT}"
-#    depends_on:
-#      - elasticsearch
-#    networks:
-#      - observability
-#  
-#  logstash:
-#    build: ./log/logstash
-#    env_file:
-#      - .env
-#    container_name: logstash
-#    volumes:
-#      - ./log/logstash/pipeline:/usr/share/logstash/pipeline
-#    ports:
-#      - "${LOGSTASH_PORT}:${LOGSTASH_PORT}"
-#    environment:
-#      - LOGSTASH_PIPELINE_YAML_LOCATION=/usr/share/logstash/pipeline/logstash.yml
-#    depends_on:
-#      - elasticsearch
-#    networks:
-#      - observability
-
-
 # Volumes
 volumes:
   frontend_db_data:
   user_db_data:
   game_db_data:
   game2_db_data:
-  esdata:
-  prometheus_data:
-  grafana_data:
 
 # Networks
 networks:
   app-network:
     driver: bridge
-  observability:
