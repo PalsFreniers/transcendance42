@@ -1,3 +1,6 @@
+import { navigateTo } from "./navClient.js";
+import { notify } from "./notify.js";
+
 export function init() {
 	
 	console.log('Init running');
@@ -16,11 +19,11 @@ export function init() {
 				body: JSON.stringify({ username, password, email }),
 			});
 			if (res.ok) {
-				alert('Registration successful!');
-				window.location.pathname = "/login";
+				notify('You are successfully register!');
+				navigateTo('/login');
 			}
 			else
-				alert('Registration failed.');
+				notify('Registration failed.');
 		} catch (err) {
 			console.error('Register error:', err);
 		}

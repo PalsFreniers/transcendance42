@@ -1,3 +1,4 @@
+import { notify } from "./notify.js";
 import { getSocket } from "./socketClient.js";
 
 export function init() {
@@ -27,6 +28,7 @@ export function init() {
                 });
                 const data = await res.json();
                 if (!data.success) {
+                    notify(`Game not created, Error: ${data.error}`);
                     console.error("Failed to create game:", data.error);
                     return;
                 }
@@ -54,6 +56,7 @@ export function init() {
                 });
                 const { lobbies } = await findLobbiesRes.json();
                 if (!lobbies || lobbies.length === 0) {
+                    notify(`Error: No open lobbies found for joinning`);
                     console.log("No open lobbies found.");
                     return;
                 }
@@ -68,6 +71,7 @@ export function init() {
                 });
                 const data = await res.json();
                 if (!data.success) {
+                    notify(`Failed to join game, Error: ${data.error}`);
                     console.error("Failed to Join game:", data.error);
                     return;
                 }
@@ -81,6 +85,7 @@ export function init() {
     if (startBtn) {
         startBtn.addEventListener("click", () => {
             const socket = getSocket(1);
+            notify(`Game is started`);
             socket!.emit("start-game");
         });
     }
@@ -98,7 +103,7 @@ export function init() {
                 });
                 const { lobbies } = await findLobbiesRes.json();
                 if (!lobbies || lobbies.length === 0) {
-                    console.log("No game running.");
+                    notify("No game actually running");
                     return;
                 }
                 listGame.innerHTML = lobbies.map(l => `<p class="lobby-item" data-name="${l.lobby_name}">${l.lobby_name} - ${l.status}</p>`).join("");
@@ -109,7 +114,10 @@ export function init() {
                         console.log("Clicked lobby:", lobbyName);
                         const socket = getSocket(1);
                         if (lobbyName)
+                        {
+                            notify(`Your spectate ${lobbyName} room`)
                             socket!.emit("spec-game", { lobbyname : lobbyName });
+                        }
                     });
                 });
 

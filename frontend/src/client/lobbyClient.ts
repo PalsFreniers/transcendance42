@@ -7,7 +7,7 @@ export let friend_select: string = '';
 export async function msg_friend()
 {
 	const token = localStorage.getItem('token');
-	const messages = await fetch(`http://${import.meta.env.VITE_LOCAL_ADDRESS}:3001/api/user/get-message`, {
+	const messages = await fetch(`/api/user/get-message`, {
 			method: 'POST',
 			headers: {
 				'Content-Type': 'application/json',
@@ -37,7 +37,7 @@ export async function msg_friend()
 
 async function friend_reload(){
 	const token = localStorage.getItem('token');
-	 const findfriend = await fetch(`http://${import.meta.env.VITE_LOCAL_ADDRESS}:3001/api/user/friend-list`, {
+	 const findfriend = await fetch(`/api/user/friend-list`, {
 		method: "GET",
 		headers: {
 			"Content-Type": "application/json",
@@ -162,7 +162,7 @@ async function msg_lobby(event: MouseEvent){
 							return;
 						}
 						try {
-							const res = await fetch(`http://${import.meta.env.VITE_LOCAL_ADDRESS}:3001/api/user/add-friend`, {
+							const res = await fetch(`/api/user/add-friend`, {
 								method: 'POST',
 								headers: {
 									'Content-Type': 'application/json',

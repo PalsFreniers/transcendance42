@@ -1,6 +1,7 @@
 import { getUserIdFromToken } from "./loginClient.js";
 import { getSocket } from "./socketClient.js";
 import { handleRoute } from "./navClient.js";
+import { notify } from "./notify.js";
 
 export async function init() {
 	try {
@@ -75,11 +76,12 @@ export async function init() {
 
 				if (!changeProfil.ok) {
 					const err = await changeProfil.json();
-					console.error('Failed to update profile:', err);
+					notify(`Failed to update profile: Error ${err}`);
 					return;
 				}
 
 				const data = await changeProfil.json();
+				notify(`profile well updated !`)
 				profil.innerHTML = `
 				  <div class="profil-card">
 					<img src="${data.user.profile_image_url || '/assets/default-avatar.png'}" class="profil-avatar" />
@@ -120,7 +122,7 @@ export async function init() {
 					});
 					const data = await res.json();
 					if (res.ok) {
-						console.log('friend deleted:', data.message);
+						notify(`friend deleted: ${data.message}`)
 						handleRoute();
 					}
 					else

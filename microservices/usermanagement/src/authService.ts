@@ -7,12 +7,12 @@ import db from './dbSqlite/db.js';
 const otpStore = new Map<number, { otp: number; expires: number }>();
 
 const transporter = nodemailer.createTransport({
-    host: 'smtp.gmail.com', // ou le SMTP de ton fournisseur
+    host: 'smtp.gmail.com',
     port: 465,
     secure: true,
     auth: {
         user: 'transendance42@gmail.com',
-        pass: process.env.EMAIL_APP_PASSWORD // App Password
+        pass: process.env.EMAIL_APP_PASSWORD
     }
 });
 
@@ -23,9 +23,8 @@ export async function register(app: FastifyInstance) {
             password: string;
             email: string;
         };
-        if (!username || !email || !password) {
+        if (!username || !email || !password)
             return reply.status(400).send({ error: 'Missing required fields' });
-        }
         const existingUser = db.prepare('SELECT 1 FROM users WHERE username = ? OR email = ?').get(username, email);
         if (existingUser)
             return reply.status(409).send({ error: 'Username or email already in use' });

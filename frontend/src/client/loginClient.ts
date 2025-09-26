@@ -1,4 +1,5 @@
 import { navigateTo } from "./navClient.js";
+import { notify } from "./notify.js";
 import { getSockets } from "./socketClient.js";
 
 export function getUserIdFromToken(): number {
@@ -62,7 +63,7 @@ export function init() {
 				if (res.ok && data.message === "OTP sent") {
 					const otp = prompt("Un code de vérification a été envoyé à votre email. Entrez-le ici :");
 					if (!otp) {
-						alert("Vous devez entrer un code OTP");
+						notify("Vous devez entrer un code OTP");
 						return;
 					}
 					const verifyRes = await fetch(`/api/user/verify-email`, {
@@ -77,18 +78,20 @@ export function init() {
 							localStorage.setItem("rememberedUsername", username);
 						else
 							localStorage.removeItem("rememberedUsername");
+						notify(`You are login!`);
 						localStorage.setItem('token', verifyData.token);
 						await getSockets();
 						navigateTo('/lobby');
 					} else {
-						alert('Code OTP invalide.');
+						notify('Code OTP invalide.');
 					}
 				} else {
-					alert('Login failed.');
+					notify('Login failed.');
 				}
 			}
 			else {
 				if (data.token) {
+					notify(`You are login!`)
 					localStorage.setItem('token', data.token);
 					await getSockets();
 					navigateTo('/lobby');
