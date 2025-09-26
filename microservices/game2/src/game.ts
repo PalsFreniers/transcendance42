@@ -5,6 +5,7 @@ import { playedCard } from "./gameObjects/gameBoard.js";
 import { Socket } from "socket.io";
 import { getUsernameFromToken } from './socketManagement.js'
 import { calculMmr } from './mmr.js'
+import { IaManager } from "./ia/iaManager.js";
 
 export interface Player {
     Id : number;
@@ -153,7 +154,16 @@ export class game
     public disconnect(playerId: number, socket)
     {
         if (playerId == this.playerOne.Id)
+        {
+            if (this.playerTwo.Id < 0)
+            {
+                IaManager.getInstance().deleteIaByGameId(this.gameId);
+                this.playerTwo.IsOnline = false;
+                this.PlayerOneTime = 0;
+                this.PlayerTwoTime = 0;
+            }
             this.playerOne.IsOnline = false;
+        }
         else if (playerId == this.playerTwo.Id)
             this.playerTwo.IsOnline = false;
         else

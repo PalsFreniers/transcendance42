@@ -18,8 +18,10 @@ import { Manager } from './gameManager.js';
 import { playedCard } from "./gameObjects/gameBoard.js";
 import db from './dbSqlite/db.js';
 import {matchmaking} from "./mmr.js";
+import { IaManager } from "./ia/iaManager.js";
 
 const manager = Manager.getInstance();
+const iaManager = IaManager.getInstance();
 
 let nextGameId: number = 1;
 
@@ -212,6 +214,21 @@ export function socketManagemente(io: Server) {
             }
         });
 
+
+        socket.on('ia-join-room', (userId : number, gameId: number, name: string) =>
+        {
+            if (!gameId || gameId > nextGameId || gameId < 0)
+                return console.log(`this game (${gameId}) doesn't exist`);
+
+            if (joinRoom(userId.toString(), name, gameId.toString())) {
+                socket.data.gameId = gameId;
+                socket.data.player = 2;
+                socket.join(`${gameId.toString()}.2`);
+                io.to(socket.id).emit('roomJoined', gameId);
+                io.to(`${gameId.toString()}.1`).emit('opponent-found', 1, name);
+            }
+        });
+
         socket.on('create-room', (userId: number, lobbyName: string, isPrivate: number = 0) =>
         {
             if (!verifTokenSocket(socket))
@@ -268,7 +285,7 @@ export function socketManagemente(io: Server) {
             socket.data.gameId = roomId;
             socket.data.player = 1;
             io.to(socket.id).emit('roomJoined', roomId);
-
+            iaManager.newIaForSoloGame(roomId);
             // cree ia et l'ajouter dans la game, la room ${roomId}-2
         });
 
