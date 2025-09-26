@@ -70,6 +70,24 @@ export function socketManagement(io: Server) {
                 if (manager.createLobby(lobbyName, gameId))
                     throw new Error(`Couldn't create lobby with name ${lobbyName}`);
                 if (manager.joinLobby(lobbyName, socket.data.userId))
+                    throw new Error(`Couldn't join lobby with name ${lobbyName}`);
+
+                manager.findGame(lobbyName)!.on("game-end",
+                    ({ game, players }) => {
+                    console.log("here");
+                    const score: number[] = Array.from(game.score);
+                    const [p1, p2] = players;
+                    console.log(players);
+                    io.to(p1).emit("game-end", {
+                        msg: score![0] > score![1] ? "You win" : "You loose",
+                        score: [score![0], score![1]]
+                    });
+                    io.to(p2).emit("game-end", {
+                        msg: score![1] > score![0] ? "You win" : "You loose",
+                        score: [score![1], score![0]]
+                    });
+                });
+
                 socket.data.lobbyName = lobbyName;
                 socket.data.gameId = `game-${gameId}`;
 
@@ -143,14 +161,16 @@ export function socketManagement(io: Server) {
             }
         });
 
-        socket.on('input', ({ key, action }) => {
+        socket.on('input', ({ key, action }) => { // trueKey
             const playerId = socket.data.userId;
             const game = manager.findGame(playerId.toString());
             if (!game)
                 return console.warn(`No active game for player ${playerId}`);
             if (game.state !== 'running')
                 return;
-            const paddle = game.getPaddle(playerId)!;
+            let paddle = game.getPaddle(playerId)!;
+            // if (!trueKey.startsWith("Arrow")) // paddle droit
+            //     paddle = game.getPaddle(-1);
             const state = paddle.getState();
             const isPressed = action === 'keydown';
             if (key === 'up')

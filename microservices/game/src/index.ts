@@ -69,6 +69,9 @@ app.register(joinLobby);
 app.register(specGame);
 
 app.listen({ port: Number(PORT), host: `0.0.0.0` }, err => {
-    if (err) throw err;
+    if (err) {
+        console.error(err);
+        throw err;
+    }
     console.log(`Game service running on port ${PORT}`);
 });

@@ -1,8 +1,9 @@
 import { Game } from './game.js'
 import { Paddle } from "./gameObjects/Paddle.js";
-import { Server } from "socket.io";
-import * as Vec2D from "vector2d";
+import { TournamentManager } from "./tournamentManager.js"
 import db from "./dbSqlite/db.js"
+import * as Vec2D from "vector2d";
+import { Server } from "socket.io";
 
 export class GameManager {
 
@@ -18,6 +19,7 @@ export class GameManager {
         return this.instance
     }
 
+    // Other Stuff
     registerSocket(userId: number, socketId: string) {
         this._userSockets.set(userId, socketId);
     }
@@ -50,19 +52,20 @@ export class GameManager {
 
     createLobby(lobbyName: string, gameID: number): number {
         if (this._games.has(lobbyName))
-            return 1; // lobby already exists
+            return 1; // lobby already exists and game isn't ended
         this._games.set(lobbyName, [new Game(gameID), [null, null]]);
         return 0;
     }
 
     joinLobby(lobbyName: string, playerID: number): number {
         if (!this._games.has(lobbyName))
-            return 1; // lobby doesnt exists
-        this._games.forEach(([_, [p1, p2]]) => {
-            if (p1 === playerID || p2 === playerID) {
-                return 4; // player already in another game
-            }
-        });
+            return 1; // lobby doesnt exist
+        if (lobbyName.startsWith("tournament") && !TournamentManager.getInstance().isPlayerRegistered(playerID))
+            return 5; // player cannot participate in tournament if not registered
+        if (!lobbyName.startsWith("tournament") && TournamentManager.getInstance().isPlayerRegistered(playerID))
+            return 6; // player cannot participate in a non tournament game if registered
+        if (this.isPlayerInGame(playerID))
+            return 4; // player already in a game
         const [game, [p1, p2]] = this._games.get(lobbyName)!;
         if (p1 === playerID || p2 === playerID)
             return 2; // player is already in the lobby
@@ -72,10 +75,10 @@ export class GameManager {
             this._games.set(lobbyName, [game.joinTeam(new Paddle(playerID, new Vec2D.Vector(9, 0)), "right"), [p1, playerID]]);
         else
             return 3; // lobby is full
-        return 0;
+        return 0; // worked just fine
     }
 
-    startGame(lobbyName: string, gameId: string, io: any, autoDelete: boolean = true) {
+    startGame(lobbyName: string, gameId: string, io: any)   {
         if (!this._games.has(lobbyName))
             return 1; // lobby doesn't exist
         const [game, [p1, p2]] = this._games.get(lobbyName)!;
@@ -89,21 +92,16 @@ export class GameManager {
                     return 0;
                 }
             });
-            game.update();
             if (game.state === "ended") {
                 clearInterval(loop);
-                const score = this.getScore(lobbyName);
-                io.to(this._userSockets.get(p1)).emit("game-end", {
-                    msg: score![0] > score![1] ? "You win" : "You loose",
-                    score: [score![0], score![1]]
-                });
-                io.to(this._userSockets.get(p2)).emit("game-end", {
-                    msg: score![1] > score![0] ? "You win" : "You loose",
-                    score: [score![1], score![0]]
-                });
-                if (autoDelete)
-                    this.deleteGame(lobbyName);
+                game.emit("game-end", {
+                    game: game,
+                    players: [this.getSocketId(p1), this.getSocketId(p2)]}
+                );
+                this.deleteGame(lobbyName);
+                return ;
             }
+            game.update();
             const state = this.getGameInfo(lobbyName, io);
             io.to(gameId).emit("game-state", state);
         }, 1000 / 60);
@@ -219,5 +217,14 @@ export class GameManager {
             }, 1000);
         });
 
+    }
+
+    isPlayerInGame(playerID: number): boolean {
+        for (const [_, [__, [p1, p2]]] of this._games) {
+            if (p1 === playerID || p2 === playerID) {
+                return true; // player already in another game
+            }
+        }
+        return false;
     }
 }

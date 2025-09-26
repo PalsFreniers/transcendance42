@@ -187,7 +187,7 @@ export function createPongSocket(socketPong: Socket | null) {
 
     document.addEventListener('keyup', (e) => {
         if (e.key === "ArrowUp" || e.key === "ArrowDown") {
-            const payload = { key: e.key === "ArrowUp" ? "up" : "down", action: "keyup" };
+            const payload = { key: e.key === "ArrowUp" ? "up" : "down", action: "keyup", trueKey: e.key };
             console.log("Emit input:", payload);
             socketPong!.emit("input", payload);
         }
