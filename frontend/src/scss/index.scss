@@ -927,6 +927,179 @@ input:-webkit-autofill {
 
 /******************************************************************************/
 /*                                                                            */
+/*                        	  Shifumi game board                              */
+/*                                                                            */
+/******************************************************************************/
+/*
+#container-button {
+  font-family: $font-main;
+  background: linear-gradient(180deg, rgba($bg-dark, .95), darken($bg-dark,5%));
+  color: $color-white;
+  padding: 18px;
+  width: 380px;
+  max-width: 95%;
+  margin: 12px auto;
+  border-radius: $radius-md;
+  box-shadow: $shadow-accent;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+
+  h2 {
+    font-size: $font-size-lg;
+    margin: 2px 0 6px;
+    text-shadow: 3px 3px 0 rgba(0,0,0,0.5);
+    letter-spacing: 1px;
+  }
+
+  p, P {
+    margin: 0;
+    padding: 4px 6px;
+    font-size: $font-size-sm;
+    color: $color-white;
+    text-shadow: 1px 1px 0 rgba(0,0,0,0.6);
+  }
+
+  #opponent-name { font-weight: 700; color: $color-accent-alt; }
+  #points { font-weight: 900; color: $color-accent; }
+
+  button {
+    font-family: $font-main;
+    font-size: $font-size-sm;
+    padding: 8px 12px;
+    cursor: pointer;
+    background: linear-gradient(180deg, $btn-bg, darken($btn-bg, 6%));
+    color: $btn-text;
+    border-radius: $radius-sm;
+    transition: transform $transition-fast, box-shadow $transition-fast, background $transition-fast;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    user-select: none;
+    -webkit-font-smoothing: none;
+    box-shadow: $shadow-cyan;
+
+    &:active {
+      transform: translateY(1px) scale(.995);
+      box-shadow: none;
+    }
+
+    &:hover {
+      background: $btn-hover-bg;
+      border-color: $btn-hover-border;
+      box-shadow: 6px 6px 0 rgba(0,0,0,0.35);
+    }
+  }
+
+  #change-player,
+  #quit-button,
+  #start-button,
+  #kick-opponent {
+    background: linear-gradient(180deg, lighten($bg-light,6%), $bg-light);
+    color: $color-black;
+    font-weight: 700;
+    padding: 10px 14px;
+  }
+
+  #start-button {
+    background: linear-gradient(180deg, $color-accent-alt, darken($color-accent-alt, 6%));
+    color: $color-black;
+  }
+
+  #quit-button {
+    background: linear-gradient(180deg, $color-accent, darken($color-accent, 8%));
+    color: $color-white;
+  }
+  .card {
+    display: inline-block;
+    min-width: 110px;
+    padding: 12px 8px;
+    margin: 6px 4px;
+    font-size: $font-size-sm;
+    background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(0,0,0,0.1));
+    color: $color-white;
+    border-radius: 6px;
+    box-shadow: 6px 6px 0 rgba(0,0,0,0.45);
+    text-align: center;
+    position: relative;
+    transition: transform $transition-fast, box-shadow $transition-fast;
+    background-image: repeating-linear-gradient(
+      135deg,
+      rgba(255,255,255,0.02) 0 2px,
+      rgba(0,0,0,0.03) 2px 4px
+    );
+
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 8px 8px 0 rgba(0,0,0,0.55);
+    }
+
+    &:active {
+      transform: translateY(1px) scale(.99);
+      box-shadow: 3px 3px 0 rgba(0,0,0,0.35);
+    }
+
+    &::before {
+      content: attr(id);
+      position: absolute;
+      left: 6px;
+      top: -8px;
+      background: $color-black;
+      color: $color-white;
+      padding: 2px 6px;
+      font-size: 11px;
+      border: 2px solid $color-white;
+      transform: translateY(-50%);
+    }
+
+    &::after {
+      content: "";
+      position: absolute;
+      right: 8px;
+      bottom: 6px;
+      font-weight: 900;
+      font-size: 14px;
+      color: rgba(255,255,255,0.6);
+    }
+  }
+
+  #card1-button {
+    background: linear-gradient(180deg, darken($color-primary, 2%), $color-primary);
+    color: $color-white;
+    &::after { content: "[1][rock]"; }
+  }
+
+  #card2-button {
+    background: linear-gradient(180deg, darken($color-secondary, 2%), $color-secondary);
+    color: $color-white;
+    &::after { content: "[2][paper]"; }
+  }
+
+  #card3-button {
+    background: linear-gradient(180deg, darken($color-accent, 2%), $color-accent);
+    color: $color-white;
+    &::after { content: "[3][scissors]"; }
+  }
+
+  #coin-button {
+    background: linear-gradient(180deg, $color-accent-alt, darken($color-accent-alt,6%));
+    color: $color-black;
+    &::after { content: "[coin]"; }
+  }
+
+  #card-played, #opponent-card-played {
+    margin-top: 8px;
+    font-size: 18px;
+    padding: 8px;
+    background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(0,0,0,0.12));
+    min-height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+}
+/******************************************************************************/
+/*                                                                            */
 /*                        		 	  Chat                            	    */
 /*                                                                            */
 /******************************************************************************/
