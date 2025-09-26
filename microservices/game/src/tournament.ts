@@ -1,12 +1,11 @@
-// import { v4 as uuidv4 } from "uuid";
-import { Server } from "socket.io";
+import {Server} from "socket.io";
 import {GameManager} from "./gameManager.js";
 import {createGameLobby} from "./gameModel.js"
 
-type player_type = [number, string]; // playerID and socketID
-type bracket_type = [player_type, player_type][];
+export type player_type = [number, string]; // playerID and socketID
+export type bracket_type = [player_type, player_type][];
 
-class Tournament {
+export class Tournament {
     private _players: player_type[] = [];
     private _winnerBracket: bracket_type = [];
     private _winningPlayers: player_type[] = [];
@@ -14,19 +13,25 @@ class Tournament {
     private _losingPlayers: player_type[] = [];
     private _state: "waiting" | "running" | "finished" = "waiting";
     private _roundNum: number = 0;
+    private _matchNum: number = 0;
     private _leaderboard: player_type[] = [];
     private _isGrandFinale: boolean = false;
+    private _canAdvance: boolean = false;
+    private _numberOfGames: number = 0;
 
     constructor(
         private _name: string,
         private _maxPlayers: number,
         private _associatedServer: Server
-    ) {}
+    ) {
+    }
 
     // Methods
     public startTournament() {
-        if (this.state !== "waiting") return 1; // tournament already started
-        if (this.players.length < 2) return 2; // not enough player
+        if (this.state !== "waiting")
+            return 1; // tournament already started
+        if (this.players.length <= 2) // 3 or more needed
+            return 2; // not enough player
 
         // Generate the brackets
         this._winnerBracket = this._initBrackets(this.players);
@@ -34,25 +39,22 @@ class Tournament {
         return 0;
     }
 
-    public async playRound() {
-        this._roundNum++;
+    public playRound() {
         if (this._state != "running"
             || !this.remainingPlayers.length)
-            return
+            return 1; // tournament is finished
+        this._roundNum++;
+        this._matchNum = 0;
         if (this.remainingPlayers.length == 2) {
-            await this._playFinale();
-            return;
+            this._playFinale();
+            return 0;
         }
-        await this._advanceWinnerBracket();
-        if (!this._winnerBracket.length) {
-            this._loserBracket = this._initBrackets(this._losingPlayers);
-            this._losingPlayers = [];
-        }
-        await this._advanceLoserBracket();
-        if (!this._loserBracket.length) {
-            this._winnerBracket = this._initBrackets(this._winningPlayers);
-            this._winningPlayers = [];
-        }
+
+        if (this._winnerBracket.length)
+            this._advanceWinnerBracket();
+        if (this._loserBracket.length)
+            this._advanceLoserBracket()
+        return 0;
     }
 
     // Accessors
@@ -115,7 +117,7 @@ class Tournament {
     }
 
     public get leaderboard(): player_type[] {
-        return this._leaderboard;
+        return this._leaderboard.reverse();
     }
 
     public get roundnum(): number {
@@ -135,39 +137,47 @@ class Tournament {
         return bracket;
     }
 
-    private async _advanceWinnerBracket() {
-        const matches = [...this._winnerBracket];
+    private _advanceWinnerBracket() {
+        const matches = [...this._winnerBracket].reverse();
         this._winnerBracket = [];
 
-        const promises = matches.map((match) =>
-            this._launchGame([match], "WinnerBracket"),
-        );
-
-        const results = await Promise.all(promises);
-
-        for (const [winner, loser] of results) {
-            this._winningPlayers.push(winner);
-            if (loser[0] !== -1) this._losingPlayers.push(loser);
-        }
+        this._numberOfGames = matches.length;
+        matches.forEach((match) => {
+            const result = this._launchGame(matches, "WinnerBracket",
+                (t, result) => {
+                    this._winningPlayers.push(result[0]);
+                    if (result[1][0] !== -1) this._losingPlayers.push(result[1]);
+                },
+                (t) => {
+                    this._loserBracket = this._initBrackets(this._losingPlayers);
+                    this._losingPlayers = [];
+                    this.playRound();
+                }
+            );
+        });
     }
 
-    private async _advanceLoserBracket() {
-        const matches = [...this._loserBracket];
+    private _advanceLoserBracket() {
+        const matches = [...this._loserBracket].reverse();
         this._loserBracket = [];
 
-        const promises = matches.map((match) =>
-            this._launchGame([match], "LoserBracket"),
-        );
-
-        const results = await Promise.all(promises);
-
-        for (const [winner, loser] of results) {
-            this._losingPlayers.push(winner);
-            if (loser[0] != -1) this._leaderboard.push(loser);
-        }
+        this._numberOfGames = matches.length;
+        matches.forEach((match) => {
+            const result = this._launchGame(matches, "LoserBracket",
+                (t, result) => {
+                    this._losingPlayers.push(result[0]);
+                    if (result[1][0] !== -1) this._leaderboard.push(result[1]);
+                },
+                (t) => {
+                    this._winnerBracket = this._initBrackets(this._winningPlayers);
+                    this._winningPlayers = [];
+                    this.playRound();
+                }
+            );
+        });
     }
 
-    private async _playFinale() {
+    private _playFinale() {
         let winner: player_type;
         let loser: player_type;
         if (!this._winningPlayers.length) {
@@ -178,29 +188,46 @@ class Tournament {
             loser = this._loserBracket[0][0];
         }
         const finalBracket: bracket_type = [[loser, winner]];
-        const finalResult = await this._launchGame(
+        const finalResult = this._launchGame(
             finalBracket,
             this._isGrandFinale ? "Grand Finale" : "Finale",
+            (t, result) => {
+                if (result[0][0] == winner[0]) { // WB won FINALE
+                    this._leaderboard.push(loser);
+                    this._leaderboard.push(winner);
+                    this._state = "finished";
+                } else if (this._isGrandFinale) { // LB won GRAND FINALE
+                    this._leaderboard.push(winner);
+                    this._leaderboard.push(loser);
+                    this._state = "finished";
+                } else { // LB won FINALE
+                    this._isGrandFinale = true;
+                }
+            },
+            (t) => {
+                if (t._isGrandFinale)
+                    t.playRound();
+            }
         );
-        if (finalResult[0][0] == winner[0]) {
-            this._leaderboard.push(loser);
-            this._leaderboard.push(winner);
-            this._state = "finished";
-        } else if (this._isGrandFinale) {
-            this._leaderboard.push(winner);
-            this._leaderboard.push(loser);
-            this._state = "finished";
-        } else {
-            this._isGrandFinale = true;
-        }
     }
 
-    private async _launchGame(bracket: bracket_type, roundName: string): Promise<[player_type, player_type]> {
+    // Lambda arguments are the current tournament and the result of the game: [winner, loser]
+    private _launchGame(
+        bracket: bracket_type,
+        roundName: string,
+        onGameEnd: ((t: Tournament, result: [player_type, player_type]) => void),
+        onBracketEnd: ((t: Tournament) => void)
+    ) {
         let round: [player_type, player_type] = bracket.splice(0, 1)[0];
-        if (round[1][0] === -1)
-            return round;
-        let name: string = `tournament_${roundName}_Round${this._roundNum}-${Math.floor(this._loserBracket.length / 2)}`;
-        // Create the associated game
+        this._numberOfGames--;
+        if (round[1][0] === -1) {
+            onGameEnd(this, round);
+            if (!this._numberOfGames)
+                onBracketEnd(this);
+            return ;
+        }
+        let name: string = `tournament_${this._name}_${roundName}_Round${this._roundNum}-${this._matchNum++}`;
+        // // Create the associated game
         const gameManager = GameManager.getInstance();
         const gameID = createGameLobby({
             playerOne: round[0][0],
@@ -215,19 +242,13 @@ class Tournament {
         gameManager.joinLobby(name, round[1][0]);
         gameManager.registerSocket(round[0][0], round[0][1]);
         gameManager.registerSocket(round[1][0], round[1][1]);
-        // Starts, and wait until game is finished
-        gameManager.startGame(name, gameID.toString(), this._associatedServer, false);
-
-        const score = await new Promise<[number, number]>((resolve) => {
-          const waitForGame = setInterval(() => {
-            const game = gameManager.findGame(name);
-            if (game && game.state === "finished") {
-              clearInterval(waitForGame);
-              resolve(game.score as [number, number]);
-            }
-          }, 1000);
+        gameManager.findGame(name)!.on("game-end", ({game, players}) => {
+            (game.score[0] > game.score[1]) ? onGameEnd(this, round) : onGameEnd(this, round.reverse() as [player_type, player_type]);
+            if (!this._numberOfGames)
+                onBracketEnd(this);
         });
-
-        return score[0] > score[1] ? [round[0], round[1]] : [round[1], round[0]];
+        // Starts, and wait until game is finished
+        gameManager.startGame(name, gameID.toString(), this._associatedServer);
+        return null;
     }
 }

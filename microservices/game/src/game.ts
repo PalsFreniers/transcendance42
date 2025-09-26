@@ -4,10 +4,11 @@ import { Collidable, createRectangle } from "./gameObjects/Collidable.js"
 import { Paddle } from "./gameObjects/Paddle.js"
 import { clamp } from "./utils.js"
 
+type Listener<T = any> = (data: T) => void;
+
 export class Game {
 
     // Constructor
-
     constructor(
         private _gameID: number,
         private _map: Collidable[] = [
@@ -25,6 +26,7 @@ export class Game {
     private _state: string = "notStarted";
     private _resumeTimer: number = 3;
     private _countdown: boolean = false;
+    private _events: Map<string, Listener[]> = new Map();
 
     // Accessors
 
@@ -113,17 +115,17 @@ export class Game {
         }, 2000);
     }
 
-
     update() {
-        this.updatePaddles();
-        if (this._state == "running")
+        if (this._state == "running") {
             this.updateBall();
+            this.updatePaddles();
+        }
         else if (this._state == "idling")
             this.idlingBall();
         else if (this._state == "starting")
             this.idlingBall();
         else if (this._state == "resume")
-            this.inCommingBall();
+            this.incomingBall();
     }
 
     private updateBall() {
@@ -167,7 +169,7 @@ export class Game {
         }
     }
 
-    private inCommingBall() {
+    private incomingBall() {
         if (this._countdown) // coutdown need to be launch just one time
             return;
         this._countdown = true;
@@ -193,7 +195,7 @@ export class Game {
         dY = paddle.hitbox.pos.y - dY;
         paddle.hitbox.getPoints().forEach((point) => { point.y += dY });
     })
-    if (this._score[scoringTeam] == 2) {
+    if (this._score[scoringTeam] == 3) {
         this._state = "ended";
         return;
     }
@@ -204,4 +206,33 @@ export class Game {
         this._state = "running";
     }, 2.5 * 1e3);
 }
+
+    // Event Manager
+    on(event: string, listener: Listener) {
+        if (!this._events.has(event))
+            this._events.set(event, []);
+        this._events.get(event)!.push(listener);
+    }
+
+    off(event: string, listener: Listener) {
+        const listeners = this._events.get(event);
+        if (!listeners)
+            return;
+        this._events.set(
+            event,
+            listeners.filter((l) => {
+                return l !== listener;
+            })
+        );
+    }
+
+    emit(event: string, data?: any) {
+        const listeners = this._events.get(event);
+        if (!listeners)
+            return;
+        listeners.forEach((listener) => {
+            listener(data);
+        });
+    }
+
 }
