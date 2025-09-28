@@ -124,3 +124,12 @@ export function navigateTo(url: string) {
 	history.pushState(null, '', url);
 	handleRoute();
 }
+
+export function backToPreviousPage(){
+	const backBtn = document.getElementById('return');
+	if (backBtn){
+		backBtn.addEventListener('click', () => {
+			history.back();
+		})
+	}
+}

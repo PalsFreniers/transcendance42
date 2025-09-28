@@ -1,6 +1,7 @@
 import { getSocket } from './socketClient.js';
 import { getUserIdFromToken } from './loginClient.js'
 import { notify } from "./notify.js";
+import { backToPreviousPage } from './navClient.js';
 
 
 export function init(){
@@ -19,6 +20,8 @@ export function init(){
 	const custom_button  = document.getElementById("custom-button") as HTMLButtonElement;
 	const listGame = document.getElementById("game-list") as HTMLElement;
 
+	backToPreviousPage();
+	
 	if (game_button)
 	{
 		game_button.addEventListener('click', async (e) => {
