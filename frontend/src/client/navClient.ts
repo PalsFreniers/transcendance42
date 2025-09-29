@@ -1,4 +1,4 @@
-import { getSockets } from './socketClient.js';
+ import { getSockets } from './socketClient.js';
 import { routes } from './template.js';
 
 import * as loginClient from './loginClient.js';
