@@ -104,12 +104,9 @@ function quitLobby(io, socket: Socket): boolean {
 export function socketManagemente(io: Server) {
     io.use(async (socket, next) => {
         if (verifTokenSocket(socket)) {
-            console.log('verif passed !');
             next();
         }
-        else
-        {
-            console.log(`socket ${socket.id} can't connect !`);
+        else {
             next(new Error('Authentication error'));
         }
     });
@@ -130,7 +127,6 @@ export function socketManagemente(io: Server) {
             socket.data.userName = getUsernameFromToken(socket.handshake.auth.token);
             socket.data.player = -1;
             socket.data.gameId = -1;
-            console.log(`User ${userId} registered with Shifumi socket ${socket.id}`);
 
             checkReconnect(io, socket, userId); // a tester
 
@@ -219,7 +215,6 @@ export function socketManagemente(io: Server) {
         {
             if (!gameId || gameId > nextGameId || gameId < 0)
                 return console.log(`this game (${gameId}) doesn't exist`);
-
             if (joinRoom(userId.toString(), name, gameId.toString())) {
                 socket.data.gameId = gameId;
                 socket.data.player = 2;
@@ -229,15 +224,15 @@ export function socketManagemente(io: Server) {
             }
         });
 
-        socket.on('create-room', (userId: number, lobbyName: string, isPrivate: number = 0) =>
+        socket.on('create-room', (userId: number, lobbyName: string, isPrivate: number = 0, isSpectabled: number = 0) =>
         {
             if (!verifTokenSocket(socket))
                 return io.to(socket.id).emit('error', 'your token is not valid !');
 
             if (!userId)
                 return io.to(socket.id).emit('error', 'error : your user id isn\'t valid !');
-
-            const roomId = createRoom(userId, socket.data.userName, lobbyName, isPrivate);
+            console.log(isSpectabled);
+            const roomId = createRoom(userId, socket.data.userName, lobbyName, isPrivate, isSpectabled);
             nextGameId++;
 
             if (roomId) {
@@ -253,6 +248,8 @@ export function socketManagemente(io: Server) {
         socket.on('kick-opponent', async () =>
         {
             let opponentId = kickOpponentFromDB(socket.data.gameId);
+            if (opponentId < 0)
+                return ;
             const target = await getSocketFromRoom(io, `${socket.data.gameId}.2`, opponentId);
 
             if (target) {
@@ -268,11 +265,10 @@ export function socketManagemente(io: Server) {
         {
             if (quitLobby(io, socket))
                 return;
-            console.error('error : fail to quit lobby !');
             io.to(socket.id).emit('error', 'fail to quit lobby');
         });
 
-        socket.on('solo-game', (userId) =>
+        socket.on('solo-game', (userId, isSpec) =>
         {
             if (!verifTokenSocket(socket))
                 return io.to(socket.id).emit('error', 'your token is not valid !');
@@ -280,7 +276,7 @@ export function socketManagemente(io: Server) {
                 return io.to(socket.id).emit('error', 'error : your user id isn\'t valid !');
 
             const roomId: number = nextGameId++;
-            if (createRoomSolo(userId, socket.data.userName, `solo ${roomId}`))
+            if (createRoomSolo(userId, socket.data.userName, `solo ${roomId}`, isSpec))
                 socket.join(`${roomId.toString()}.1`);
             socket.data.gameId = roomId;
             socket.data.player = 1;
@@ -341,7 +337,7 @@ export function socketManagemente(io: Server) {
                 if (game)
                     game.spectate(1, socket);
                 else
-                    io.to(`${socket.data.gameId}.1`).to(`${socket.data.gameId}.2`).emit('roomInfo', `${socket.data.userName} spectate`);
+                    socket.to(`${socket.data.gameId}.1`).to(`${socket.data.gameId}.2`).emit('roomInfo', `${socket.data.userName} spectate`);
             }
         });
 
@@ -374,12 +370,9 @@ export function socketManagemente(io: Server) {
                     usedCoin : false,
                     IsOnline : true
                 }, id.id);
-                console.log(`in start-game, id = ${id.id}`);
                 var shifumi = manager.getGame(id.id);
                 if (shifumi)
-                {
                     shifumi.start(socket.handshake.auth.token);
-                }
             }
         });
 
@@ -394,7 +387,6 @@ export function socketManagemente(io: Server) {
         socket.on('play-card', (gameId: number, play: playedCard) =>
         {
             const game = manager.getGame(gameId);
-            console.log(`id player = ${play.userId}`);
             if (game)
                 game.chooseCard(play);
         });

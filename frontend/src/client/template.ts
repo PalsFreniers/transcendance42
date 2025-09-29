@@ -193,6 +193,16 @@ const templates: Record<string, () => string> = {
   <div class="shifumi-wrapper">
     <h2 class="shifumi-title">✊ Shifumi</h2>
     <div id="shifumi-controls">
+        <div id="checkbox-shifumi" >
+            <div class="div_checkbox">
+                <input type="range" class="miniSlider" id="slidePriv" min="0" max="1" step="1" value="0">
+                <span class="toggleText" id="priv">Private</span>
+            </div>
+            <div class="div_checkbox">
+                <input type="range" class="miniSlider" id="slideSpec" min="0" max="1" step="1" value="1">
+                <span class="toggleText" id="spec">Spectator</span>
+            </div>
+        </div>
     <input type="text" id="lobby-name" placeholder="Room name" required />
         <div class="shifumi-buttons">
           <button id="solo-button">Join Solo</button>

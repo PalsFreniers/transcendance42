@@ -34,7 +34,6 @@ export async function matchmaking(playerId: number, token) : Promise<number> {
     while (range < maxRange)
     {
         mmrMap.forEach((mmr, id, map) => {
-            console.log(`mmr = ${mmr}`);
             if (mmr >= (PlayerMmr - range) && mmr <= (PlayerMmr + range)) {
                 idGame = playerMap.get(id);
             }
@@ -94,7 +93,6 @@ async function getMmrFromId(id: number, token): Promise<number> {
 
 async function setMmrFromId(id: number, token, newMmr: number)  {
     try {
-        console.log(`newMmr = ${newMmr}`);
         const res = await fetch('http://user-service:3001/api/user/set-mmr-shifumi', {
             method: 'POST',
             headers: {

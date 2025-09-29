@@ -18,7 +18,6 @@ export class Manager
     {
         if (this.games.has(gameId))
             return false;
-        console.log('here');
         this.games.set(gameId, new game(playerOne, playerTwo, gameId));
     }
 

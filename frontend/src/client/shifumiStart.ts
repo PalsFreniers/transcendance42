@@ -139,7 +139,6 @@ export function init() {
     if (card1)
     {
         card1.hidden = true;
-        console.log('here');
         card1.addEventListener('click', async (e) => {
             if (spectate.spec)
                 return ;

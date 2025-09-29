@@ -21,6 +21,14 @@ export class Ia {
         this._initSocket();
     }
 
+    public destructor() {
+        if (this._socket)
+        {
+            this._socket.removeAllListeners();
+            this._socket.disconnect()
+        }
+    }
+
     private _initSocket() {
         this._socket = io(`http://game2-service:3003`, {
             path: '/shifumiSocket/',
@@ -31,15 +39,10 @@ export class Ia {
 
         this._socket.on('connect', () => {
             if (this._socket)
-            {
-                console.log(this._name);
                 this._socket.emit('ia-join-room', this._id, this._gameId, this._name);
-            }
         });
 
         this._socket.on('roomJoined', (gameId) => {
-            if (this._socket)
-                this._socket.emit('ready');
         });
 
         this._socket.on('card', (cards: [number,number][]) => {
@@ -55,9 +58,9 @@ export class Ia {
     private startSelectCard() {
         let playcard: [number, number];
 
-        const pierres = this._cards.filter(c => c[0] === 1);
-        const feuilles = this._cards.filter(c => c[0] === 2);
-        const ciseaux = this._cards.filter(c => c[0] === 3);
+        const stones = this._cards.filter(c => c[0] === 1);
+        const papers = this._cards.filter(c => c[0] === 2);
+        const scissors = this._cards.filter(c => c[0] === 3);
         const jokers = this._cards.filter(c => c[0] === 0);
 
         const playedStones = this._allCardsPlay.filter(c => c[0] === 1).length;
@@ -66,23 +69,23 @@ export class Ia {
 
         let bestChoice: [number, number] | null = null;
         if (this._cards.length > 0) {
-            if (playedStones > playedPapers && ciseaux.length > 0) bestChoice = ciseaux[Math.floor(Math.random() * ciseaux.length)];
-            else if (playedScissors > playedStones && feuilles.length > 0) bestChoice = feuilles[Math.floor(Math.random() * feuilles.length)];
-            else if (playedPapers > playedScissors && pierres.length > 0) bestChoice = pierres[Math.floor(Math.random() * pierres.length)];
+            if (playedStones > playedPapers && scissors.length > 0)
+                bestChoice = scissors[Math.floor(Math.random() * scissors.length)];
+            else if (playedScissors > playedStones && papers.length > 0)
+                bestChoice = papers[Math.floor(Math.random() * papers.length)];
+            else if (playedPapers > playedScissors && stones.length > 0)
+                bestChoice = stones[Math.floor(Math.random() * stones.length)];
         }
 
         const randomChance = Math.random();
-        if (!bestChoice || randomChance < 0.3) {
+        if (!bestChoice || randomChance < 0.3)
             playcard = this._cards[Math.floor(Math.random() * this._cards.length)];
-        } else {
+        else
             playcard = bestChoice;
-        }
 
-        if (this._cards.length <= 2 && jokers.length > 0) {
+        if (this._cards.length <= 2 && jokers.length > 0)
             playcard = jokers[Math.floor(Math.random() * jokers.length)];
-        }
 
-        console.log(`ia choose this card : ${playcard}`);
         if (this._socket)
             this._socket.emit('play-card', this._gameId, {
                 userId: this._id,

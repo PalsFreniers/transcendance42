@@ -3,6 +3,43 @@ import { getUserIdFromToken } from './loginClient.js'
 import { notify } from "./notify.js";
 
 
+function activetoggleButton(slider: HTMLInputElement, toggleText :HTMLSpanElement) {
+	if (slider && toggleText) {
+		slider.disabled = true;
+		if (slider.value == "1")
+			slider.style.background = '#1a9809';
+		else
+			slider.style.background = '#ee0000'
+
+		toggleText.addEventListener('mousedown', (e) => {
+			toggleText.style.background = 'rgba(141,111,111,0.3)'
+		})
+
+		toggleText.addEventListener('mouseenter', (e) => {
+			toggleText.style.background = 'rgba(141,111,111,0.3)'
+		})
+
+		toggleText.addEventListener('mouseup', (e) => {
+			toggleText.style.background = 'none'
+		})
+
+		toggleText.addEventListener('mouseleave', (e) => {
+			toggleText.style.background = 'none'
+		})
+
+		// Clique sur le texte
+		toggleText.addEventListener('click', (e) => {
+			e.preventDefault();
+			slider.value = slider.value === "0" ? "1" : "0";
+
+			if (slider.value == "1")
+				slider.style.background = '#1a9809';
+			else
+				slider.style.background = '#ee0000'
+		});
+	}
+}
+
 export function init(){
 	const token = localStorage.getItem('token');
 	if (!token) {
@@ -18,6 +55,14 @@ export function init(){
 	const spec_button  = document.getElementById("spec-button") as HTMLButtonElement;
 	const custom_button  = document.getElementById("custom-button") as HTMLButtonElement;
 	const listGame = document.getElementById("game-list") as HTMLElement;
+	const sliderPriv = document.getElementById("slidePriv") as HTMLInputElement;
+	const priv = document.getElementById("priv") as HTMLSpanElement;
+	const sliderSpec = document.getElementById("slideSpec") as HTMLInputElement;
+	const spec = document.getElementById("spec") as HTMLSpanElement;
+
+	activetoggleButton(sliderPriv, priv);
+	activetoggleButton(sliderSpec, spec);
+
 
 	if (game_button)
 	{
@@ -32,10 +77,11 @@ export function init(){
 				return console.error('error 404 : socket not found !');
 			else
 			{
-				sock.emit('create-room', getUserIdFromToken(), lobbyName.value);
-				console.log(`socket(${sock.id}) emit create room !`);
+				let Vpriv = sliderPriv && sliderPriv.value == "1" ? 1 : 0;
+				let Vspec = sliderSpec && sliderSpec.value == "1" ? 1 : 0;
+
+				sock.emit('create-room', getUserIdFromToken(), lobbyName.value, Vpriv, Vspec);
 			}
-			console.log('game button pressed !');
 		})
 	}
 
@@ -53,9 +99,7 @@ export function init(){
 			else
 			{
 				sock.emit('join-room-name', getUserIdFromToken(), lobbyName.value);
-				console.log(`socket(${sock.id}) emit join room !`);
 			}
-			console.log('game button pressed !');
 		})
 	}
 
@@ -68,7 +112,6 @@ export function init(){
 				return console.error('error 404 : socket not found !');
 			else
 				sock.emit('join-room', getUserIdFromToken());
-			console.log('join button pressed !');
 		})
 	}
 
@@ -79,9 +122,10 @@ export function init(){
 			var sock = getSocket(2);
 			if (!sock)
 				return console.error('error 404 : socket not found !');
-			else
-				sock.emit('solo-game', getUserIdFromToken());
-			console.log('solo button pressed !');
+			else {
+				let Vspec = sliderSpec && sliderSpec.value == "1" ? 1 : 0;
+				sock.emit('solo-game', getUserIdFromToken(), Vspec);
+			}
 		});
 	}
 
@@ -110,7 +154,6 @@ export function init(){
 					el.addEventListener("click", (e) => {
 						const target = e.currentTarget as HTMLElement;
 						const lobbyName = target.dataset.name;
-						console.log("Clicked lobby:", lobbyName);
 						const socket = getSocket(2);
 						if (lobbyName) {
 							socket!.emit("spec-game", getUserIdFromToken(), {lobbyname: lobbyName});
