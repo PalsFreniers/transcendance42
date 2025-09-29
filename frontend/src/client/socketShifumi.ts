@@ -277,9 +277,7 @@ export function createShifumiSocket(socketShifumi: Socket | null) {
                 button.textContent = `[${card[0]}][${card[1]}]`;
             }
         });
-
         const len = cards.length;
-
         for (let i = 0; i < 3; i++)
         {
             const button = document.getElementById(`card${i + 1}-button`)

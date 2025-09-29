@@ -103,8 +103,6 @@ export async function init() {
 		});
 		const dataFriend = await resFriends.json();
 		const friendListContainer = document.getElementById('friend-list') as HTMLUListElement;
-		const imgFriend = document.getElementById('friend-img') as HTMLElement;
-		const usernameFriend = document.getElementById('data-friendusername') as HTMLElement;
 		if (dataFriend && Array.isArray(dataFriend.friends)) {
 			dataFriend.friends.forEach(friend => {
 				const li = document.createElement('li');

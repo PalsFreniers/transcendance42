@@ -102,6 +102,15 @@ export class Game {
         return this;
     }
 
+    leaveTeam(playerID: number) {
+        this._leftTeam = this._leftTeam.filter((paddle) => {
+            return paddle.hitbox.name !== `paddle.${playerID}`;
+        });
+        this._rightTeam = this._rightTeam.filter((paddle) => {
+            return paddle.hitbox.name !== `paddle.${playerID}`;
+        });
+    }
+    
     start() {
         this._leftTeam.forEach((paddle) => { this._allTeams.push(paddle); });
         this._rightTeam.forEach((paddle) => { this._allTeams.push(paddle); });

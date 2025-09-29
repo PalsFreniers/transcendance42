@@ -105,11 +105,17 @@ export function init() {
             }
         });
     }
-    if (quitBtn){
+    if (quitBtn) {
         quitBtn.addEventListener("click", () => {
-            console.log(lobbyName.value);
-            socket!.emit("left-game", { lobbyname: lobbyName.value });
-        })
+            const lobbyElem = document.getElementById('lobbyname') as HTMLParagraphElement;
+            if (!lobbyElem) 
+                return;
+            const lobbyText = lobbyElem.textContent || "";
+            const nameOnly = lobbyText.replace("Lobby name:", "").trim();
+
+            notify(`Quit lobby: ${nameOnly}`);
+            socket!.emit("left-game", { lobbyname: nameOnly });
+        });
     }
     if (startBtn) {
         startBtn.addEventListener("click", () => {

@@ -78,7 +78,7 @@ export class GameManager {
         return 0; // worked just fine
     }
 
-    startGame(lobbyName: string, gameId: string, io: any)   {
+    startGame(lobbyName: string, gameId: string, io: any) {
         if (!this._games.has(lobbyName))
             return 1; // lobby doesn't exist
         const [game, [p1, p2]] = this._games.get(lobbyName)!;
@@ -96,10 +96,11 @@ export class GameManager {
                 clearInterval(loop);
                 game.emit("game-end", {
                     game: game,
-                    players: [this.getSocketId(p1), this.getSocketId(p2)]}
+                    players: [this.getSocketId(p1), this.getSocketId(p2)]
+                }
                 );
                 this.deleteGame(lobbyName);
-                return ;
+                return;
             }
             game.update();
             const state = this.getGameInfo(lobbyName, io);
@@ -140,6 +141,31 @@ export class GameManager {
         db.prepare(`DELETE FROM games WHERE id = ?`).run(game.gameID);
         this._games.delete(lobbyName);
         return 0;
+    }
+
+    leaveGame(lobbyName: string, playerId: number) {
+        console.log(playerId);
+        if (!this._games.has(lobbyName))
+            return 1; // lobby doesnt exist
+        for (const [_, [game, [p1, p2]]] of this._games) {
+            if (playerId === p1) {
+                this._games.set(lobbyName, [game, [p2, null]]);
+                console.log(`p1: ${p1}, p2: ${p2}`);
+                if (!p2) {
+                    this.findGame(lobbyName)!.state = "ended";
+                    this.deleteGame(lobbyName);
+                    return 0;
+                }
+                db.prepare(`UPDATE games SET player_one_id = player_two_id, player_two_id = NULL WHERE id = ?`).run(game.gameID);
+                game.leaveTeam(playerId);
+                return 0;
+            } else if (playerId === p2) {
+                this._games.set(lobbyName, [game, [p1, null]])
+                db.prepare(`UPDATE games SET player_two_id = NULL WHERE id = ?`).run(game.gameID);
+                game.leaveTeam(playerId);
+                return 0;
+            }
+        }
     }
 
     getGameInfo(lobbyName: string, io: Server) {
