@@ -1,4 +1,4 @@
-import { player_type, bracket_type, Tournament } from "./tournament.js"
+import { player_type, bracket_type, Tournament, Listener } from "./tournament.js"
 import { GameManager } from "./gameManager.js";
 import { Server } from "socket.io"
 
@@ -45,11 +45,11 @@ export class TournamentManager {
         return 0;
     }
 
-    startTournament(name: string) {
+    startTournament(name: string, onTournamentEnd: Listener) {
         if (!this._tournaments.has(name))
             return 1; // tournament doesn't exist
         const t = this._tournaments.get(name)!;
-        const errno = t.startTournament();
+        const errno = t.startTournament(onTournamentEnd);
         if (errno)
             // errno can be 2 or 3
             // case 2: tournament already started
@@ -57,6 +57,16 @@ export class TournamentManager {
             return 1 + errno
         t.playRound();
         return 0;
+    }
+
+    getTournament(name: string) {
+        return this._tournaments.get(name);
+    }
+
+    isTournamentFinished(name: string): boolean {
+        if (!this._tournaments.has(name))
+            return false; // tournament doesn't exist
+        return this._tournaments.get(name)!.state === "finished";
     }
 
     // Search for a player in a tournament and returns either their tournament or null
