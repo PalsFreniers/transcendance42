@@ -185,7 +185,15 @@ export function socketManagement(io: Server) {
                 return console.warn(`Game ${lobbyname} not found or finished`);
             console.log(`spec register in room game-${game.gameID}`);
             socket.join(`game-${game.gameID}`);
-        })
+        });
+
+        socket.on('left-game', ({ lobbyname }) => {
+            const game = manager.findGame(lobbyname);
+            if (!game)
+                return;
+            console.log(`you left the room game-${game.gameID}`);
+            manager.deleteGame(lobbyname);
+        });
 
         socket.on('disconnect', () => {
             manager.unregisterSocket(socket.data.userId);

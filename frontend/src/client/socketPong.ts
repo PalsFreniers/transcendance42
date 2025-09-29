@@ -1,5 +1,5 @@
 import io, { Socket } from 'socket.io-client';
-import { handleRoute } from './navClient.js';
+import { handleRoute, navigateTo } from './navClient.js';
 
 let lobbyname: String | null = null;
 
@@ -56,10 +56,8 @@ export function createPongSocket(socketPong: Socket | null) {
 
     socketPong.on('in-game', () => {
         const path = window.location.pathname;
-        if (path === '/lobby') {
-            history.pushState(null, '', '/pong')
-            handleRoute();
-        }
+        if (path !== '/pong')
+            navigateTo('/pong')
     });
 
     socketPong.on('game-state', (state) => {

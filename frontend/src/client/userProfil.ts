@@ -2,6 +2,7 @@ import { getUserIdFromToken } from "./loginClient.js";
 import { getSocket } from "./socketClient.js";
 import { handleRoute } from "./navClient.js";
 import { notify } from "./notify.js";
+import { mini_msg } from "./chatClient.js";
 
 export async function init() {
 	try {
@@ -130,67 +131,7 @@ export async function init() {
 				});
 				li.appendChild(button);
 				friendListContainer.appendChild(li);
-				const friendConverstaion = document.getElementById('chat-friend') as HTMLElement;
-				const friendPP = document.createElement('div');
-				friendPP.classList.add('friend-pp');
-				const imgDiv = document.createElement('div');
-				const ppFriend = document.createElement('img');
-				ppFriend.src = friend.profile_image_url;
-				imgDiv.appendChild(ppFriend);
-				const nameDiv = document.createElement('div');
-				const nameFriend = document.createElement('p');
-				nameFriend.textContent = friend.username;
-				nameDiv.appendChild(nameFriend);
-				friendPP.appendChild(imgDiv);
-				friendPP.appendChild(nameDiv);
-				friendConverstaion.appendChild(friendPP);
-				ppFriend.dataset.friendusername = friend.username;
-				ppFriend.addEventListener('click', async (e) => {
-					e.preventDefault();
-					document.querySelectorAll('.friend-pp').forEach(el => el.classList.remove('selected'));
-					const usernameTarget = (e.currentTarget as HTMLImageElement).dataset.friendusername;
-					const friendPPDiv = (e.currentTarget as HTMLElement).closest('.friend-pp');
-					friendPPDiv?.classList.add('selected');
-					console.log("Image cliquée => username:", usernameTarget);
-					const messages = await fetch(`/api/user/get-message`, {
-						method: 'POST',
-						headers: {
-							'Content-Type': 'application/json',
-							'Authorization': `Bearer ${token}`
-						},
-						body: JSON.stringify({ friendUsername: usernameTarget })
-					});
-					const data = await messages.json();
-					if (data.messages) {
-						const boxMsg = document.getElementById('display-msg') as HTMLElement;
-						boxMsg.innerHTML = ``;
-						data.messages.forEach(msg => {
-							if (!msg)
-								return;
-							const msgElement = document.createElement('p');
-							msgElement.textContent = msg.text;
-							if (msg.userId === getUserIdFromToken())
-								msgElement.className = "user-msg";
-							else
-								msgElement.className = "user-target-msg";
-							boxMsg.appendChild(msgElement);
-						});
-						boxMsg.scrollTop = boxMsg.scrollHeight;
-					}
-					const formMsg = document.getElementById('chat-input') as HTMLFormElement;
-					const msgsend = document.getElementById('msg-send') as HTMLInputElement; 
-					if (formMsg) {
-						formMsg.addEventListener('submit', async (e) => {
-							e.preventDefault();
-							const server = getSocket(0);
-							if (msgsend.value.length != 0)
-							{
-								server!.emit('message', msgsend.value, getUserIdFromToken(), friend.username)
-								msgsend.value = '';
-							}
-						})
-					}
-				});
+				mini_msg(friend);
 				
 			});
 		} else {

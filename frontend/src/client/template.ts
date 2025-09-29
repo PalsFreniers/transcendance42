@@ -167,7 +167,10 @@ const templates: Record<string, () => string> = {
 			`,
 	pong: () => `
 	<div id="back-pong">
-  <div class="pong-wrapper">
+	<div id="return" class="svg-ico">
+		<svg fill="#000000ff" viewBox="-7.68 -7.68 47.36 47.36" version="1.1" xmlns="http://www.w3.org/2000/svg" transform="matrix(1, 0, 0, 1, 0, 0)" stroke="#000000" stroke-width="0.00032"><g id="SVGRepo_bgCarrier" stroke-width="0" transform="translate(2.24,2.24), scale(0.86)"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round" stroke="#e323be" stroke-width="2.368"> <title>return</title> <path d="M0 21.984q0.032-0.8 0.608-1.376l4-4q0.448-0.48 1.056-0.576t1.12 0.128 0.864 0.736 0.352 1.12v1.984h18.016q0.8 0 1.408-0.576t0.576-1.408v-8q0-0.832-0.576-1.408t-1.408-0.608h-16q-0.736 0-1.248-0.416t-0.64-0.992 0-1.152 0.64-1.024 1.248-0.416h16q2.464 0 4.224 1.76t1.76 4.256v8q0 2.496-1.76 4.224t-4.224 1.76h-18.016v2.016q0 0.64-0.352 1.152t-0.896 0.704-1.12 0.096-1.024-0.544l-4-4q-0.64-0.608-0.608-1.44z"></path> </g><g id="SVGRepo_iconCarrier"> <title>return</title> <path d="M0 21.984q0.032-0.8 0.608-1.376l4-4q0.448-0.48 1.056-0.576t1.12 0.128 0.864 0.736 0.352 1.12v1.984h18.016q0.8 0 1.408-0.576t0.576-1.408v-8q0-0.832-0.576-1.408t-1.408-0.608h-16q-0.736 0-1.248-0.416t-0.64-0.992 0-1.152 0.64-1.024 1.248-0.416h16q2.464 0 4.224 1.76t1.76 4.256v8q0 2.496-1.76 4.224t-4.224 1.76h-18.016v2.016q0 0.64-0.352 1.152t-0.896 0.704-1.12 0.096-1.024-0.544l-4-4q-0.64-0.608-0.608-1.44z"></path> </g></svg>
+	</div>
+  	<div id="pong-wrapper" class="pong-wrapper">
       <h2 class="pong-title">🎮 Pong Area</h2>
     <div id="pong-controls">
           <input type="text" id="lobby-name" placeholder="Room name" required />
@@ -175,7 +178,9 @@ const templates: Record<string, () => string> = {
             <button id="game-button">Create Game</button>
             <button id="join-button">Join Game</button>
             <button id="start-game-btn">Start Game</button>
-        <button id="spectator-btn">Spectate</button>
+			<button id="quit-game-button">Quit lobby</button>
+        	<button id="spectator-btn">Spectate</button>
+			<button id="custom-button">Customisation</button>
           </div>
       </div>
     <div id="game-list" class="pong-lobby">
@@ -190,7 +195,10 @@ const templates: Record<string, () => string> = {
 </div>`,
 	shifumiLobby: () => `
 	<div id="back_shifumi">
-  <div class="shifumi-wrapper">
+	<div id="return" class="svg-ico">
+		<svg fill="#000000ff" viewBox="-7.68 -7.68 47.36 47.36" version="1.1" xmlns="http://www.w3.org/2000/svg" transform="matrix(1, 0, 0, 1, 0, 0)" stroke="#000000" stroke-width="0.00032"><g id="SVGRepo_bgCarrier" stroke-width="0" transform="translate(2.24,2.24), scale(0.86)"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round" stroke="#e323be" stroke-width="2.368"> <title>return</title> <path d="M0 21.984q0.032-0.8 0.608-1.376l4-4q0.448-0.48 1.056-0.576t1.12 0.128 0.864 0.736 0.352 1.12v1.984h18.016q0.8 0 1.408-0.576t0.576-1.408v-8q0-0.832-0.576-1.408t-1.408-0.608h-16q-0.736 0-1.248-0.416t-0.64-0.992 0-1.152 0.64-1.024 1.248-0.416h16q2.464 0 4.224 1.76t1.76 4.256v8q0 2.496-1.76 4.224t-4.224 1.76h-18.016v2.016q0 0.64-0.352 1.152t-0.896 0.704-1.12 0.096-1.024-0.544l-4-4q-0.64-0.608-0.608-1.44z"></path> </g><g id="SVGRepo_iconCarrier"> <title>return</title> <path d="M0 21.984q0.032-0.8 0.608-1.376l4-4q0.448-0.48 1.056-0.576t1.12 0.128 0.864 0.736 0.352 1.12v1.984h18.016q0.8 0 1.408-0.576t0.576-1.408v-8q0-0.832-0.576-1.408t-1.408-0.608h-16q-0.736 0-1.248-0.416t-0.64-0.992 0-1.152 0.64-1.024 1.248-0.416h16q2.464 0 4.224 1.76t1.76 4.256v8q0 2.496-1.76 4.224t-4.224 1.76h-18.016v2.016q0 0.64-0.352 1.152t-0.896 0.704-1.12 0.096-1.024-0.544l-4-4q-0.64-0.608-0.608-1.44z"></path> </g></svg>
+	</div>
+  	<div class="shifumi-wrapper">
     <h2 class="shifumi-title">✊ Shifumi</h2>
     <div id="shifumi-controls">
         <div id="checkbox-shifumi" >

@@ -1,4 +1,4 @@
-import { getSockets } from './socketClient.js';
+ import { getSockets } from './socketClient.js';
 import { routes } from './template.js';
 
 import * as loginClient from './loginClient.js';
@@ -123,4 +123,13 @@ export async function handleRoute() {
 export function navigateTo(url: string) {
 	history.pushState(null, '', url);
 	handleRoute();
+}
+
+export function backToPreviousPage(){
+	const backBtn = document.getElementById('return');
+	if (backBtn){
+		backBtn.addEventListener('click', () => {
+			history.back();
+		})
+	}
 }

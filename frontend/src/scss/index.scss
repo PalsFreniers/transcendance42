@@ -731,6 +731,19 @@ input:-webkit-autofill {
 	row-gap: 5%;
 	align-items: center;
 	justify-content: center;
+
+	.svg-ico {
+		width: 70px;
+		height: 70px;
+		z-index: 7;
+		filter: $shadow-accent;
+		cursor: pointer;
+		transition: transform $transition-fast;
+
+		&:hover {
+			transform: scale(1.1);
+		}
+	}
 }
 
 .pong-wrapper {
@@ -859,6 +872,19 @@ input:-webkit-autofill {
 	display: flex;
 	align-items: center;
 	justify-content: center;
+
+	.svg-ico {
+		width: 70px;
+		height: 70px;
+		z-index: 7;
+		filter: $shadow-accent;
+		cursor: pointer;
+		transition: transform $transition-fast;
+
+		&:hover {
+			transform: scale(1.1);
+		}
+	}
 
 	.shifumi-wrapper {
 		background: rgba($color-black, 0.6);

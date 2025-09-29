@@ -1,6 +1,7 @@
 import { getSocket } from './socketClient.js';
 import { getUserIdFromToken } from './loginClient.js'
 import { notify } from "./notify.js";
+import { backToPreviousPage } from './navClient.js';
 
 
 function activetoggleButton(slider: HTMLInputElement, toggleText :HTMLSpanElement) {
@@ -64,6 +65,8 @@ export function init(){
 	activetoggleButton(sliderSpec, spec);
 
 
+	backToPreviousPage();
+	
 	if (game_button)
 	{
 		game_button.addEventListener('click', async (e) => {

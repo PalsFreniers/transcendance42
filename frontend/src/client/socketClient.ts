@@ -2,7 +2,7 @@ import io, { Socket } from 'socket.io-client';
 import { createShifumiSocket } from './socketShifumi.js';
 import { createPongSocket } from './socketPong.js';
 import { notify } from './notify.js'
-import { friend_select, msg_friend } from './lobbyClient.js'
+import { friend_select, msg_friend } from './chatClient.js'
 
 interface ChatMessage {
     from: string;
