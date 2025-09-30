@@ -1092,25 +1092,25 @@ input:-webkit-autofill {
   #card1-button {
     background: linear-gradient(180deg, darken($color-primary, 2%), $color-primary);
     color: $color-white;
-    &::after { content: "[1][rock]"; }
+    //&::after { content: "[1][rock]"; }
   }
 
   #card2-button {
     background: linear-gradient(180deg, darken($color-secondary, 2%), $color-secondary);
     color: $color-white;
-    &::after { content: "[2][paper]"; }
+    //&::after { content: "[2][paper]"; }
   }
 
   #card3-button {
     background: linear-gradient(180deg, darken($color-accent, 2%), $color-accent);
     color: $color-white;
-    &::after { content: "[3][scissors]"; }
+    //&::after { content: "[3][scissors]"; }
   }
 
   #coin-button {
     background: linear-gradient(180deg, $color-accent-alt, darken($color-accent-alt,6%));
     color: $color-black;
-    &::after { content: "[coin]"; }
+    //&::after { content: "[coin]"; }
   }
 
   #card-played, #opponent-card-played {
@@ -1495,35 +1495,6 @@ input:-webkit-autofill {
 /*                                                                            */
 /******************************************************************************/
 
-.toggleText {
-	border-radius: 10px;
-	text-align: center;
-	display: inline-block;
-	align-self: center;
-	padding: 5px;
-}
-
-.miniSlider {
-	-webkit-appearance: none;
-	appearance: none;
-	height: 15px;
-	width:28px;
-	border-radius: 15px;
-	background: crimson;
-}
-
-.miniSlider::-moz-range-track {
-	height: 6px;
-	border-radius: 15px;
-}
-
-.miniSlider::-moz-range-thumb {
-	cursor: pointer;
-	border: none;
-	height: 13px;
-	width: 13px;
-}
-
 #checkbox-shifumi {
 	display: flex;
 	flex-direction: row;
@@ -1537,4 +1508,51 @@ input:-webkit-autofill {
 	align-items: center;
 	column-gap: 2px;
 	justify-content: center;
+}
+
+.toggleText {
+	border-radius: 10px;
+	text-align: center;
+	display: inline-block;
+	align-self: center;
+	padding: 5px;
+}
+
+.miniSlider {
+	-webkit-appearance: none;
+	appearance: none;
+	height: 16px;
+	width: 32px;
+	border-radius: 16px;
+
+	@each $slid in $browsersSlider {
+		&::#{$slid}-thumb {
+			@include slider;
+			@include sliderThumb;
+		}
+	}
+	@each $slid in $browsersSlider2 {
+		&::#{$slid}-track {
+			@include slider;
+		}
+	}
+
+	&[value="1"] {
+		background-color: #1a9809;
+		&::-moz-range-thumb {
+			transform: translateX(2px);
+		}
+		&::-webkit-slider-thumb {
+			transform: translateY(-1px) translateX(2px);
+		}
+	}
+	&[value="0"] {
+		background-color: #ee0000;
+		&::-moz-range-thumb {
+			transform: translateX(-2px);
+		}
+		&::-webkit-slider-thumb {
+			transform: translateY(-1px) translateX(-2px);
+		}
+	}
 }

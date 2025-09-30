@@ -7,10 +7,6 @@ import { backToPreviousPage } from './navClient.js';
 function activetoggleButton(slider: HTMLInputElement, toggleText :HTMLSpanElement) {
 	if (slider && toggleText) {
 		slider.disabled = true;
-		if (slider.value == "1")
-			slider.style.background = '#1a9809';
-		else
-			slider.style.background = '#ee0000'
 
 		toggleText.addEventListener('mousedown', (e) => {
 			toggleText.style.background = 'rgba(141,111,111,0.3)'
@@ -31,12 +27,7 @@ function activetoggleButton(slider: HTMLInputElement, toggleText :HTMLSpanElemen
 		// Clique sur le texte
 		toggleText.addEventListener('click', (e) => {
 			e.preventDefault();
-			slider.value = slider.value === "0" ? "1" : "0";
-
-			if (slider.value == "1")
-				slider.style.background = '#1a9809';
-			else
-				slider.style.background = '#ee0000'
+			slider.setAttribute("value", slider.value === "0" ? "1" : "0");
 		});
 	}
 }

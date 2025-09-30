@@ -24,6 +24,8 @@ export let spectate: {
     spec: false
 }
 
+const cardTypes = ["Joker", "Rock", "Paper", "Scissors"];
+
 export function createShifumiSocket(socketShifumi: Socket | null) {
     
     const token = localStorage.getItem('token');
@@ -270,11 +272,11 @@ export function createShifumiSocket(socketShifumi: Socket | null) {
             spectate.playerCard = cards;
         else
             myCard = cards;
-
+        const cardTypes = ["Joker", "Rock", "Paper", "Scissors"];
         cards.forEach((card, index) => {
             const button = document.getElementById(`card${index + 1}-button`);
             if (button) {
-                button.textContent = `[${card[0]}][${card[1]}]`;
+                button.textContent = `${cardTypes[card[0]]}`;
             }
         });
         const len = cards.length;
@@ -307,19 +309,19 @@ export function createShifumiSocket(socketShifumi: Socket | null) {
         const playedCard = document.getElementById('opponent-card-played') as HTMLElement;
 
         if (playedCard)
-            playedCard.textContent = `[${card[0]}][${card[1]}]`;
+            playedCard.textContent = `${cardTypes[card[0]]}`;
     });
 
-    socketShifumi.on('played-card', ( cards: [ number, number ] ) => {
+    socketShifumi.on('played-card', ( card: [ number, number ] ) => {
         const playedCard = document.getElementById('card-played') as HTMLElement;
 
         if (playedCard)
-            playedCard.textContent = `[${cards[0]}][${cards[1]}]`;
+            playedCard.textContent = `${cardTypes[card[0]]}`;
 
         if (spectate.spec)
         {
             spectate.playerCard?.forEach((card, index) => {
-                if (card[0] == cards[0] && card[1] == cards[1]) {
+                if (card[0] == card[0] && card[1] == card[1]) {
                     const button = document.getElementById(`card${index + 1}-button`);
                     if (button)
                         button.textContent = '[][]';
