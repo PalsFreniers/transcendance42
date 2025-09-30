@@ -48,7 +48,7 @@ export async function matchmaking(playerId: number, token) : Promise<number> {
 export async function calculMmr(gameId: number, player: Player, opponent: Player, token): Promise<number> {
 
     if (gameIsPrivate(gameId))
-        return -1;
+        return -2000;
 
     const playerMmr = await getMmrFromId(player.Id, token);
     const opponentMmr = await getMmrFromId(opponent.Id, token);

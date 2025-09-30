@@ -215,14 +215,13 @@ const templates: Record<string, () => string> = {
         <div class="shifumi-buttons">
           <button id="solo-button">Join Solo</button>
           <button id="match-button">Join Matchmaking</button>
-          <button id="tournois-button">Tournois</button>
           <button id="game-button">Create Room</button>
           <button id="join-button">Join Room</button>
           <button id="spec-button">Spectator</button>
           <button id="custom-button">Customisation</button>
         </div>
         <div id="game-list" class="shifumi-lobby">
-      <h4>List of current games</h4>
+      <h4></h4>
     </div>
     </div>
   </div>

@@ -34,15 +34,6 @@ export function joinRoom(userId, name,  roomId)
     return true;
 }
 
-export function joinRoomSolo(name,  roomId) // a utiliser pour register l'ia
-{
-    const update = db.prepare(`
-        UPDATE games2 SET player_two_name = ? WHERE id = ?
-        `);
-    update.run(name, roomId);
-    return true;
-}
-
 export function getOpponentName(gameId: number, userId:number)
 {
     const game = db.prepare(`
@@ -215,8 +206,8 @@ export async function saveStats(gameId: number, token: string, mmrPlayerOne, mmr
             final_score : game.game_score!,
             round_number : game.round_nmb, // a modif
             game_time : game.game_time! / 4, // temps en s
-            mmr_gain_player_one : ((mmrPlayerOne < 0 ? 'private' : mmrPlayerOne.toString())),
-            mmr_gain_player_two : ((mmrPlayerTwo < 0 ? 'private' : mmrPlayerTwo.toString())),
+            mmr_gain_player_one : ((mmrPlayerOne == -2000 ? 'private' : mmrPlayerOne.toString())),
+            mmr_gain_player_two : ((mmrPlayerTwo == -2000 ? 'private' : mmrPlayerTwo.toString())),
             date : game.date!
         };
 
