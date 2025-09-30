@@ -1,5 +1,5 @@
 import io, { Socket } from 'socket.io-client';
-import { handleRoute, navigateTo } from './navClient.js';
+import { navigateTo } from './navClient.js';
 
 let lobbyname: String | null = null;
 
@@ -44,8 +44,11 @@ export function createPongSocket(socketPong: Socket | null) {
 
     socketPong.on('player-joined', (data) => {
         console.log("Player joined event:", data);
+        const startBtn = document.getElementById('start-game-btn') as HTMLButtonElement;
         // Update UI with both players
         lobbyname = data.lobbyName;
+        if (data.playerTwo === '-')
+            startBtn.style.display = 'block';
         const lobbyGame = document.getElementById("game-salon") as HTMLDivElement;
         lobbyGame.innerHTML = `
         <p id="lobbyname"><strong>Lobby name:</strong> ${data.lobbyName}</p>

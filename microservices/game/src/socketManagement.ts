@@ -201,7 +201,7 @@ export function socketManagement(io: Server) {
                 gameId: game.gameID,
                 lobbyName: lobbyname,
                 playerOne: playerOneUsername,
-                playerTwo: null,
+                playerTwo: '-',
                 status: 'waiting'
             });
         });

@@ -160,6 +160,11 @@ export class GameManager {
                 game.leaveTeam(playerId);
                 return 0;
             } else if (playerId === p2) {
+                if (!p1) {
+                    this.findGame(lobbyName)!.state = "ended";
+                    this.deleteGame(lobbyName);
+                    return 0;
+                }
                 this._games.set(lobbyName, [game, [p1, null]])
                 db.prepare(`UPDATE games SET player_two_id = NULL WHERE id = ?`).run(game.gameID);
                 game.leaveTeam(playerId);

@@ -1,4 +1,4 @@
-import { backToPreviousPage } from "./navClient.js";
+import { backToPreviousPage, navigateTo } from "./navClient.js";
 import { notify } from "./notify.js";
 import { getSocket } from "./socketClient.js";
 
@@ -112,9 +112,9 @@ export function init() {
                 return;
             const lobbyText = lobbyElem.textContent || "";
             const nameOnly = lobbyText.replace("Lobby name:", "").trim();
-
             notify(`Quit lobby: ${nameOnly}`);
             socket!.emit("left-game", { lobbyname: nameOnly });
+            navigateTo('/pong');
         });
     }
     if (startBtn) {
