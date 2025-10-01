@@ -138,6 +138,7 @@ export class GameManager {
         const [game, _] = this._games.get(lobbyName)!;
         if (game.state !== "ended")
             return 2;
+        // SAVE STATS
         db.prepare(`DELETE FROM games WHERE id = ?`).run(game.gameID);
         this._games.delete(lobbyName);
         return 0;
@@ -185,8 +186,12 @@ export class GameManager {
         return {
             ballPos: { x: game.ball.pos.x, y: game.ball.pos.y },
             ballDir: { x: game.ball.dir.x, y: game.ball.dir.y },
-            leftPaddle: { x: game.leftTeam[0].hitbox.getPoint(0).x, y: game.leftTeam[0].hitbox.getPoint(0).y },
-            rightPaddle: { x: game.rightTeam[0].hitbox.getPoint(0).x, y: game.rightTeam[0].hitbox.getPoint(0).y },
+            leftPaddle: game.leftTeam[0]
+                ? { x: game.leftTeam[0].hitbox.getPoint(0).x, y: game.leftTeam[0].hitbox.getPoint(0).y }
+                : null,
+            rightPaddle: game.rightTeam[0]
+                ? { x: game.rightTeam[0].hitbox.getPoint(0).x, y: game.rightTeam[0].hitbox.getPoint(0).y }
+                : null,
             leftScore: game.score[0],
             rightScore: game.score[1],
             state: game.state,

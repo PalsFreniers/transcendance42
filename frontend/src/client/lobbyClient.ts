@@ -1,10 +1,5 @@
 import { handleRoute } from "./navClient.js";
-import { getUserIdFromToken } from "./loginClient.js";
-import { getSocket } from "./socketClient.js";
 import { msg_lobby } from "./chatClient.js";
-
-
-
 
 async function profil_image(){
 	const token = localStorage.getItem('token');

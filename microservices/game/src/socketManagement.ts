@@ -197,6 +197,9 @@ export function socketManagement(io: Server) {
             const playerOneUsername = manager.getUsernameFromSocket(manager.getSocketId(manager.getGameInfo(lobbyname, io)!.playerOneID!)!, io);
             manager.leaveGame(lobbyname, socket.data.userId);
             socket.leave(socket.data.gameId);
+            const state = manager.getGameInfo(lobbyname, io);
+            if (!state) 
+                return;
             io.to(socket.data.gameId).emit('player-joined', {
                 gameId: game.gameID,
                 lobbyName: lobbyname,

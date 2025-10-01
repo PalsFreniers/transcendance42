@@ -18,7 +18,6 @@ export function init() {
     const lobbyInfo = document.getElementById('game-salon') as HTMLElement;
     const quitBtn = document.getElementById('quit-game-button') as HTMLButtonElement;
     const customBtn = document.getElementById('custom-button') as HTMLButtonElement
-    const pongInfo = document.getElementById('pong-wrapper') as HTMLElement;
 
     startBtn.style.display = 'none';
     listGame.style.display = 'none';
@@ -120,7 +119,6 @@ export function init() {
     if (startBtn) {
         startBtn.addEventListener("click", () => {
             socket!.emit("start-game");
-            pongInfo.style.display = 'none';
         });
     }
     if (specBtn) {
@@ -153,7 +151,6 @@ export function init() {
                         if (lobbyName) {
                             notify(`Your spectate ${lobbyName} room`)
                             socket!.emit("spec-game", { lobbyname: lobbyName });
-                            pongInfo.style.display = 'none';
                         }
                     });
                 });

@@ -16,7 +16,7 @@ export class Ball {
     }
 
     public get baseSpeed() {
-        return 0.2;
+        return 0.15;
     }
     public get maxSpeed() {
         return this.baseSpeed * 10;

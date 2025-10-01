@@ -15,7 +15,7 @@ export class Paddle {
     };
 
     public get speed() {
-        return 0.25; // this is speed per move() call
+        return 0.15; // this is speed per move() call
     };
 
     // Constructor
