@@ -895,6 +895,11 @@ input:-webkit-autofill {
 		width: 500px;
 		text-align: center;
 		color: $color-white;
+
+		display: flex;
+		flex-wrap: wrap;
+		justify-content: center;
+		row-gap: 10px;
 	}
 
 	.shifumi-title {
@@ -903,49 +908,49 @@ input:-webkit-autofill {
 		margin-bottom: 20px;
 	}
 
+	#lobby-name {
+		border-radius: $radius-xl;
+		border: 1px solid $color-secondary;
+		padding: 8px 12px;
+		font-family: $font-main;
+		font-size: $font-size-xs;
+		color: $color-accent;
+		background: rgba($color-white, 0.1);
+		text-align: center;
+
+		&:focus {
+			outline: none;
+			border-color: $color-accent-alt;
+			box-shadow: 0 0 6px $color-accent-alt;
+		}
+	}
+
 	#shifumi-controls {
 		display: flex;
 		flex-direction: column;
 		gap: 15px;
+	}
 
-		#lobby-name {
-			border-radius: $radius-xl;
-			border: 1px solid $color-secondary;
-			padding: 8px 12px;
-			font-family: $font-main;
+	.shifumi-buttons {
+		display: flex;
+		flex-wrap: wrap;
+		justify-content: center;
+		gap: 10px;
+
+		button {
+			background: $btn-bg;
+			color: $btn-text;
+			padding: 10px 16px;
 			font-size: $font-size-xs;
-			color: $color-accent;
-			background: rgba($color-white, 0.1);
-			text-align: center;
+			border-radius: $radius-md;
+			border: 2px solid transparent;
+			cursor: pointer;
+			transition: $transition-fast;
 
-			&:focus {
-				outline: none;
-				border-color: $color-accent-alt;
-				box-shadow: 0 0 6px $color-accent-alt;
-			}
-		}
-
-		.shifumi-buttons {
-			display: flex;
-			flex-wrap: wrap;
-			justify-content: center;
-			gap: 10px;
-
-			button {
-				background: $btn-bg;
-				color: $btn-text;
-				padding: 10px 16px;
-				font-size: $font-size-xs;
-				border-radius: $radius-md;
-				border: 2px solid transparent;
-				cursor: pointer;
-				transition: $transition-fast;
-
-				&:hover {
-					background: $color-accent-alt;
-					color: $color-black;
-					border-color: $color-black;
-				}
+			&:hover {
+				background: $color-accent-alt;
+				color: $color-black;
+				border-color: $color-black;
 			}
 		}
 	}
@@ -1498,7 +1503,7 @@ input:-webkit-autofill {
 #checkbox-shifumi {
 	display: flex;
 	flex-direction: row;
-	align-items: center;
+	width: 100%;
 	justify-content: space-around;
 }
 
