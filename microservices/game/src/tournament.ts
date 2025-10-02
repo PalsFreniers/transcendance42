@@ -1,10 +1,10 @@
 import {Server} from "socket.io";
+import {Listener} from "./game.js";
 import {GameManager} from "./gameManager.js";
 import {createGameLobby} from "./gameModel.js"
 
 export type player_type = [number, string]; // playerID and socketID
 export type bracket_type = [player_type, player_type][];
-export type Listener<T = any> = (data: T) => void;
 
 export class Tournament {
     public _players: player_type[] = [];

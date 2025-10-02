@@ -179,12 +179,14 @@ export function createPongSocket(socketPong: Socket | null) {
         if (e.key === "ArrowUp" && !keysPressed.up) {
             keysPressed.up = true;
             socketPong!.emit("input", { key: "up", pressed: true });
+            socketPong!.emit("input", { key: "up", action: "keyup" });
             console.log("Emit input:", { key: "up", pressed: true });
         }
 
         if (e.key === "ArrowDown" && !keysPressed.down) {
             keysPressed.down = true;
             socketPong!.emit("input", { key: "down", pressed: true });
+            socketPong!.emit("input", { key: "down", action: "keyup" });
             console.log("Emit input:", { key: "down", pressed: true });
         }
     });
@@ -193,12 +195,14 @@ export function createPongSocket(socketPong: Socket | null) {
         if (e.key === "ArrowUp" && keysPressed.up) {
             keysPressed.up = false;
             socketPong!.emit("input", { key: "up", pressed: false });
+            socketPong!.emit("input", { key: "up", action: "keydown" });
             console.log("Emit input:", { key: "up", pressed: false });
         }
 
         if (e.key === "ArrowDown" && keysPressed.down) {
             keysPressed.down = false;
             socketPong!.emit("input", { key: "down", pressed: false });
+            socketPong!.emit("input", { key: "down", action: "keydown" });
             console.log("Emit input:", { key: "down", pressed: false });
         }
     });

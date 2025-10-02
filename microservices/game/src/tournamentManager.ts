@@ -1,5 +1,6 @@
-import { player_type, bracket_type, Tournament, Listener } from "./tournament.js"
+import { player_type, bracket_type, Tournament } from "./tournament.js"
 import { GameManager } from "./gameManager.js";
+import { Listener } from "./game.js";
 import { Server } from "socket.io"
 
 export class TournamentManager {
