@@ -72,9 +72,9 @@ export class GameAI {
     }
 
     private _reactToInfo() {
+        if (!this._lastState) return;
         // if (this._lastState!.ballSpd > this._speedThreat)
         //     this._decision = "attack";
-
         let impactPosY: number;
         if (this._lastState!.ballDir.x < 0)
             impactPosY = 0;
