@@ -40,7 +40,7 @@ export function createPongSocket(socketPong: Socket | null) {
         const lobbyGame = document.getElementById("game-salon") as HTMLDivElement;
         lobbyname = data.lobbyName;
         lobbyGame.innerHTML = `
-        <p><strong>Lobby name:</strong> ${data.lobbyName}</p>
+        <p id="lobbyname"><strong>Lobby name:</strong> ${data.lobbyName}</p>
         <p><strong>Player 1:</strong> ${data.userName}</p>
         <p><strong>Player 2:</strong> ${data.playerTwo ?? "-"}</p>
         <p><strong>Status:</strong> ${data.status}</p>`;

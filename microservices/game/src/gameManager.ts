@@ -165,8 +165,7 @@ export class GameManager {
         for (const [_, [game, [p1, p2]]] of this._games) {
             if (playerId === p1) {
                 this._games.set(lobbyName, [game, [p2, null]]);
-                console.log(`p1: ${p1}, p2: ${p2}`);
-                if (!p2) {
+                if (!p2 && p2 === -2) {
                     this.findGame(lobbyName)!.state = "ended";
                     this.deleteGame(lobbyName, token);
                     return 0;
