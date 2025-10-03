@@ -133,6 +133,7 @@ export function init() {
                 socket!.emit("join-room", { gameId: lobby.id });
                 lobbyInfo.style.display = 'block';
                 quitBtn.style.display = 'block';
+                iaBtn.style.display = 'none';
                 specBtn.style.display = "none";
                 customBtn.style.display = "none"
                 createGameButton.style.display = "none";

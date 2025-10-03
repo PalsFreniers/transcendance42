@@ -61,7 +61,7 @@ export async function specGame(app: FastifyInstance) {
                 lobby_name: l.lobby_name,
                 status: l.status,
                 playerOne: manager.getUsernameFromSocket(p1SocketId!, io),
-                playerTwo: manager.getUsernameFromSocket(p2SocketId!, io),
+                playerTwo: manager.getUsernameFromSocket(p2SocketId!, io) || 'ia',
             };
         });
 

@@ -2,7 +2,7 @@ import { Server } from "socket.io";
 import { GameManager } from "./gameManager.js";
 import { verifTokenSocket } from "./index.js";
 import db from './dbSqlite/db.js';
-import {GameAI} from "./gameAI.js";
+import { GameAI } from "./gameAI.js";
 
 const manager = GameManager.getInstance();
 
@@ -91,16 +91,26 @@ export function socketManagement(io: Server) {
                 socket.data.gameId = `game-${gameId}`;
 
                 socket.join(socket.data.gameId);
-                //ia
-                socket.emit('room-created', {
-                    gameId,
-                    lobbyName,
-                    userName,
-                    playerTwo: null,
-                    status: 'waiting'
-                });
+                if (ia) {
+                    new GameAI(lobbyName, io);
+                    socket.emit('room-created', {
+                        gameId,
+                        lobbyName,
+                        userName,
+                        playerTwo: 'ia',
+                        status: 'ready'
+                    });
+                }
+                else {
+                    socket.emit('room-created', {
+                        gameId,
+                        lobbyName,
+                        userName,
+                        playerTwo: null,
+                        status: 'waiting'
+                    });
+                }
                 console.log(`User ${socket.data.userId} created and joined room ${socket.data.gameId}`);
-                new GameAI(lobbyName, io); // BRUT FORCE AI GAMES
             } catch (err) {
                 console.error('create-room error:', err);
                 socket.emit('error', err);
@@ -177,9 +187,9 @@ export function socketManagement(io: Server) {
             const state = paddle.getState();
             const isPressed = action === 'keydown';
             if (key === 'up')
-                state[1] = isPressed;
-            else if (key === 'down')
                 state[0] = isPressed;
+            else if (key === 'down')
+                state[1] = isPressed;
         });
 
         socket.on('spec-game', ({ lobbyname }) => {

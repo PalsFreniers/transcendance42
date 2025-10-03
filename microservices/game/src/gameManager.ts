@@ -195,8 +195,9 @@ export class GameManager {
         if (game === undefined)
             return null;
         const usernameLeftTeam = this.getUsernameFromSocket(this.getSocketId(p1!)!, io);
-        const usernameRightTeam = this.getUsernameFromSocket(this.getSocketId(p2!)!, io);
-
+        let usernameRightTeam = this.getUsernameFromSocket(this.getSocketId(p2!)!, io);
+        if (p2 === -2)
+            usernameRightTeam = 'ia';
         return {
             ballPos: { x: game.ball.pos.x, y: game.ball.pos.y },
             ballDir: { x: game.ball.dir.x, y: game.ball.dir.y },
