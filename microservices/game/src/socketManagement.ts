@@ -2,7 +2,7 @@ import { Server } from "socket.io";
 import { GameManager } from "./gameManager.js";
 import { verifTokenSocket } from "./index.js";
 import db from './dbSqlite/db.js';
-
+import {GameAI} from "./gameAI.js";
 
 const manager = GameManager.getInstance();
 
@@ -74,18 +74,17 @@ export function socketManagement(io: Server) {
 
                 manager.findGame(lobbyName)!.on("game-end",
                     ({ game, players }) => {
-                        console.log("here");
                         const score: number[] = Array.from(game.score);
                         const [p1, p2] = players;
-                        console.log(players);
                         io.to(p1).emit("game-end", {
                             msg: score![0] > score![1] ? "You win" : "You loose",
                             score: [score![0], score![1]]
                         });
-                        io.to(p2).emit("game-end", {
-                            msg: score![1] > score![0] ? "You win" : "You loose",
-                            score: [score![1], score![0]]
-                        });
+                        if (p2 !== "-1" || p2 !== "-2")
+                            io.to(p2).emit("game-end", {
+                                msg: score![1] > score![0] ? "You win" : "You loose",
+                                score: [score![1], score![0]]
+                            });
                     });
 
                 socket.data.lobbyName = lobbyName;
@@ -101,6 +100,7 @@ export function socketManagement(io: Server) {
                     status: 'waiting'
                 });
                 console.log(`User ${socket.data.userId} created and joined room ${socket.data.gameId}`);
+                new GameAI(lobbyName, io); // BRUT FORCE AI GAMES
             } catch (err) {
                 console.error('create-room error:', err);
                 socket.emit('error', err);
@@ -171,14 +171,15 @@ export function socketManagement(io: Server) {
             if (game.state !== 'running')
                 return;
             let paddle = game.getPaddle(playerId)!;
+            // console.log(`key: ${key} && action: ${action}`);
             // if (!trueKey.startsWith("Arrow")) // paddle droit
             //     paddle = game.getPaddle(-1);
             const state = paddle.getState();
             const isPressed = action === 'keydown';
             if (key === 'up')
-                state[0] = isPressed;
-            else if (key === 'down')
                 state[1] = isPressed;
+            else if (key === 'down')
+                state[0] = isPressed;
         });
 
         socket.on('spec-game', ({ lobbyname }) => {

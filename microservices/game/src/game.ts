@@ -4,7 +4,7 @@ import { Collidable, createRectangle } from "./gameObjects/Collidable.js"
 import { Paddle } from "./gameObjects/Paddle.js"
 import { clamp } from "./utils.js"
 
-type Listener<T = any> = (data: T) => void;
+export type Listener<T = any> = (data: T) => void;
 
 export class Game {
 
@@ -40,6 +40,14 @@ export class Game {
 
     public get rightTeam() {
         return this._rightTeam;
+    }
+
+    public get allTeams() {
+        return this._allTeams;
+    }
+
+    public get map() {
+        return this._map;
     }
 
     public get score() {
@@ -120,6 +128,7 @@ export class Game {
         this._state = "starting";
 
         setTimeout(() => {
+            this.emit("point-start");
             this._state = "running";
         }, 2000);
     }
@@ -148,6 +157,7 @@ export class Game {
                 for (const paddle of this._allTeams) {
                     if (paddle.hitbox.name !== ballCollision.name) continue;
                     this.ball.paddleReflect(paddle);
+                    this.emit("paddle-reflect");
                     break;
                 }
             } else if (ballCollision.name.startsWith("map")) {
@@ -179,7 +189,7 @@ export class Game {
     }
 
     private incomingBall() {
-        if (this._countdown) // coutdown need to be launch just one time
+        if (this._countdown) // countdown need to be launch just one time
             return;
         this._countdown = true;
         this._resumeTimer = 3;
@@ -190,37 +200,42 @@ export class Game {
                 clearInterval(countdown); // CLEAR INTERVAL AND SET RUNNING BECAUSE GAME RESTART
                 this._state = "running";
                 this._countdown = false; // RESET FALSE FOR NEXT PAUSE
+                this.emit("point-start");
             }
         }, 1000);
     }
 
     private onScore(scoringTeam: number) {
-    this._ball.pos = new Vec2D.Vector(0, 0);
-    this._ball.speed = 0;
-    ++this._score[scoringTeam];
-    this._allTeams.forEach(paddle => {
-        let dY = paddle.hitbox.pos.y;
-        paddle.hitbox.pos.y = clamp(paddle.hitbox.pos.y - paddle.hitbox.pos.y, -5 + paddle.length / 2, 5 - paddle.length / 2);
-        dY = paddle.hitbox.pos.y - dY;
-        paddle.hitbox.getPoints().forEach((point) => { point.y += dY });
-    })
-    if (this._score[scoringTeam] == 3) {
-        this._state = "ended";
-        return;
+        this.emit("score", { ballSpeed: this._ball.speed, ballDir: this._ball.dir, scoringTeam});
+        this._ball.pos = new Vec2D.Vector(0, 0);
+        this._ball.speed = 0;
+        ++this._score[scoringTeam];
+        this._allTeams.forEach(paddle => {
+            let dY = paddle.hitbox.pos.y;
+            paddle.hitbox.pos.y = clamp(paddle.hitbox.pos.y - paddle.hitbox.pos.y, -5 + paddle.len / 2, 5 - paddle.len / 2);
+            dY = paddle.hitbox.pos.y - dY;
+            paddle.hitbox.getPoints().forEach((point) => { point.y += dY });
+            paddle.shouldMove = [false, false];
+        })
+        if (this._score[scoringTeam] == 3) {
+            this._state = "ended";
+            return;
+        }
+        this._state = "idling";
+        setTimeout(() => {
+            this._ball.speed = this._ball.baseSpeed;
+            this._ball.dir = new Vec2D.Vector(0.5 - scoringTeam, 0);
+            this._state = "running";
+            this.emit("point-start");
+        }, 2.5 * 1e3);
     }
-    this._state = "idling";
-    setTimeout(() => {
-        this._ball.speed = this._ball.baseSpeed;
-        this._ball.dir = new Vec2D.Vector(0.5 - scoringTeam, 0);
-        this._state = "running";
-    }, 2.5 * 1e3);
-}
 
     // Event Manager
     on(event: string, listener: Listener) {
         if (!this._events.has(event))
             this._events.set(event, []);
         this._events.get(event)!.push(listener);
+        return this;
     }
 
     off(event: string, listener: Listener) {
@@ -233,6 +248,7 @@ export class Game {
                 return l !== listener;
             })
         );
+        return this;
     }
 
     emit(event: string, data?: any) {
@@ -242,6 +258,7 @@ export class Game {
         listeners.forEach((listener) => {
             listener(data);
         });
+        return this;
     }
 
 }

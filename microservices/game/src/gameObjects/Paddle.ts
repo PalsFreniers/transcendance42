@@ -4,19 +4,33 @@ import { Collidable, createRectangle } from "./Collidable.js";
 
 export class Paddle {
 
-    // Const member
+    // Static member
 
-    public get length() {
+    static get len() {
         return 2;
-    };
+    }
+
+    static get width() {
+        return 0.5;
+    }
+
+    static get speed() {
+        return 0.15; // this is speed per move() call
+    }
+
+    // Static member Workaround
+
+    public get len() {
+        return Paddle.len;
+    }
 
     public get width() {
-        return 0.5;
-    };
+        return Paddle.width;
+    }
 
     public get speed() {
-        return 0.15; // this is speed per move() call
-    };
+        return Paddle.speed; // this is speed per move() call
+    }
 
     // Constructor
 
@@ -25,7 +39,7 @@ export class Paddle {
         _playerID: number,
         _pos: Vec2D.Vector
     ) {
-        this._hitbox = createRectangle(_pos, new Vec2D.Vector(this.width, this.length), `paddle.${_playerID}`);
+        this._hitbox = createRectangle(_pos, new Vec2D.Vector(this.width, this.len), `paddle.${_playerID}`);
     }
     private _state = [false, false];
 
@@ -67,7 +81,7 @@ export class Paddle {
     // Methods
     move() {
         let dY = this._hitbox.pos.y;
-        this._hitbox.pos.y = clamp(this._hitbox.pos.y + this.dir.y, -5 + this.length / 2, 5 - this.length / 2);
+        this._hitbox.pos.y = clamp(this._hitbox.pos.y + this.dir.y, -5 + this.len / 2, 5 - this.len / 2);
         dY = this._hitbox.pos.y - dY;
         this._hitbox.getPoints().forEach((point) => { point.y += dY });
     }

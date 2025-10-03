@@ -54,7 +54,7 @@ export class GameManager {
 
     createLobby(lobbyName: string, gameID: number): number {
         if (this._games.has(lobbyName))
-            return 1; // lobby already exists and game isn't ended
+            return 3; // lobby already exists and game isn't ended
         this._games.set(lobbyName, [new Game(gameID), [null, null]]);
         return 0;
     }
@@ -62,12 +62,14 @@ export class GameManager {
     joinLobby(lobbyName: string, playerID: number): number {
         if (!this._games.has(lobbyName))
             return 1; // lobby doesnt exist
-        if (lobbyName.startsWith("tournament") && !TournamentManager.getInstance().isPlayerRegistered(playerID))
-            return 5; // player cannot participate in tournament if not registered
-        if (!lobbyName.startsWith("tournament") && TournamentManager.getInstance().isPlayerRegistered(playerID))
-            return 6; // player cannot participate in a non tournament game if registered
-        if (this.isPlayerInGame(playerID))
-            return 4; // player already in a game
+        if (playerID != -2) { // IF player joining isn't the AI
+            if (lobbyName.startsWith("tournament") && !TournamentManager.getInstance().isPlayerRegistered(playerID))
+                return 5; // player cannot participate in tournament if not registered
+            if (!lobbyName.startsWith("tournament") && TournamentManager.getInstance().isPlayerRegistered(playerID))
+                return 6; // player cannot participate in a non tournament game if registered
+            if (this.isPlayerInGame(playerID))
+                return 4; // player already in a game
+        }
         const [game, [p1, p2]] = this._games.get(lobbyName)!;
         if (p1 === playerID || p2 === playerID)
             return 2; // player is already in the lobby
@@ -99,13 +101,13 @@ export class GameManager {
                 game.emit("game-end", {
                     game: game,
                     players: [this.getSocketId(p1), this.getSocketId(p2)]
-                }
-                );
+                });
                 this.deleteGame(lobbyName, token);
                 return;
             }
             game.update();
             const state = this.getGameInfo(lobbyName, io);
+            game.emit("game-state", state);
             io.to(gameId).emit("game-state", state);
         }, 1000 / 60);
         return 0;
@@ -198,12 +200,15 @@ export class GameManager {
         return {
             ballPos: { x: game.ball.pos.x, y: game.ball.pos.y },
             ballDir: { x: game.ball.dir.x, y: game.ball.dir.y },
-            leftPaddle: game.leftTeam[0]
+            ballSpd: game.ball.speed,
+            leftPaddleObj: game.leftTeam[0],
+            leftPaddle: (game.leftTeam.length !== 0
                 ? { x: game.leftTeam[0].hitbox.getPoint(0).x, y: game.leftTeam[0].hitbox.getPoint(0).y }
-                : null,
-            rightPaddle: game.rightTeam[0]
+                : null),
+            rightPaddleObj: game.rightTeam[0],
+            rightPaddle: (game.rightTeam.length !== 0
                 ? { x: game.rightTeam[0].hitbox.getPoint(0).x, y: game.rightTeam[0].hitbox.getPoint(0).y }
-                : null,
+                : null),
             leftScore: game.score[0],
             rightScore: game.score[1],
             state: game.state,
@@ -211,7 +216,8 @@ export class GameManager {
             usernameRightTeam: usernameRightTeam,
             usernameLeftTeam: usernameLeftTeam,
             playerOneID: p1,
-            playerTwoID: p2
+            playerTwoID: p2,
+            game: game
         };
     }
 
@@ -226,7 +232,7 @@ export class GameManager {
                 const socketp2 = this.getSocketId(p2);
 
                 const p1IsOnline = p1 && io.sockets.sockets.get(socketp1);
-                const p2IsOnline = p2 && io.sockets.sockets.get(socketp2);
+                const p2IsOnline = (p2 && io.sockets.sockets.get(socketp2) || socketp2 === "-2");
 
                 if (p1IsOnline && p2IsOnline) {
                     PlayerOneTime = 15;
