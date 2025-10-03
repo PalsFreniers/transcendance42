@@ -4,6 +4,7 @@ import logger;
 import std::core::ascii;
 import std::io;
 import app::box;
+import std::thread;
 
 const MAX_EVENTS_CALLBACKS = 20;
 
@@ -96,6 +97,34 @@ fn void Window.putPixel(&self, int[<2>] pos, Color c) {
 	tb::putCell(pos.x, pos.y / CHAR_HEIGHT, &cell);
 }
 
+fn void Window.putRaw(&self, int[<2>] pos, ushort c) {
+	if(pos.x < 0 || pos.x >= self.size.x) return;
+	if(pos.y < 0 || pos.y >= self.size.y) return;
+	Cell prev = (*self)[pos];
+	Cell cell;
+	cell.ch = 0x2584;
+	if(pos.y % 2 != 0) {
+		cell.fg.raw = c;
+		cell.bg = prev.bg;
+	} else {
+		cell.bg.raw = c;
+		cell.fg = prev.fg;
+	}
+	tb::putCell(pos.x, pos.y / CHAR_HEIGHT, &cell);
+}
+
+fn void Window.putRect(&self, int[<2>] pos, int[<2>] size, Color c) {
+	Cell cell;
+	cell.fg.r = mapColorByte(c.r);
+	cell.fg.g = mapColorByte(c.g);
+	cell.fg.b = mapColorByte(c.b);
+	for(int y = 0; y < size.y; y++) {
+		for(int x = 0; x < size.x; x++) {
+			self.putRaw(pos + {x, y}, cell.fg.raw);
+		}
+	}
+}
+
 fn Cell genCell(ushort ch, Color fg, Color bg) {
 	Cell cell;
 	cell.ch = ch;
@@ -171,6 +200,7 @@ fn void Window.mainloop(&self) {
 			if(cb != null) cb();
 		}
 		tb::present();
+		thread::sleep_ms(10);
 	}
 	foreach(cb: self.onQuitCbs) {
 		if(cb != null) cb();

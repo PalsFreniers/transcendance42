@@ -14,6 +14,7 @@ struct Menu (State) {
 	App* handle;
 	Button join;
 	Button create;
+	Button ia;
 	TextBox gameName;
 	TextBox* currText;
 }
@@ -24,12 +25,14 @@ enum Positions : const inline int {
 	NAME = 0,
 	JOIN = 1,
 	CREATE = 2,
+	IA = 3,
 }
 
 enum Names : const inline String {
 	NAME = "Name",
-	JOIN = "Join",
-	CREATE = "Create",
+	JOIN = "Join Game",
+	CREATE = "Create Game",
+	IA = "IA Game",
 }
 
 fn void Menu.init(&self, App* handle) @dynamic {
@@ -38,11 +41,13 @@ fn void Menu.init(&self, App* handle) @dynamic {
 	int[<2>][] positions = {
 		{ w.width() / 2 - textbox::LEN_2, w.height() / 2 - textbox::HEIGHT_2 - w.height() / 4 },
 		{ w.width() / 2 - Names.JOIN.len / 2, w.height() / 2 - button::HEIGHT_2  + w.height() / 4},
-		{ w.width() / 2 - Names.CREATE.len / 2, w.height() / 2 - textbox::HEIGHT_2 },
+		{ w.width() / 2 - Names.CREATE.len - 3 * win::CHAR_WIDTH, w.height() / 2 - button::HEIGHT_2 },
+		{ w.width() / 2 + 3 * win::CHAR_WIDTH, w.height() / 2 - button::HEIGHT_2 },
 	};
 	self.gameName = textbox::new(Names.NAME, positions[Positions.NAME]);
 	self.join = button::new(Names.JOIN, positions[Positions.JOIN], &onJoinClicked);
 	self.create = button::new(Names.CREATE, positions[Positions.CREATE], &onCreateClicked);
+	self.ia = button::new(Names.IA, positions[Positions.IA], &onIAClicked);
 }
 
 fn void Menu.load(&self, App* handle) @dynamic {
@@ -51,6 +56,8 @@ fn void Menu.load(&self, App* handle) @dynamic {
 	handle.getWindow().onKey(&onKeyTextBox);
 	self.join.draw(handle.getWindow());
 	self.create.draw(handle.getWindow());
+	self.ia.draw(handle.getWindow());
+	self.gameName.markDirty();
 }
 
 fn void Menu.unload(&self, App* handle) @dynamic {
@@ -90,7 +97,7 @@ fn void onJoinClicked(Mouse m) {
 	}
 	instance.handle.getSocketIO().emit("join-room", jsonJoin);
 	instance.handle.setNeedQuit();
-	instance.handle.setLobbyObj(lobbyName);
+	instance.handle.setLobbyObj(name);
 	instance.handle.changeState(States.WAIT);
 }
 
@@ -100,11 +107,13 @@ fn String createJSON(String gameName) {
 	return obj.end();
 }
 
-fn String createSockJSON(String gameName, int gameId) {
+fn String createSockJSON(String gameName, int gameId, bool ia) {
 	JSONObj obj = json::new();
 	obj.setVal("gameId", gameId);
 	obj.next();
 	obj.setVal("lobbyName", gameName);
+	obj.next();
+	obj.setVal("ia", ia);
 	return obj.end();
 }
 
@@ -123,7 +132,30 @@ fn void onCreateClicked(Mouse m) {
 		api::errNotify(w, err);
 		return;
 	}
-	String jsonCreateSock = createSockJSON(lobbyName, res.get_int("gameId")!!);
+	String jsonCreateSock = createSockJSON(lobbyName, res.get_int("gameId")!!, false);
+	defer jsonCreateSock.free(mem);
+	instance.handle.getSocketIO().emit("create-room", jsonCreateSock);
+	instance.handle.setNeedQuit();
+	instance.handle.setLobbyObj(lobbyName);
+	instance.handle.changeState(States.WAIT);
+}
+
+fn void onIAClicked(Mouse m) {
+	Window* w = instance.handle.getWindow();
+	String lobbyName = instance.gameName.getValue();
+	defer lobbyName.free(mem);
+	String jsonCreate = createJSON(lobbyName);
+	defer jsonCreate.free(mem);
+	Object* res;
+	defer res.free();
+	if(!api::curlPostT(instance.handle, &res, api::CREATE_EP, jsonCreate)) return;
+	if(!res.get_bool("success")!!) {
+		String err = res.get_string("error")!!;
+		win::_log.error("unable to join lobby: %s", err);
+		api::errNotify(w, err);
+		return;
+	}
+	String jsonCreateSock = createSockJSON(lobbyName, res.get_int("gameId")!!, true);
 	defer jsonCreateSock.free(mem);
 	instance.handle.getSocketIO().emit("create-room", jsonCreateSock);
 	instance.handle.setNeedQuit();
@@ -155,6 +187,8 @@ fn void onMouseClicked(Mouse m) {
 		instance.join.onClick(m);
 	} else if(((Box)&instance.create).collide(&mouseRect)) {
 		instance.create.onClick(m);
+	} else if(((Box)&instance.ia).collide(&mouseRect)) {
+		instance.ia.onClick(m);
 	}
 	release = false;
 }

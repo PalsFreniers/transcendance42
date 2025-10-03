@@ -2,6 +2,7 @@ module app::states::wait;
 import std::collections::object;
 import window;
 import app;
+import termbox;
 
 import app::state;
 import app::button;
@@ -66,14 +67,14 @@ fn void onMouseClicked(Mouse m) {
 	if(!release) return;
 	if(m != KeyCode.MOUSE_LEFT) return;
 	Rect mouseRect = (Rect) {m.pos * {win::CHAR_WIDTH, win::CHAR_HEIGHT}, 1, 1};
-	if(((Box)&instance.join).collide(&mouseRect)) {
+	if(((Box)&instance.start).collide(&mouseRect)) {
 		instance.start.onClick(m);
 	}
 	release = false;
 }
 
 fn void onStartClicked(Mouse m) {
-	instance.handle.getSocketIO().emmit("start-game");
+	instance.handle.getSocketIO().emit("start-game");
 }
 
 fn void Wait.activateStart(&self) {

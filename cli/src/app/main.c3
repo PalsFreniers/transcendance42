@@ -15,7 +15,7 @@ struct App {
 	Socket s;
 	String secret;
 	String lobbyName;
-	bool needQuit;
+	bool _needQuit;
 	int userId;
 	void*[] tmpMem;
 	usz tmpMemP;
@@ -32,8 +32,9 @@ macro void App.saveSecret(&self, String secret) => self.secret = secret;
 macro String App.getSecret(&self) => self.secret.copy(mem);
 macro void App.setID(&self, int id) => self.userId = id;
 macro int App.getID(&self) => self.userId;
-macro void App.setNeedQuit(&self) => self.needQuit = true;
-macro bool App.needQuit(&self) => self.needQuit;
+macro void App.setNeedQuit(&self) => self._needQuit = true;
+macro void App.unsetNeedQuit(&self) => self._needQuit = false;
+macro bool App.needQuit(&self) => self._needQuit;
 macro void App.setLobbyObj(&self, String name) {
 	self.lobbyName.free(mem);
 	JSONObj t = json::new();
@@ -44,7 +45,7 @@ macro String App.getLobbyObj(&self) => self.lobbyName;
 macro void App.setSocketIO(&self, Socket s) {
 	self.s.setHandle(s.handle);
 	self.w.onUpdate(fn void() {
-		getHandle().s.onUpdate();
+		instance.s.onUpdate();
 	});
 }
 macro Socket* App.getSocketIO(&self) => &(self.s);
@@ -94,7 +95,7 @@ fn void init() {
 	});
 	instance.getSocketIO().on("in-game", fn void(Object* obj) => instance.changeState(States.MENU));
 	instance.changeState(States.LOGIN, unload: false, force: true);	
-	instance.getWindow().onQuit(fn void() => if(instance.needQuit()) instance.getSocketIO().emit("left-game", instance.getLobbyObj()));
+	instance.getWindow().onQuit(fn void() { if(instance.needQuit()) instance.getSocketIO().emit("left-game", instance.getLobbyObj()); });
 }
 
 fn void cleanup() {

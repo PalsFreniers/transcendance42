@@ -32,13 +32,21 @@ fn void Socket.free(&self) {
 fn void Socket.onUpdate(&self) {
 	String res;
 	defer res.free(mem);
-	CURLcode code = api::recvWSpayloadNoRetry(self.handle, &res);
-	if(code != CURLcode.E_OK) {
-		if(code != CURLcode.E_AGAIN) win::_log.error("curl error: %s", ((ZString)curl::easy_strerror(code)).str_view());
-		return;
-	}
+	Ws_frame* meta;
+	do {
+		String tmp;
+		CURLcode code = api::recvWSpayloadNoRetry(self.handle, &tmp, &meta);
+		if(code != CURLcode.E_OK) {
+			if(code != CURLcode.E_AGAIN) win::_log.error("curl error: %s", ((ZString)curl::easy_strerror(code)).str_view());
+			return;
+		}
+		String x = res;
+		res = res.concat(mem, tmp);
+		x.free(mem);
+		tmp.free(mem);
+	} while(meta.bytesleft != 0);
 	if(res.len == 0) return;
-	win::_log.info("got frame from websocket: %s", res);
+	//win::_log.info("got frame from websocket: %s", res);
 	if(res[0] == '2') {
 		self.direct("3");
 	} else if(res[0] == '4') {

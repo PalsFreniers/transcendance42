@@ -103,9 +103,6 @@ enum Output : const inline int {
 		RGB = 5,
 }
 
-faultdef UNSUPPORTED_TERMINAL, FAILED_TO_OPEN_TTY, PIPE_TRAP_ERROR;
-
-
 struct Event {
         EventType type;
         Mod mod;
