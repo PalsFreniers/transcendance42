@@ -10,7 +10,7 @@ interface IGameInfo {
     ballPos: { x: number, y: number };
     ballDir: { x: number, y: number };
     ballSpd: number;
-    leftPaddleObj: Paddle;
+    // leftPaddleObj: Paddle;
     leftPaddle: { x: number, y: number } | null;
     rightPaddleObj: Paddle;
     rightPaddle: { x: number, y: number } | null;
@@ -22,7 +22,7 @@ interface IGameInfo {
     usernameLeftTeam: string | null;
     playerOneID: number | null;
     playerTwoID: number | null;
-    game: Game;
+    // game: Game;
 }
 
 export class GameAI {
@@ -99,7 +99,7 @@ export class GameAI {
         const ballPos = { x: this._lastState!.ballPos.x, y: this._lastState!.ballPos.y };
         const ballDir = { x: this._lastState!.ballDir.x, y: this._lastState!.ballDir.y };
         const paddleLine = this._lastState!.rightPaddle!.x;
-        const game = this._lastState!.game;
+        const game = new Game(69420);
         const predictBall = new Ball(
             new Vec2D.Vector(ballPos.x, ballPos.y),
             new Vec2D.Vector(ballDir.x, ballDir.y),
