@@ -4,6 +4,8 @@ import { TournamentManager } from "./tournamentManager.js"
 import db from "./dbSqlite/db.js"
 import * as Vec2D from "vector2d";
 import { Server } from "socket.io";
+import { saveStats } from './gameRoutes.js';
+import { GameRecord } from './gameModel.js';
 
 export class GameManager {
 
@@ -78,7 +80,7 @@ export class GameManager {
         return 0; // worked just fine
     }
 
-    startGame(lobbyName: string, gameId: string, io: any) {
+    startGame(lobbyName: string, gameId: string, io: any, token: string) {
         if (!this._games.has(lobbyName))
             return 1; // lobby doesn't exist
         const [game, [p1, p2]] = this._games.get(lobbyName)!;
@@ -86,7 +88,7 @@ export class GameManager {
             return 2; // lobby isn't full
         game.start();
         const loop = setInterval(() => {
-            this.playerIsOffline(p1, p2, io, lobbyName).then(isOffline => {
+            this.playerIsOffline(p1, p2, io, lobbyName, token).then(isOffline => {
                 if (isOffline) {
                     clearInterval(loop);
                     return 0;
@@ -99,7 +101,7 @@ export class GameManager {
                     players: [this.getSocketId(p1), this.getSocketId(p2)]
                 }
                 );
-                this.deleteGame(lobbyName);
+                this.deleteGame(lobbyName, token);
                 return;
             }
             game.update();
@@ -132,19 +134,29 @@ export class GameManager {
         return game.score;
     }
 
-    deleteGame(lobbyName: string): number {
+    deleteGame(lobbyName: string, token: string): number {
         if (!this._games.has(lobbyName))
             return 1; // lobby doesnt exist
-        const [game, _] = this._games.get(lobbyName)!;
+        const [game, [p1, p2]] = this._games.get(lobbyName)!;
         if (game.state !== "ended")
             return 2;
-        // SAVE STATS
+        const date = db.prepare(`SELECT * FROM games WHERE id = ? `).get(game.gameID) as GameRecord;
+        const stats = {
+            game_name: 'pong',
+            part_name: this._games.get(lobbyName),
+            part_id: game.gameID,
+            player_one_id: p1,
+            player_two_id: p2,
+            final_score: game.score.toString(),
+            date: date.gameDate
+        };
+        saveStats(game, stats, token);
         db.prepare(`DELETE FROM games WHERE id = ?`).run(game.gameID);
         this._games.delete(lobbyName);
         return 0;
     }
 
-    leaveGame(lobbyName: string, playerId: number) {
+    leaveGame(lobbyName: string, playerId: number, token: string) {
         console.log(playerId);
         if (!this._games.has(lobbyName))
             return 1; // lobby doesnt exist
@@ -154,7 +166,7 @@ export class GameManager {
                 console.log(`p1: ${p1}, p2: ${p2}`);
                 if (!p2) {
                     this.findGame(lobbyName)!.state = "ended";
-                    this.deleteGame(lobbyName);
+                    this.deleteGame(lobbyName, token);
                     return 0;
                 }
                 db.prepare(`UPDATE games SET player_one_id = player_two_id, player_two_id = NULL WHERE id = ?`).run(game.gameID);
@@ -163,7 +175,7 @@ export class GameManager {
             } else if (playerId === p2) {
                 if (!p1) {
                     this.findGame(lobbyName)!.state = "ended";
-                    this.deleteGame(lobbyName);
+                    this.deleteGame(lobbyName, token);
                     return 0;
                 }
                 this._games.set(lobbyName, [game, [p1, null]])
@@ -203,7 +215,7 @@ export class GameManager {
         };
     }
 
-    playerIsOffline(p1: number, p2: number, io: any, lobbyName: string): Promise<boolean> {
+    playerIsOffline(p1: number, p2: number, io: any, lobbyName: string, token: string): Promise<boolean> {
         return new Promise(resolve => {
             let PlayerOneTime = 15;
             let PlayerTwoTime = 15;
@@ -246,7 +258,7 @@ export class GameManager {
                     }
                 }
                 if (!p1IsOnline && !p2IsOnline) {
-                    this.deleteGame(lobbyName);
+                    this.deleteGame(lobbyName, token);
                     clearInterval(socketCheck);
                     resolve(true);
                 }

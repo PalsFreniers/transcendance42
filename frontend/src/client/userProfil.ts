@@ -1,5 +1,3 @@
-import { getUserIdFromToken } from "./loginClient.js";
-import { getSocket } from "./socketClient.js";
 import { handleRoute } from "./navClient.js";
 import { notify } from "./notify.js";
 import { mini_msg } from "./chatClient.js";
@@ -130,44 +128,13 @@ export async function init() {
 				li.appendChild(button);
 				friendListContainer.appendChild(li);
 				mini_msg(friend);
-				
+
 			});
 		} else {
 			const msg = document.createElement('p');
 			msg.textContent = 'No friends found.';
 			friendListContainer.appendChild(msg);
 		}
-		const nameFriend = document.getElementById('friend-username') as HTMLInputElement;
-		const addFriend = document.getElementById('add-friend-button') as HTMLButtonElement;
-		addFriend.addEventListener('click', async (e) => {
-			e.preventDefault();
-			const friendUsername = nameFriend.value;
-			if (!friendUsername) {
-				console.error('Friend username is empty');
-				return;
-			}
-			try {
-				const res = await fetch(`/api/user/add-friend`, {
-					method: 'POST',
-					headers: {
-						'Content-Type': 'application/json',
-						'Authorization': `Bearer ${token}`
-					},
-					body: JSON.stringify({ friendUsername })
-				});
-				const data = await res.json();
-				if (res.ok) {
-					console.log('friend added:', data.message);
-					handleRoute();
-				}
-				else
-					console.log('Failed to add friend', data.error);
-			}
-			catch (err) {
-				console.error('Error:', err);
-			}
-		});
-
 	} catch (err) {
 		console.error('Error:', err);
 	}

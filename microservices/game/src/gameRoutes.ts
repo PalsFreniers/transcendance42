@@ -2,6 +2,11 @@
 import { FastifyInstance } from 'fastify';
 import db from './dbSqlite/db.js';
 import { createGameLobby} from './gameModel.js';
+import { Game } from './game.js';
+import { GameManager } from './gameManager.js';
+import { io } from './index.js';
+
+const manager = GameManager.getInstance();
 
 export async function createRoom(app: FastifyInstance) {
     app.post("/api/game/create-game", async (req, reply) => {
@@ -40,12 +45,30 @@ export async function awaitForOpponent(app: FastifyInstance) {
     });
 }
 
-export async function specGame(app: FastifyInstance){
-    app.post('/api/game/spec-lobbies', async(req, reply) => {
-        const lobbies = db.prepare(`SELECT * FROM games WHERE status = 'playing'`).all();
-        return reply.send({ success: true, lobbies });
-    })
+export async function specGame(app: FastifyInstance) {
+    app.post('/api/game/spec-lobbies', async (req, reply) => {
+        const lobbies = db.prepare(`
+            SELECT lobby_name, status, player_one_id, player_two_id 
+            FROM games 
+            WHERE status = 'playing'
+        `).all();
+
+        const enriched = lobbies.map((l: any) => {
+            const p1SocketId = manager.getSocketId(l.player_one_id);
+            const p2SocketId = manager.getSocketId(l.player_two_id);
+
+            return {
+                lobby_name: l.lobby_name,
+                status: l.status,
+                playerOne: manager.getUsernameFromSocket(p1SocketId!, io),
+                playerTwo: manager.getUsernameFromSocket(p2SocketId!, io),
+            };
+        });
+
+        return reply.send({ success: true, lobbies: enriched });
+    });
 }
+
 
 export async function joinLobby(app: FastifyInstance) {
     app.post('/api/game/join-lobby', async (req, reply) => {
@@ -63,4 +86,25 @@ export async function joinLobby(app: FastifyInstance) {
         db.prepare(`UPDATE games SET player_two_id = ? WHERE id = ?`).run(user.userId, gameId);
         return reply.send({ success: true, message: 'Joined lobby', gameId, lobbyName: lobby.lobby_name, username: user.username });
     });
+}
+
+export async function saveStats(game: Game, stats: object, token: string){
+        try {
+            const res = await fetch('http://user-service:3001/api/user/add-stats', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({
+                    stats
+                }),
+            });
+            if (!res.ok)
+                console.error('fail to save stat ');
+
+        } 
+        catch (err) {
+            console.error(`error save stats for game : ${game.gameID}\n(${err})`);
+        }
 }

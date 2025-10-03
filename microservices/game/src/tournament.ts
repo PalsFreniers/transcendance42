@@ -45,7 +45,7 @@ export class Tournament {
         return 0;
     }
 
-    public playRound() {
+    public playRound(token: string) {
         if (this._state === "finished"
             || this._state === "waiting"
             || this._finaleInProgress)
@@ -56,12 +56,12 @@ export class Tournament {
             this._roundNum++;
             this._matchNum = 0;
             if (this.remainingPlayers.length == 2) {
-                this._playFinale();
+                this._playFinale(token);
             } else {
                 if (this._winnerBracket.length)
-                    this._advanceWinnerBracket();
+                    this._advanceWinnerBracket(token);
                 if (this._loserBracket.length)
-                    this._advanceLoserBracket()
+                    this._advanceLoserBracket(token)
             }
         }, 1e3);
     }
@@ -177,13 +177,14 @@ export class Tournament {
         return bracket;
     }
 
-    private _advanceWinnerBracket() {
+    private _advanceWinnerBracket(token: string) {
         const matches = [...this._winnerBracket].reverse();
         this._winnerBracket = [];
 
         this._numberOfGames = matches.length;
         matches.forEach((match) => {
             this._launchGame(match, "WinnerBracket",
+                token,
                 (t, result) => {
                     if (t._state === "finished") return;
                     t._winningPlayers.push(result[0]);
@@ -198,20 +199,21 @@ export class Tournament {
                     if (!t._numberOfGames) {
                         t._loserBracket = t._initBrackets(t._losingPlayers);
                         t._losingPlayers = [];
-                        t.playRound();
+                        t.playRound(token);
                     }
                 }
             );
         });
     }
 
-    private _advanceLoserBracket() {
+    private _advanceLoserBracket(token: string) {
         const matches = [...this._loserBracket].reverse();
         this._loserBracket = [];
 
         this._numberOfGames = matches.length;
         matches.forEach((match) => {
             this._launchGame(match, "LoserBracket",
+                token,
                 (t, result) => {
                     if (t._state === "finished") return;
                     t._losingPlayers.push(result[0]);
@@ -226,15 +228,16 @@ export class Tournament {
                     if (!t._numberOfGames) {
                         t._winnerBracket = t._initBrackets(t._winningPlayers);
                         t._winningPlayers = [];
-                        t.playRound();
+                        t.playRound(token);
                     }
                 }
             );
         });
     }
 
-    private _playFinale() {
-        if (this._finaleInProgress) return;
+    private _playFinale(token: string) {
+        if (this._finaleInProgress) 
+            return;
         this._finaleInProgress = true;
         let winner: player_type;
         let loser: player_type;
@@ -252,6 +255,7 @@ export class Tournament {
         this._launchGame(
             finalBracket,
             this._isGrandFinale ? "Grand Finale" : "Finale",
+            token,
             (t, result) => {
                 this.emit("won", { t: this, result });
                 const handleTournamentEnd = (tournamentWinner, tournamentLoser) => {
@@ -275,7 +279,7 @@ export class Tournament {
                     this.emit("lose", { t: this, result });
                     this._isGrandFinale = true;
                     this._finaleInProgress = false;
-                    this.playRound();
+                    this.playRound(token);
                 }
             }
         );
@@ -285,6 +289,7 @@ export class Tournament {
     private _launchGame(
         round: [player_type, player_type],
         roundName: string,
+        token: string,
         onGameEnd: ((t: Tournament, result: [player_type, player_type]) => void),
     ) {
         if (round[1][0] === -1) {
@@ -324,7 +329,7 @@ export class Tournament {
             (game.score[0] > game.score[1]) ? onGameEnd(this, round) : onGameEnd(this, round.reverse() as [player_type, player_type]);
         });
         // Starts, and wait until game is finished
-        const errno = gameManager.startGame(name, gameID.toString(), this._associatedServer);
+        const errno = gameManager.startGame(name, gameID.toString(), this._associatedServer, token);
         if (errno) {
             if (errno == 1)
                 throw new Error(`Lobby ${name} doesn't exist`); // Shouldn't happen...

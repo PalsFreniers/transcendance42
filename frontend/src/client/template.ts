@@ -141,8 +141,6 @@ const templates: Record<string, () => string> = {
 						<form id="form-profil"></form>
 						<h3>List of friends</h3>
 						<ul id="friend-list"></ul>
-						<input id="friend-username" type="text" placeholder="Enter friend username" />
-						<button id="add-friend-button">Add Friend</button>
 					</div>
 					${templates.chat()}
 				</div>`,
@@ -176,6 +174,7 @@ const templates: Record<string, () => string> = {
           <input type="text" id="lobby-name" placeholder="Room name" required />
           <div class="pong-buttons">
             <button id="game-button">Create Game</button>
+			<button id="game-vs-ia">Ia VS</button>
             <button id="join-button">Join Game</button>
             <button id="start-game-btn">Start Game</button>
 			<button id="quit-game-button">Quit lobby</button>

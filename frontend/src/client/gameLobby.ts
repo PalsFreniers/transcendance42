@@ -10,6 +10,7 @@ export function init() {
     }
     const socket = getSocket(1);
     const createGameButton = document.getElementById('game-button') as HTMLButtonElement;
+    const iaBtn = document.getElementById('game-vs-ia') as HTMLElement;
     const joinGameButton = document.getElementById('join-button') as HTMLButtonElement;
     const lobbyName = document.getElementById('lobby-name') as HTMLInputElement;
     const startBtn = document.getElementById('start-game-btn') as HTMLButtonElement;
@@ -45,8 +46,46 @@ export function init() {
                 socket!.emit("create-room", {
                     gameId: data.gameId,
                     lobbyName: data.lobbyName,
+                    ia : false,
                 });
                 lobbyInfo.style.display = 'block';
+                iaBtn.style.display = 'none',
+                createGameButton.style.display = "none";
+                joinGameButton.style.display = "none";
+                specBtn.style.display = "none";
+                customBtn.style.display = "none"
+                startBtn.style.display = "block";
+                quitBtn.style.display = 'block';
+            } catch (err) {
+                console.error("Create game error", err);
+            }
+        });
+    }
+    if (iaBtn){
+        iaBtn.addEventListener("click", async (e) => {
+            e.preventDefault();
+            try {
+                const res = await fetch(`/api/game/create-game`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authorization: `Bearer ${token}`,
+                    },
+                    body: JSON.stringify({ lobbyName: lobbyName.value }),
+                });
+                const data = await res.json();
+                if (!data.success) {
+                    notify(`Game not created, Error: ${data.error}`);
+                    console.error("Failed to create game:", data.error);
+                    return;
+                }
+                socket!.emit("create-room", {
+                    gameId: data.gameId,
+                    lobbyName: data.lobbyName,
+                    ia : true,
+                });
+                lobbyInfo.style.display = 'block';
+                iaBtn.style.display = 'none',
                 createGameButton.style.display = "none";
                 joinGameButton.style.display = "none";
                 specBtn.style.display = "none";
@@ -139,7 +178,7 @@ export function init() {
                     return;
                 }
                 listGame.style.display = 'block';
-                listGame.innerHTML = lobbies.map(l => `<p class="lobby-item" data-name="${l.lobby_name}">${l.lobby_name} - ${l.status}</p>`).join("");
+                listGame.innerHTML = lobbies.map(l => `<p class="lobby-item" data-name="${l.lobby_name}"> ${l.lobby_name} - ${l.playerOne} vs ${l.playerTwo} - ${l.status}</p>`).join("");
                 document.querySelectorAll(".lobby-item").forEach(el => {
                     el.addEventListener("click", (e) => {
                         const target = e.currentTarget as HTMLElement;

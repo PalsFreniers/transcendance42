@@ -64,7 +64,7 @@ export function socketManagement(io: Server) {
             console.log(`User ${socket.data.userId} registered with socket ${socket.id}`);
         });
 
-        socket.on('create-room', ({ gameId, lobbyName }) => {
+        socket.on('create-room', ({ gameId, lobbyName, ia }) => {
             try {
                 const userName = socket.data.userName;
                 if (manager.createLobby(lobbyName, gameId))
@@ -92,6 +92,7 @@ export function socketManagement(io: Server) {
                 socket.data.gameId = `game-${gameId}`;
 
                 socket.join(socket.data.gameId);
+                //ia
                 socket.emit('room-created', {
                     gameId,
                     lobbyName,
@@ -99,7 +100,6 @@ export function socketManagement(io: Server) {
                     playerTwo: null,
                     status: 'waiting'
                 });
-
                 console.log(`User ${socket.data.userId} created and joined room ${socket.data.gameId}`);
             } catch (err) {
                 console.error('create-room error:', err);
@@ -149,7 +149,7 @@ export function socketManagement(io: Server) {
                 }
                 if (socket.data.gameId === -1)
                     throw new Error(`Failed to start game, you are already in game`);
-                const errno = manager.startGame(lobbyName, socket.data.gameId, io);
+                const errno = manager.startGame(lobbyName, socket.data.gameId, io, socket.handshake.auth.token);
                 if (errno)
                     throw new Error(`Failed to start game: ${errno}`);
                 db.prepare(`UPDATE games SET status = 'playing' WHERE lobby_name = ?`).run(lobbyName);
@@ -189,16 +189,17 @@ export function socketManagement(io: Server) {
             socket.join(`game-${game.gameID}`);
         });
 
+
         socket.on('left-game', ({ lobbyname }) => {
             const game = manager.findGame(lobbyname);
             if (!game)
                 return;
             console.log(`you left the room game-${game.gameID}`);
             const playerOneUsername = manager.getUsernameFromSocket(manager.getSocketId(manager.getGameInfo(lobbyname, io)!.playerOneID!)!, io);
-            manager.leaveGame(lobbyname, socket.data.userId);
+            manager.leaveGame(lobbyname, socket.data.userId, socket.handshake.auth.token);
             socket.leave(socket.data.gameId);
             const state = manager.getGameInfo(lobbyname, io);
-            if (!state) 
+            if (!state)
                 return;
             io.to(socket.data.gameId).emit('player-joined', {
                 gameId: game.gameID,

@@ -3,9 +3,9 @@ import { navigateTo } from './navClient.js';
 
 let lobbyname: String | null = null;
 let keysPressed = {
-        up: false,
-        down: false,
-    };
+    up: false,
+    down: false,
+};
 
 export function getUserIdFromToken(): number {
     const token = localStorage.getItem('token');
@@ -104,7 +104,7 @@ export function createPongSocket(socketPong: Socket | null) {
             ctx.lineTo(canvas.width, y);
             ctx.stroke();
         }
-        
+
         ctx.strokeStyle = "#0034de";
         ctx.lineWidth = 4;
         ctx.strokeRect(
@@ -178,31 +178,24 @@ export function createPongSocket(socketPong: Socket | null) {
     document.addEventListener("keydown", (e) => {
         if (e.key === "ArrowUp" && !keysPressed.up) {
             keysPressed.up = true;
-            socketPong!.emit("input", { key: "up", pressed: true });
-            console.log("Emit input:", { key: "up", pressed: true });
+            socketPong!.emit("input", { key: "up", action: "keydown" });
         }
-
         if (e.key === "ArrowDown" && !keysPressed.down) {
             keysPressed.down = true;
-            socketPong!.emit("input", { key: "down", pressed: true });
-            console.log("Emit input:", { key: "down", pressed: true });
+            socketPong!.emit("input", { key: "down", action: "keydown" });
         }
     });
 
     document.addEventListener("keyup", (e) => {
         if (e.key === "ArrowUp" && keysPressed.up) {
             keysPressed.up = false;
-            socketPong!.emit("input", { key: "up", pressed: false });
-            console.log("Emit input:", { key: "up", pressed: false });
+            socketPong!.emit("input", { key: "up", action: "keyup" });
         }
-
         if (e.key === "ArrowDown" && keysPressed.down) {
             keysPressed.down = false;
-            socketPong!.emit("input", { key: "down", pressed: false });
-            console.log("Emit input:", { key: "down", pressed: false });
+            socketPong!.emit("input", { key: "down", action: "keyup" });
         }
     });
-
 
     socketPong.on('game-end', (data) => {
         const canvas = document.getElementById("pong-canvas") as HTMLCanvasElement;

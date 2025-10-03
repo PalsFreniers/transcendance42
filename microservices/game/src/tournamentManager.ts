@@ -45,7 +45,7 @@ export class TournamentManager {
         return 0;
     }
 
-    startTournament(name: string, onTournamentEnd: Listener) {
+    startTournament(name: string, onTournamentEnd: Listener, token: string) {
         if (!this._tournaments.has(name))
             return 1; // tournament doesn't exist
         const t = this._tournaments.get(name)!;
@@ -55,7 +55,7 @@ export class TournamentManager {
             // case 2: tournament already started
             // case 3: not enough player
             return 1 + errno
-        t.playRound();
+        t.playRound(token);
         return 0;
     }
 
