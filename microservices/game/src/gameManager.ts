@@ -165,7 +165,7 @@ export class GameManager {
         for (const [_, [game, [p1, p2]]] of this._games) {
             if (playerId === p1) {
                 this._games.set(lobbyName, [game, [p2, null]]);
-                if (!p2 && p2 === -2) {
+                if (!p2 || p2 === -2) {
                     this.findGame(lobbyName)!.state = "ended";
                     this.deleteGame(lobbyName, token);
                     return 0;
@@ -201,11 +201,9 @@ export class GameManager {
             ballPos: { x: game.ball.pos.x, y: game.ball.pos.y },
             ballDir: { x: game.ball.dir.x, y: game.ball.dir.y },
             ballSpd: game.ball.speed,
-            // leftPaddleObj: game.leftTeam[0],
             leftPaddle: (game.leftTeam.length !== 0
                 ? { x: game.leftTeam[0].hitbox.getPoint(0).x, y: game.leftTeam[0].hitbox.getPoint(0).y }
                 : null),
-            rightPaddleObj: game.rightTeam[0],
             rightPaddle: (game.rightTeam.length !== 0
                 ? { x: game.rightTeam[0].hitbox.getPoint(0).x, y: game.rightTeam[0].hitbox.getPoint(0).y }
                 : null),
@@ -217,7 +215,6 @@ export class GameManager {
             usernameLeftTeam: usernameLeftTeam,
             playerOneID: p1,
             playerTwoID: p2,
-            // game: game
         };
     }
 

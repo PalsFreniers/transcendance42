@@ -10,9 +10,7 @@ interface IGameInfo {
     ballPos: { x: number, y: number };
     ballDir: { x: number, y: number };
     ballSpd: number;
-    // leftPaddleObj: Paddle;
     leftPaddle: { x: number, y: number } | null;
-    rightPaddleObj: Paddle;
     rightPaddle: { x: number, y: number } | null;
     leftScore: number;
     rightScore: number;
@@ -22,7 +20,6 @@ interface IGameInfo {
     usernameLeftTeam: string | null;
     playerOneID: number | null;
     playerTwoID: number | null;
-    // game: Game;
 }
 
 export class GameAI {
@@ -83,16 +80,16 @@ export class GameAI {
         const dY = impactPosY - this._lastState!.rightPaddle!.y - Paddle.len / 2;
         this._moveCycle = Math.abs(Math.round(dY / Paddle.speed));
         if (dY > 0)
-            this._lastState!.rightPaddleObj!.shouldMove = [false, true]; // Go up
+            GameManager.getInstance().findGame(this.lobby)!.getPaddle(-2)!.shouldMove = [false, true]; // Go up
         else if (dY < 0)
-            this._lastState!.rightPaddleObj!.shouldMove = [true, false]; // Go down
+            GameManager.getInstance().findGame(this.lobby)!.getPaddle(-2)!.shouldMove = [true, false]; // Go down
     }
 
     private _moveToPos() {
         if (!this._lastState) return;
         this._moveCycle--;
         if (this._moveCycle <= 0)
-            this._lastState!.rightPaddleObj!.shouldMove = [false, false];
+            GameManager.getInstance().findGame(this.lobby)!.getPaddle(-2)!.shouldMove = [false, false];
     }
 
     private _predictImpact() {
