@@ -101,7 +101,7 @@ fn void onKey(Key k) {
 			}
 			instance.handle.getSocketIO().emit("input", "{\"key\":\"down\",\"action\":\"keydown\"}");
 			instance.down = true;
-		case KeyCoded.SPACE:
+		case KeyCode.SPACE:
 			if(instance.up) {
 				instance.handle.getSocketIO().emit("input", "{\"key\":\"up\",\"action\":\"keyup\"}");
 				instance.up = false;

@@ -1,2 +1,2 @@
 module app::api::gen;
-const String SERVER_ADDRESS = "10.18.245.197:8443";
+const String SERVER_ADDRESS = "10.124.199.157:8443";

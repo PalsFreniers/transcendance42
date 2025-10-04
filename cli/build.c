@@ -53,7 +53,7 @@ int curl(bool clean) {
 		}
 		if(!nob_mkdir_if_not_exists("buildCurl")) return 1;
 		if(chdir("buildCurl")) return 1;
-		if(!configure("../curl-8.16.0", "--without-lipsl", "--disable-shared", "--enable-static", "--enable-websockets", "--with-openssl")) return 1;
+		if(!configure("../curl-8.16.0", "--without-zstd", "--without-libpsl", "--disable-shared", "--enable-static", "--enable-websockets", "--with-openssl")) return 1;
 		if(chdir("..")) return 1;
 		if(!make("./buildCurl")) return 1;
 		if(!mv("buildCurl/lib/.libs/libcurl.a", LIBCURL)) return 1;
