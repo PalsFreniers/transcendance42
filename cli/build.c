@@ -53,7 +53,7 @@ int curl(bool clean) {
 		}
 		if(!nob_mkdir_if_not_exists("buildCurl")) return 1;
 		if(chdir("buildCurl")) return 1;
-		if(!configure("../curl-8.16.0", "--disable-shared", "--enable-static", "--enable-websockets", "--with-openssl")) return 1;
+		if(!configure("../curl-8.16.0", "--without-lipsl", "--disable-shared", "--enable-static", "--enable-websockets", "--with-openssl")) return 1;
 		if(chdir("..")) return 1;
 		if(!make("./buildCurl")) return 1;
 		if(!mv("buildCurl/lib/.libs/libcurl.a", LIBCURL)) return 1;
@@ -102,8 +102,8 @@ int cli(bool clean) {
 	for(int i = 0; i < NOB_ARRAY_LEN(sources); i++)
 		nob_cmd_append(&cmd, sources[i]);
 	nob_cmd_append(&cmd, "-z", LIBTB, "-z", LIBCURL);
-	nob_cmd_append(&cmd, "-z", "-lssl", "-z", "-lcrypto", "-z", "-lzstd", "-z", "-lz");
-	nob_cmd_append(&cmd, "-z", "-lpsl", "-z", "-lbrotlidec", "-z", "-lbrotlienc");
+	nob_cmd_append(&cmd, "-z", "-lssl", "-z", "-lcrypto", "-z", "-lz");
+	nob_cmd_append(&cmd, "-z", "-lbrotlidec", "-z", "-lbrotlienc");
 	if(!nob_cmd_run(&cmd)) return 1;
 	return 0;
 }
