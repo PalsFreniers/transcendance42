@@ -15,6 +15,8 @@ struct Game (State) {
 	App* handle;
 	double[<2>] scale;
 	double[<2>] offset;
+	bool up;
+	bool down;
 }
 
 Game instance;
@@ -60,8 +62,6 @@ fn void drawBoard(Object* obj) {
 	Object* paddleLeftObj = obj.get("leftPaddle")!!;
 	double[<2>] paddleLeft = (double[<2>]){paddleLeftObj.get_float("x")!!, paddleLeftObj.get_float("y")!!} * instance.scale + instance.offset;
 	w.putRect((int[<2>])paddleLeft, (int[<2>])paddleSize, win::BLUE);
-	// win::_log.debug("%s, %s, %s, %s", paddleLeft, paddleSize, paddleRight, ballPos);
-	// win::_log.debug("%s", );
 	DString score = dstring::new(mem);
 	defer score.free();
 	score.appendf("%s %d - %d %s",
@@ -81,19 +81,34 @@ fn void drawBoard(Object* obj) {
 		s = score.str_view();
 		w.putStr(s, {w.width() / 2 - s.len / 2, 2 * win::CHAR_HEIGHT}, win::PWHITE, win::BLACK);
 	}
-	tb::present();
 }
 
 fn void onKey(Key k) {
 	switch(k.code) {
 		case KeyCode.ARROW_UP:
+			if(instance.up) return;
+			if(instance.down) {
+				instance.handle.getSocketIO().emit("input", "{\"key\":\"down\",\"action\":\"keyup\"}");
+				instance.down = false;
+			}
 			instance.handle.getSocketIO().emit("input", "{\"key\":\"up\",\"action\":\"keydown\"}");
-			thread::sleep_ms(5);
-			instance.handle.getSocketIO().emit("input", "{\"key\":\"up\",\"action\":\"keyup\"}");
+			instance.up = true;
 		case KeyCode.ARROW_DOWN:
+			if(instance.down) return;
+			if(instance.up) {
+				instance.handle.getSocketIO().emit("input", "{\"key\":\"up\",\"action\":\"keyup\"}");
+				instance.up = false;
+			}
 			instance.handle.getSocketIO().emit("input", "{\"key\":\"down\",\"action\":\"keydown\"}");
-			thread::sleep_ms(5);
-			instance.handle.getSocketIO().emit("input", "{\"key\":\"down\",\"action\":\"keyup\"}");
+			instance.down = true;
+		case KeyCoded.SPACE:
+			if(instance.up) {
+				instance.handle.getSocketIO().emit("input", "{\"key\":\"up\",\"action\":\"keyup\"}");
+				instance.up = false;
+			} else if(instance.down) {
+				instance.handle.getSocketIO().emit("input", "{\"key\":\"down\",\"action\":\"keyup\"}");
+				instance.down = false;
+			}
 		default:
 	}
 }
