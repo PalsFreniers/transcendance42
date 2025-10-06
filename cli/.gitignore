@@ -1,0 +1,9 @@
+*.a
+*.o
+*.tar.*
+curl-8.16.0
+c3
+trancli
+build
+buildCurl
+src/app/api/gen.c3
