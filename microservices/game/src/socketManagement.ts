@@ -3,8 +3,11 @@ import { GameManager } from "./gameManager.js";
 import { verifTokenSocket } from "./index.js";
 import db from './dbSqlite/db.js';
 import { GameAI } from "./gameAI.js";
+import { Tournament } from "./tournament.js";
+import { TournamentManager } from "./tournamentManager.js";
 
 const manager = GameManager.getInstance();
+const TmManager = TournamentManager.getInstance();
 
 function getUserIdFromToken(token: string): number {
     if (!token) return 0;
@@ -117,6 +120,29 @@ export function socketManagement(io: Server) {
             }
         });
 
+        socket.on('create-tournament', ({ lobbyName }) => {
+            try {
+
+                TmManager.createTournament(lobbyName, 8, io);
+                const errno = TmManager.joinTournament(lobbyName, [socket.data.playerId, socket.data.socketId]);
+                if (errno)
+                    throw new Error(`joinTournament(tournamentName, p): ${errno}`);
+                socket.data.lobbyName = lobbyName;
+                TmManager.getTournament(lobbyName)!.on("game-start", ({ round, name, game }) => {
+                    console.log(`${name}: ${round[0][0]} vs ${round[1][0]}`)
+                }).on("won", ({ t, result }) => { // We can chain event listener for better code
+                    console.log(`${result[0][0]} won against ${result[1][0]}`);
+                }).on("lose", ({ t, result }) => {
+                    console.log(`${result[1][0]} lost against ${result[0][0]}`);
+                }).on("elimination", ({ t, result }) => {
+                    console.log(`${result[1][0]} is eliminated and is ${t.remainingPlayers.length}th`);
+                });
+            } catch (e) {
+                console.error(e);
+                return;
+            }
+        });
+
         socket.on('join-room', ({ gameId }) => {
             try {
                 socket.data.gameId = `game-${gameId}`;
@@ -164,12 +190,24 @@ export function socketManagement(io: Server) {
                     throw new Error(`Failed to start game: ${errno}`);
                 db.prepare(`UPDATE games SET status = 'playing' WHERE lobby_name = ?`).run(lobbyName);
                 console.log(`Game started for lobby ${lobbyName}`);
-
             } catch (err) {
                 console.error("start-game error:", err);
                 socket.emit("error", err);
             }
         });
+
+        socket.on('start-tournament', () => {
+            try {
+                const lobbyName = socket.data.lobbyName;
+                TmManager.startTournament(lobbyName, (t) => {
+                    console.log(t.leaderboard);
+                }, socket.handshake.auth.token);
+            }
+            catch (err) {
+                console.error(err);
+                return;
+            }
+        })
 
         socket.on('input', ({ key, action }) => { // trueKey
             const playerId = socket.data.userId;
