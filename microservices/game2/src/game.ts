@@ -13,6 +13,7 @@ export interface Player {
     Card : playedCard | null;
     usedCoin : boolean;
     IsOnline : boolean;
+    Forfeit: boolean;
 }
 
 export async function clearRoom(room: string)
@@ -305,6 +306,8 @@ export class game
 
                 if (this.PlayerOneTime == 0 && this.PlayerTwoTime == 0)
                 {
+                    this.playerOne.Forfeit = true;
+                    this.playerTwo.Forfeit = true;
                     io.to(`${this.gameId}.1`).to(`${this.gameId}.2`).emit('forfeit', 'all player');
                     forfeit(this.gameId, 0, 0, this.gameTime, this.round_nmb);
                     clearInterval(interval);
@@ -314,6 +317,7 @@ export class game
                 }
                 else if (this.PlayerOneTime == 0 && this.playerTwo.IsOnline)
                 {
+                    this.playerOne.Forfeit = true;
                     io.to(`${this.gameId}.1`).to(`${this.gameId}.2`).emit('forfeit', getPlayerName(this.gameId)?.playerOneName);
                     forfeit(this.gameId, 1, this.playerTwo.Point, this.gameTime, this.round_nmb);
                     clearInterval(interval);
@@ -323,6 +327,7 @@ export class game
                 }
                 else if (this.PlayerTwoTime == 0 && this.playerOne.IsOnline)
                 {
+                    this.playerTwo.Forfeit = true;
                     forfeit(this.gameId, 2, this.playerOne.Point, this.gameTime, this.round_nmb);
                     io.to(`${this.gameId}.1`).to(`${this.gameId}.2`).emit('forfeit', getPlayerName(this.gameId)?.playerTwoName);
                     clearInterval(interval);

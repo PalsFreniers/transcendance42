@@ -99,7 +99,7 @@ export function forfeit(gameId: number, player: number, score: number, gameTime:
         up = db.prepare(`UPDATE games2 SET game_score = '${score} - forfeit' , game_time = ? , status = 'finished', round_nmb = ? WHERE id = ?`);
     else
         up = db.prepare(`UPDATE games2 SET game_score = 'forfeit - forfeit' , game_time = ? , status = 'finished', round_nmb = ? WHERE id = ?`);
-    up.run(gameTime, gameId, round_nmb);
+    up.run(gameTime, round_nmb, gameId);
     return true;
 }
 
@@ -124,7 +124,7 @@ export function createRoom(userId: number, name :string | null,  lobbyName: stri
         player_two_id: null,
         player_two_name: null,
         lobby_name: lobbyName,
-        game_score: '0-0',
+        game_score: '0 - 0',
         status: 'waiting',
         round_nmb: 0,
         is_private: isPrivate,
@@ -144,7 +144,7 @@ export function createRoomSolo(userId: number, name :string | null,  lobbyName: 
         player_two_id: 0,
         player_two_name: null,
         lobby_name: lobbyName,
-        game_score: '0-0',
+        game_score: '0 - 0',
         status: 'waiting',
         round_nmb: 0,
         is_private: 1,
@@ -197,6 +197,7 @@ export async function saveStats(gameId: number, token: string, mmrPlayerOne, mmr
     const game = db.prepare(`SELECT * FROM games2 WHERE id = ?`).get(gameId) as GameData | undefined;
     if (game)
     {
+        console.log(game.game_score);
         const stats : GameStats = {
             game_name : 'shifumi',
             part_name : game.lobby_name,
@@ -204,7 +205,7 @@ export async function saveStats(gameId: number, token: string, mmrPlayerOne, mmr
             player_one_id : game.player_one_id,
             player_two_id : game.player_two_id!,
             final_score : game.game_score!,
-            round_number : game.round_nmb, // a modif
+            round_number : game.round_nmb,
             game_time : game.game_time! / 4, // temps en s
             mmr_gain_player_one : ((mmrPlayerOne == -2000 ? 'private' : mmrPlayerOne.toString())),
             mmr_gain_player_two : ((mmrPlayerTwo == -2000 ? 'private' : mmrPlayerTwo.toString())),

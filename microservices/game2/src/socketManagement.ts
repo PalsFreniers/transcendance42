@@ -362,13 +362,15 @@ export function socketManagemente(io: Server) {
                     Point : 0,
                     Card : null,
                     usedCoin : false,
-                    IsOnline : true
+                    IsOnline : true,
+                    Forfeit : false
                 }, {
                     Id : playerTwo.player_two_id,
                     Point : 0,
                     Card : null,
                     usedCoin : false,
-                    IsOnline : true
+                    IsOnline : true,
+                    Forfeit : false
                 }, id.id);
                 var shifumi = manager.getGame(id.id);
                 if (shifumi)
