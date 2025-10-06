@@ -28,6 +28,8 @@ fn void Game.init(&self, App* handle) @dynamic {
 }
 
 fn void Game.load(&self, App* handle) @dynamic {
+	self.up = false;
+	self.down = false;
 	drawBoard(handle.popTmp());
 	handle.getSocketIO().on("game-end", fn void(Object* obj) {
 		instance.handle.pushTmp(obj);
@@ -54,6 +56,7 @@ fn void drawBoard(Object* obj) {
 	instance.handle.resetScreen();
 	Object* ballPosObj = obj.get("ballPos")!!;
 	double[<2>] ballPos = (double[<2>]){ballPosObj.get_float("x")!!, ballPosObj.get_float("y")!!} * instance.scale + instance.offset;
+	w.putRect((int[<2>])(ballPos - (double[<2>]){1, 1}), {3, 3}, win::GREEN);
 	w.putPixel((int[<2>])ballPos, win::PWHITE);
 	double[<2>] paddleSize = (double[<2>]){0.5, 2} * instance.scale;
 	Object* paddleRightObj = obj.get("rightPaddle")!!;
@@ -75,11 +78,15 @@ fn void drawBoard(Object* obj) {
 	String state = obj.get_string("state")!!;
 	if(state == "idling") {
 		w.putStr("PAUSED", {w.width() / 2 - 3 * win::CHAR_WIDTH, 2 * win::CHAR_HEIGHT}, win::PWHITE, win::BLACK);
+		instance.up = false;
+		instance.down = false;
 	} else if(state == "resume") {
 		score.clear();
-		score.appendf("Resuming in %d", obj.get("resumeTimer")!!);
+		score.appendf("Resuming in %d", obj.get_int("resumeTimer")!!);
 		s = score.str_view();
 		w.putStr(s, {w.width() / 2 - s.len / 2, 2 * win::CHAR_HEIGHT}, win::PWHITE, win::BLACK);
+		instance.up = false;
+		instance.down = false;
 	}
 }
 

@@ -19,6 +19,7 @@ help:
 	@echo "  game-prod   Run game service in prod mode"
 	@echo "  nginx       Run only nginx"
 	@echo "  front       Run only frontend"
+	@echo "  cli         compile the cli and open pdf documentation"
 
 localadress:
 	@if grep -q "^VITE_LOCAL_ADDRESS=" $(ENV_FILE); then \
@@ -26,7 +27,6 @@ localadress:
 	fi
 	echo "VITE_LOCAL_ADDRESS=$$($(CMD_LOCAL_NETWORK_ADDR))" >> $(ENV_FILE);
 	@echo "VITE_LOCAL_ADDRESS set to $$($(CMD_LOCAL_NETWORK_ADDR)) in $(ENV_FILE)"
-	echo "module app::api::gen;\nconst String SERVER_ADDRESS = \"$$($(CMD_LOCAL_NETWORK_ADDR)):8443\";" > $(GEN_API_FILE)
 
 all: localadress
 	$(COMPOSE) -f $(COMPOSE_FILE) up -d
@@ -56,3 +56,8 @@ nginx:
 front:
 	$(COMPOSE) -f $(COMPOSE_FILE) up -d frontend
 
+cli:
+	echo "module app::api::gen;\nconst String SERVER_ADDRESS = \"$$($(CMD_LOCAL_NETWORK_ADDR)):8443\";" > $(GEN_API_FILE)
+	$(MAKE) -C cli --no-print-directory
+
+.PHONY: help localadress all down restart logs build clean user nginx front cli
