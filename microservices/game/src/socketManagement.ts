@@ -3,8 +3,12 @@ import { GameManager } from "./gameManager.js";
 import { verifTokenSocket } from "./index.js";
 import db from './dbSqlite/db.js';
 import { GameAI } from "./gameAI.js";
+import { Tournament } from "./tournament.js";
+import { TournamentManager } from "./tournamentManager.js";
+import { Paddle } from "./gameObjects/Paddle.js";
 
 const manager = GameManager.getInstance();
+const TmManager = TournamentManager.getInstance();
 
 function getUserIdFromToken(token: string): number {
     if (!token) return 0;
@@ -64,7 +68,7 @@ export function socketManagement(io: Server) {
             console.log(`User ${socket.data.userId} registered with socket ${socket.id}`);
         });
 
-        socket.on('create-room', ({ gameId, lobbyName, ia }) => {
+        socket.on('create-room', ({ gameId, lobbyName, ia, local }) => {
             try {
                 const userName = socket.data.userName;
                 if (manager.createLobby(lobbyName, gameId))
@@ -101,6 +105,19 @@ export function socketManagement(io: Server) {
                         status: 'ready'
                     });
                 }
+                else if (local) {
+                    const errno = manager.joinLobby(lobbyName, -1);
+                    if (errno)
+                        throw new Error(`Couldn't make the second player join lobby with name ${lobbyName}: ${errno}`);
+                    socket.emit('room-created', {
+                        gameId,
+                        lobbyName,
+                        userName,
+                        playerTwo: local,
+                        status: 'ready'
+                    });
+                    manager.findGame(lobbyName)!.localPlayer = local;
+                }
                 else {
                     socket.emit('room-created', {
                         gameId,
@@ -114,6 +131,29 @@ export function socketManagement(io: Server) {
             } catch (err) {
                 console.error('create-room error:', err);
                 socket.emit('error', err);
+            }
+        });
+
+        socket.on('create-tournament', ({ lobbyName }) => {
+            try {
+
+                TmManager.createTournament(lobbyName, 8, io);
+                const errno = TmManager.joinTournament(lobbyName, [socket.data.playerId, socket.data.socketId]);
+                if (errno)
+                    throw new Error(`joinTournament(tournamentName, p): ${errno}`);
+                socket.data.lobbyName = lobbyName;
+                TmManager.getTournament(lobbyName)!.on("game-start", ({ round, name, game }) => {
+                    console.log(`${name}: ${round[0][0]} vs ${round[1][0]}`)
+                }).on("won", ({ t, result }) => { // We can chain event listener for better code
+                    console.log(`${result[0][0]} won against ${result[1][0]}`);
+                }).on("lose", ({ t, result }) => {
+                    console.log(`${result[1][0]} lost against ${result[0][0]}`);
+                }).on("elimination", ({ t, result }) => {
+                    console.log(`${result[1][0]} is eliminated and is ${t.remainingPlayers.length}th`);
+                });
+            } catch (e) {
+                console.error(e);
+                return;
             }
         });
 
@@ -164,14 +204,26 @@ export function socketManagement(io: Server) {
                     throw new Error(`Failed to start game: ${errno}`);
                 db.prepare(`UPDATE games SET status = 'playing' WHERE lobby_name = ?`).run(lobbyName);
                 console.log(`Game started for lobby ${lobbyName}`);
-
             } catch (err) {
                 console.error("start-game error:", err);
                 socket.emit("error", err);
             }
         });
 
-        socket.on('input', ({ key, action }) => { // trueKey
+        socket.on('start-tournament', () => {
+            try {
+                const lobbyName = socket.data.lobbyName;
+                TmManager.startTournament(lobbyName, (t) => {
+                    console.log(t.leaderboard);
+                }, socket.handshake.auth.token);
+            }
+            catch (err) {
+                console.error(err);
+                return;
+            }
+        })
+
+        socket.on('input', ({ key, action, localPlayer }) => { // trueKey
             const playerId = socket.data.userId;
             if (!playerId)
                 return;
@@ -180,10 +232,9 @@ export function socketManagement(io: Server) {
                 return console.warn(`No active game for player ${playerId}`);
             if (game.state !== 'running')
                 return;
-            let paddle = game.getPaddle(playerId)!;
-            // console.log(`key: ${key} && action: ${action}`);
-            // if (!trueKey.startsWith("Arrow")) // paddle droit
-            //     paddle = game.getPaddle(-1);
+            let paddle: Paddle | null = game.getPaddle(-1);
+            if (!localPlayer || !paddle)
+                paddle = game.getPaddle(playerId)!;
             const state = paddle.getState();
             const isPressed = action === 'keydown';
             if (key === 'up')
@@ -199,7 +250,6 @@ export function socketManagement(io: Server) {
             console.log(`spec register in room game-${game.gameID}`);
             socket.join(`game-${game.gameID}`);
         });
-
 
         socket.on('left-game', ({ lobbyname }) => {
             const game = manager.findGame(lobbyname);

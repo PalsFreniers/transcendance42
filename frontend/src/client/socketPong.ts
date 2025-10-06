@@ -5,6 +5,8 @@ let lobbyname: String | null = null;
 let keysPressed = {
     up: false,
     down: false,
+    upP2: false,
+    downP2: false,
 };
 
 export function getUserIdFromToken(): number {
@@ -180,9 +182,17 @@ export function createPongSocket(socketPong: Socket | null) {
             keysPressed.up = true;
             socketPong!.emit("input", { key: "up", action: "keydown" });
         }
-        if (e.key === "ArrowDown" && !keysPressed.down) {
+        else if (e.key === "ArrowDown" && !keysPressed.down) {
             keysPressed.down = true;
             socketPong!.emit("input", { key: "down", action: "keydown" });
+        }
+        else if (e.key.toLowerCase() === "w" && !keysPressed.upP2) {
+            keysPressed.upP2 = true;
+            socketPong!.emit("input", { key: "up", action: "keydown", localPlayer: true });
+        }
+        else if (e.key.toLowerCase() === "s" && !keysPressed.downP2) {
+            keysPressed.downP2 = true;
+            socketPong!.emit("input", { key: "down", action: "keydown", localPlayer: true });
         }
     });
 
@@ -191,9 +201,17 @@ export function createPongSocket(socketPong: Socket | null) {
             keysPressed.up = false;
             socketPong!.emit("input", { key: "up", action: "keyup" });
         }
-        if (e.key === "ArrowDown" && keysPressed.down) {
+        else if (e.key === "ArrowDown" && keysPressed.down) {
             keysPressed.down = false;
             socketPong!.emit("input", { key: "down", action: "keyup" });
+        }
+        else if (e.key.toLowerCase() === "w" && keysPressed.upP2) {
+            keysPressed.upP2 = false;
+            socketPong!.emit("input", { key: "up", action: "keyup", localPlayer: true });
+        }
+        else if (e.key.toLowerCase() === "s" && keysPressed.downP2) {
+            keysPressed.downP2 = false;
+            socketPong!.emit("input", { key: "down", action: "keyup", localPlayer: true });
         }
     });
 

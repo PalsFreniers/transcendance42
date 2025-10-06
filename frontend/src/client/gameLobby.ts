@@ -11,6 +11,7 @@ export function init() {
     const socket = getSocket(1);
     const createGameButton = document.getElementById('game-button') as HTMLButtonElement;
     const iaBtn = document.getElementById('game-vs-ia') as HTMLElement;
+    const localGameBtn = document.getElementById('game-local') as HTMLElement;
     const joinGameButton = document.getElementById('join-button') as HTMLButtonElement;
     const lobbyName = document.getElementById('lobby-name') as HTMLInputElement;
     const startBtn = document.getElementById('start-game-btn') as HTMLButtonElement;
@@ -18,12 +19,15 @@ export function init() {
     const listGame = document.getElementById('game-list') as HTMLElement;
     const lobbyInfo = document.getElementById('game-salon') as HTMLElement;
     const quitBtn = document.getElementById('quit-game-button') as HTMLButtonElement;
-    const customBtn = document.getElementById('custom-button') as HTMLButtonElement
+    const customBtn = document.getElementById('custom-button') as HTMLButtonElement;
+    const tournamentBtn = document.getElementById('tournament-button') as HTMLButtonElement;
+    const startTournament = document.getElementById('tournament-start') as HTMLButtonElement;
 
     startBtn.style.display = 'none';
     listGame.style.display = 'none';
     lobbyInfo.style.display = 'none';
     quitBtn.style.display = 'none';
+    startTournament.style.display = "none";
     backToPreviousPage();
     if (createGameButton) {
         createGameButton.addEventListener("click", async (e) => {
@@ -46,10 +50,13 @@ export function init() {
                 socket!.emit("create-room", {
                     gameId: data.gameId,
                     lobbyName: data.lobbyName,
-                    ia : false,
+                    ia: false,
                 });
                 lobbyInfo.style.display = 'block';
-                iaBtn.style.display = 'none',
+                iaBtn.style.display = 'none';
+                localGameBtn.style.display = 'none';
+                tournamentBtn.style.display = "none";
+                startTournament.style.display = "none";
                 createGameButton.style.display = "none";
                 joinGameButton.style.display = "none";
                 specBtn.style.display = "none";
@@ -61,7 +68,7 @@ export function init() {
             }
         });
     }
-    if (iaBtn){
+    if (iaBtn) {
         iaBtn.addEventListener("click", async (e) => {
             e.preventDefault();
             try {
@@ -82,10 +89,13 @@ export function init() {
                 socket!.emit("create-room", {
                     gameId: data.gameId,
                     lobbyName: data.lobbyName,
-                    ia : true,
+                    ia: true,
                 });
                 lobbyInfo.style.display = 'block';
-                iaBtn.style.display = 'none',
+                tournamentBtn.style.display = "none";
+                startTournament.style.display = "none";
+                iaBtn.style.display = 'none';
+                localGameBtn.style.display = 'none';
                 createGameButton.style.display = "none";
                 joinGameButton.style.display = "none";
                 specBtn.style.display = "none";
@@ -96,6 +106,80 @@ export function init() {
                 console.error("Create game error", err);
             }
         });
+    }
+    if (localGameBtn) {
+        localGameBtn.addEventListener("click", async (e) => {
+            e.preventDefault();
+            try {
+                const res = await fetch(`/api/game/create-game`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        Authorization: `Bearer ${token}`,
+                    },
+                    body: JSON.stringify({ lobbyName: lobbyName.value }),
+                });
+                const data = await res.json();
+                if (!data.success) {
+                    notify(`Game not created, Error: ${data.error}`);
+                    console.error("Failed to create game:", data.error);
+                    return;
+                }
+                const secondPlayer = prompt("Select the second player's name");
+                if (!secondPlayer)
+                    throw new Error("Invalid name for the second player");
+                socket!.emit("create-room", {
+                    gameId: data.gameId,
+                    lobbyName: data.lobbyName,
+                    local: secondPlayer,
+                });
+                lobbyInfo.style.display = 'block';
+                tournamentBtn.style.display = "none";
+                startTournament.style.display = "none";
+                iaBtn.style.display = 'none';
+                localGameBtn.style.display = 'none';
+                createGameButton.style.display = "none";
+                joinGameButton.style.display = "none";
+                specBtn.style.display = "none";
+                customBtn.style.display = "none"
+                startBtn.style.display = "block";
+                quitBtn.style.display = 'block';
+            } catch (err) {
+                console.error("Create game error", err);
+            }
+        });
+    }
+    if (tournamentBtn) {
+        tournamentBtn.addEventListener("click", async (e) => {
+            e.preventDefault();
+            try {
+                if (!lobbyName.value)
+                    return;
+                socket!.emit("create-tournament", {
+                    lobbyName: lobbyName.value
+                });
+                createGameButton.style.display = "none";
+                joinGameButton.style.display = "none";
+                tournamentBtn.style.display = "none";
+                iaBtn.style.display = 'none';
+                localGameBtn.style.display = 'none';
+                specBtn.style.display = "none";
+                customBtn.style.display = "none"
+                startBtn.style.display = "none";
+                startTournament.style.display = "block";
+                quitBtn.style.display = 'block';
+            }
+            catch (err) {
+                console.error("Create tournament error", err);
+            }
+        });
+    }
+    if (startTournament) {
+        startTournament.addEventListener('click', async (e) => {
+            e.preventDefault();
+            socket!.emit('tournament-start')
+        }
+        );
     }
     if (joinGameButton) {
         joinGameButton.addEventListener("click", async (e) => {
@@ -134,11 +218,14 @@ export function init() {
                 lobbyInfo.style.display = 'block';
                 quitBtn.style.display = 'block';
                 iaBtn.style.display = 'none';
+                localGameBtn.style.display = 'none';
                 specBtn.style.display = "none";
                 customBtn.style.display = "none"
                 createGameButton.style.display = "none";
                 joinGameButton.style.display = "none";
                 specBtn.style.display = "none";
+                tournamentBtn.style.display = "none";
+                startTournament.style.display = "none";
             } catch (err) {
                 console.error("Error joining game:", err);
             }
@@ -147,7 +234,7 @@ export function init() {
     if (quitBtn) {
         quitBtn.addEventListener("click", () => {
             const lobbyElem = document.getElementById('lobbyname') as HTMLParagraphElement;
-            if (!lobbyElem) 
+            if (!lobbyElem)
                 return;
             const lobbyText = lobbyElem.textContent || "";
             const nameOnly = lobbyText.replace("Lobby name:", "").trim();
@@ -186,9 +273,11 @@ export function init() {
                         const target = e.currentTarget as HTMLElement;
                         const lobbyName = target.dataset.name;
                         createGameButton.style.display = "none";
+                        tournamentBtn.style.display = "none";
                         joinGameButton.style.display = "none";
                         specBtn.style.display = "none";
                         specBtn.style.display = "none";
+                        startTournament.style.display = "none";
                         if (lobbyName) {
                             notify(`Your spectate ${lobbyName} room`)
                             socket!.emit("spec-game", { lobbyname: lobbyName });
