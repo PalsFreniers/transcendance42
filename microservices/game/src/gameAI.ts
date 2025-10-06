@@ -9,9 +9,7 @@ interface IGameInfo {
     ballPos: { x: number, y: number };
     ballDir: { x: number, y: number };
     ballSpd: number;
-    leftPaddleObj: Paddle;
     leftPaddle: { x: number, y: number } | null;
-    rightPaddleObj: Paddle;
     rightPaddle: { x: number, y: number } | null;
     leftScore: number;
     rightScore: number;
@@ -21,7 +19,6 @@ interface IGameInfo {
     usernameLeftTeam: string | null;
     playerOneID: number | null;
     playerTwoID: number | null;
-    game: Game;
 }
 
 export class GameAI {
@@ -98,23 +95,23 @@ export class GameAI {
         console.log(`paddleY: ${paddleY}`);
         console.log(`dY: ${dY}`);
         if (dY > 0)
-            this._lastState!.rightPaddleObj!.shouldMove = [false, true]; // Go up
-        else
-            this._lastState!.rightPaddleObj!.shouldMove = [true, false]; // Go down
+            GameManager.getInstance().findGame(this.lobby)!.getPaddle(-2)!.shouldMove = [false, true]; // Go up
+        else if (dY < 0)
+            GameManager.getInstance().findGame(this.lobby)!.getPaddle(-2)!.shouldMove = [true, false]; // Go down
     }
 
     private _moveToPos() {
         if (!this._lastState) return;
         this._moveCycle--;
         if (this._moveCycle <= 0)
-            this._lastState!.rightPaddleObj!.shouldMove = [false, false];
+            GameManager.getInstance().findGame(this.lobby)!.getPaddle(-2)!.shouldMove = [false, false];
     }
 
     private _predictImpact() {
         const ballPos = { x: this._lastState!.ballPos.x, y: this._lastState!.ballPos.y };
         const ballDir = { x: this._lastState!.ballDir.x, y: this._lastState!.ballDir.y };
         const paddleLine = this._lastState!.rightPaddle!.x;
-        const game = this._lastState!.game;
+        const game = new Game(69420);
         const predictBall = new Ball(
             new Vec2D.Vector(ballPos.x, ballPos.y),
             new Vec2D.Vector(ballDir.x, ballDir.y),

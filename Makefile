@@ -2,6 +2,7 @@ COMPOSE=docker compose
 COMPOSE_FILE=docker-compose.yml
 CMD_LOCAL_NETWORK_ADDR=ip addr | grep "brd 10." | awk '{print $$2}' | cut -d'/' -f1;
 ENV_FILE=.env
+GEN_API_FILE=cli/src/app/api/gen.c3
 
 help:
 	@echo "Usage: make [TARGET]"
@@ -25,6 +26,7 @@ localadress:
 	fi
 	echo "VITE_LOCAL_ADDRESS=$$($(CMD_LOCAL_NETWORK_ADDR))" >> $(ENV_FILE);
 	@echo "VITE_LOCAL_ADDRESS set to $$($(CMD_LOCAL_NETWORK_ADDR)) in $(ENV_FILE)"
+	echo "module app::api::gen;\nconst String SERVER_ADDRESS = \"$$($(CMD_LOCAL_NETWORK_ADDR)):8443\";" > $(GEN_API_FILE)
 
 all: localadress
 	$(COMPOSE) -f $(COMPOSE_FILE) up -d
