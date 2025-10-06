@@ -62,7 +62,7 @@ export class GameManager {
     joinLobby(lobbyName: string, playerID: number): number {
         if (!this._games.has(lobbyName))
             return 1; // lobby doesnt exist
-        if (playerID != -2) { // IF player joining isn't the AI
+        if (playerID !== -1 && playerID !== -2) { // IF player joining isn't the AI nor a local player
             if (lobbyName.startsWith("tournament") && !TournamentManager.getInstance().isPlayerRegistered(playerID))
                 return 5; // player cannot participate in tournament if not registered
             if (!lobbyName.startsWith("tournament") && TournamentManager.getInstance().isPlayerRegistered(playerID))
@@ -165,7 +165,7 @@ export class GameManager {
         for (const [_, [game, [p1, p2]]] of this._games) {
             if (playerId === p1) {
                 this._games.set(lobbyName, [game, [p2, null]]);
-                if (!p2 && p2 === -2) {
+                if (!p2 || p2 === -2 || p2 === -1) {
                     this.findGame(lobbyName)!.state = "ended";
                     this.deleteGame(lobbyName, token);
                     return 0;
@@ -197,6 +197,8 @@ export class GameManager {
         let usernameRightTeam = this.getUsernameFromSocket(this.getSocketId(p2!)!, io);
         if (p2 === -2)
             usernameRightTeam = 'ia';
+        else if (p2 === -1)
+            usernameRightTeam = game.localPlayer;
         return {
             ballPos: { x: game.ball.pos.x, y: game.ball.pos.y },
             ballDir: { x: game.ball.dir.x, y: game.ball.dir.y },
@@ -232,7 +234,7 @@ export class GameManager {
                 const socketp2 = this.getSocketId(p2);
 
                 const p1IsOnline = p1 && io.sockets.sockets.get(socketp1);
-                const p2IsOnline = (p2 && io.sockets.sockets.get(socketp2) || socketp2 === "-2");
+                const p2IsOnline = (p2 && io.sockets.sockets.get(socketp2) || socketp2 === "-2" || p2 == -1);
 
                 if (p1IsOnline && p2IsOnline) {
                     PlayerOneTime = 15;

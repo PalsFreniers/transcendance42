@@ -27,6 +27,7 @@ export class Game {
     private _resumeTimer: number = 3;
     private _countdown: boolean = false;
     private _events: Map<string, Listener[]> = new Map();
+    private _localPlayer: string | null = null;
 
     // Accessors
 
@@ -84,6 +85,16 @@ export class Game {
 
     public set countdown(bool: boolean) {
         this._countdown = bool;
+    }
+
+    public get localPlayer(): string | null {
+        if (this._localPlayer)
+            return this._localPlayer;
+        return null;
+    }
+
+    public set localPlayer(localPlayer: string) {
+        this._localPlayer = localPlayer;
     }
 
     getPaddle(playerID: number) {

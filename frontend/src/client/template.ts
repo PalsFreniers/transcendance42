@@ -176,6 +176,7 @@ const templates: Record<string, () => string> = {
             <button id="game-button">Create Game</button>
 			<button id="tournament-button">Tournament</button>
 			<button id="game-vs-ia">Ia VS</button>
+			<button id="game-local">Local Game</button>
             <button id="join-button">Join Game</button>
             <button id="start-game-btn">Start Game</button>
 			<button id="tournament-start">Start Tournament</button>
