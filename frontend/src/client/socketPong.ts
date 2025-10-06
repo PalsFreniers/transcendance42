@@ -1,5 +1,6 @@
 import io, { Socket } from 'socket.io-client';
 import { navigateTo } from './navClient.js';
+import { getUsernameFromToken } from './loginClient.js';
 
 let lobbyname: String | null = null;
 let keysPressed = {
@@ -64,6 +65,44 @@ export function createPongSocket(socketPong: Socket | null) {
         <p><strong>Player 2:</strong> ${data.playerTwo}</p>
         <p><strong>Status:</strong> ${data.status}</p>`;
     });
+
+    socketPong.on("lobby-info", (data) => {
+        const path = window.location.pathname;
+        if (path !== '/pong')
+            navigateTo('/pong')
+        const lobbyGame = document.getElementById("game-salon") as HTMLDivElement;
+        const startBtn = document.getElementById('start-game-btn') as HTMLButtonElement;
+        const quitBtn = document.getElementById('quit-game-button') as HTMLButtonElement;
+        const createGameButton = document.getElementById('game-button') as HTMLButtonElement;
+        const iaBtn = document.getElementById('game-vs-ia') as HTMLElement;
+        const localGameBtn = document.getElementById('game-local') as HTMLElement;
+        const joinGameButton = document.getElementById('join-button') as HTMLButtonElement;
+        const specBtn = document.getElementById('spectator-btn') as HTMLButtonElement;
+        const customBtn = document.getElementById('custom-button') as HTMLButtonElement;
+        const tournamentBtn = document.getElementById('tournament-button') as HTMLButtonElement;
+        const startTournament = document.getElementById('tournament-start') as HTMLButtonElement;
+
+        lobbyGame.style.display = 'block';
+        startTournament.style.display = "none";
+        iaBtn.style.display = 'none';
+        localGameBtn.style.display = 'none';
+        tournamentBtn.style.display = "none";
+        startTournament.style.display = "none";
+        createGameButton.style.display = "none";
+        joinGameButton.style.display = "none";
+        specBtn.style.display = "none";
+        customBtn.style.display = "none"
+        if (getUsernameFromToken() === data.playerOne)
+            startBtn.style.display = "block";
+        quitBtn.style.display = 'block';
+
+        lobbyGame.innerHTML = `
+            <p id="lobbyname"><strong>Lobby name:</strong> ${data.lobbyName}</p>
+            <p><strong>Player 1:</strong> ${data.playerOne}</p>
+            <p><strong>Player 2:</strong> ${data.playerTwo ?? "-"}</p>
+            <p><strong>Status:</strong> ${data.status}</p>`;
+    });
+
 
     socketPong.on('in-game', () => {
         const path = window.location.pathname;

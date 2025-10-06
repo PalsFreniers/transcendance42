@@ -101,7 +101,7 @@ export async function init() {
 		});
 		const dataFriend = await resFriends.json();
 		const friendListContainer = document.getElementById('friend-list') as HTMLUListElement;
-		if (dataFriend && Array.isArray(dataFriend.friends)) {
+		if (dataFriend && Array.isArray(dataFriend.friends) && dataFriend.friends.length > 0) {
 			dataFriend.friends.forEach(friend => {
 				const li = document.createElement('li');
 				li.textContent = friend.username;
@@ -131,6 +131,8 @@ export async function init() {
 
 			});
 		} else {
+			const display = document.getElementById('chat-display') as HTMLElement;
+			display.style.display = "none";
 			const msg = document.createElement('p');
 			msg.textContent = 'No friends found.';
 			friendListContainer.appendChild(msg);
