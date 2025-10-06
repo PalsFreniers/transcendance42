@@ -4,7 +4,6 @@ import { GameManager } from "./gameManager.js";
 import { Paddle } from "./gameObjects/Paddle.js";
 import { Ball } from "./gameObjects/Ball.js";
 import { Server } from "socket.io";
-import { clamp } from "./utils.js";
 
 interface IGameInfo {
     ballPos: { x: number, y: number };
@@ -31,19 +30,18 @@ export class GameAI {
         public lobby: string,
         private _server: Server
     ) {
-        this.joinGame(lobby);
+        this._joinGame(lobby);
     }
 
     private _lastTime: number = Date.now();
     private _moveCycle: number = 0;
     private _lastState: IGameInfo | null = null; // isActually IGameInfo
     private _decision: "accelerate" | "attack" = "attack";
-    private _speedThreat: number = (Ball.baseSpeed + Ball.acceleration * 25);
-    private _shootAngle: number = 30;
+    private _speedThreat: number = (Ball.baseSpeed * Math.pow(1 + Ball.acceleration, 25));
     private _ballSpeedOnScore: number[] = [];
     private _ballAngleOnScore: number[] = [];
 
-    joinGame(lobbyName: string) {
+    private _joinGame(lobbyName: string) {
         const gameManager = GameManager.getInstance();
         const errno = gameManager.joinLobby(lobbyName, -2);
         switch (errno) {
@@ -72,19 +70,36 @@ export class GameAI {
     }
 
     private _reactToInfo() {
+        const padLen2 = Paddle.len / 2;
         if (!this._lastState) return;
-        // if (this._lastState!.ballSpd > this._speedThreat)
-        //     this._decision = "attack";
-        let impactPosY: number;
-        if (this._lastState!.ballDir.x < 0)
-            impactPosY = 0;
-        else
+        if (this._moveCycle > 0) return;
+        if (this._lastState!.ballSpd > this._speedThreat) {
+            this._decision = "attack";
+            console.log("Im attacking now");
+        }
+        let impactPosY = 0;
+        if (this._lastState!.ballDir.x > 0) {
             impactPosY = this._predictImpact().y;
-        const dY = impactPosY - this._lastState!.rightPaddle!.y - Paddle.len / 2;
+            if (this._decision === "accelerate")
+                impactPosY += Math.random() > 0.5 ? (padLen2 - Paddle.speed) : -(padLen2 - Paddle.speed);
+            else { // this._decision === "attack"
+                const playerPaddleY = this._lastState!.leftPaddle!.y + padLen2;
+                const shootAngle = 35;
+                if (Math.abs(playerPaddleY) < 3)
+                    impactPosY += Math.random() > 0.5 ? (0.3 * padLen2) : -(0.3 * padLen2);
+                else
+                    impactPosY += playerPaddleY > 0 ? (shootAngle / 75 * padLen2) : -(shootAngle / 75 * padLen2);
+            }
+        }
+        const paddleY = this._lastState!.rightPaddle!.y + padLen2;
+        const dY = paddleY - impactPosY;
         this._moveCycle = Math.abs(Math.round(dY / Paddle.speed));
+        console.log(`impactPosY: ${impactPosY}`);
+        console.log(`paddleY: ${paddleY}`);
+        console.log(`dY: ${dY}`);
         if (dY > 0)
             this._lastState!.rightPaddleObj!.shouldMove = [false, true]; // Go up
-        else if (dY < 0)
+        else
             this._lastState!.rightPaddleObj!.shouldMove = [true, false]; // Go down
     }
 
@@ -132,7 +147,7 @@ export class GameAI {
 
     private _adapt(ballSpeed: number, ballDir: Vec2D.AbstractVector, scoringTeam: number) {
         // Reset AI decision
-        // this._decision = "accelerate";
+        this._decision = "accelerate";
 
         const speedAdaptModifier = 0.20; // must be [0..1] and not so subtle
         const angleAdaptModifier = 0.10; // must be [0..1] and subtle
@@ -153,16 +168,5 @@ export class GameAI {
             this._speedThreat -= speedAdaptModifier * (mean - this._speedThreat);
         else
             this._speedThreat += speedAdaptModifier * (mean - this._speedThreat);
-        
-        // Update shoot angle for deadlier ones
-        if (this._ballAngleOnScore.length) {
-            mean = 0;
-            this._ballAngleOnScore.forEach((angle) => { mean += angle; });
-            mean /= this._ballSpeedOnScore.length;
-            if (mean > this._shootAngle)
-                this._shootAngle += angleAdaptModifier * (mean - this._shootAngle);
-            else
-                this._shootAngle -= angleAdaptModifier * (mean - this._shootAngle);
-        }
     }
 }
