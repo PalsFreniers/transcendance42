@@ -4,4 +4,10 @@ all:
 	@echo "launching build script"
 	./build build
 
-.PHONY: all
+clean:
+	./build clean
+
+re:
+	./build re
+
+.PHONY: all clean re

@@ -46,6 +46,7 @@ build:
 
 clean:
 	$(COMPOSE) -f $(COMPOSE_FILE) down -v --rmi all --remove-orphans
+	$(MAKE) -C cli clean
 
 user:
 	$(COMPOSE) -f $(COMPOSE_FILE) up -d user-service
@@ -56,8 +57,10 @@ nginx:
 front:
 	$(COMPOSE) -f $(COMPOSE_FILE) up -d frontend
 
+re: clean all
+
 cli:
 	echo "addr:=\"$$($(CMD_LOCAL_NETWORK_ADDR))\"\nport:=\"8443\"" > $(GEN_API_FILE)
 	$(MAKE) -C cli --no-print-directory
 
-.PHONY: help localadress all down restart logs build clean user nginx front cli
+.PHONY: help localadress all down restart logs build clean user nginx front cli re
