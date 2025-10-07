@@ -287,3 +287,16 @@ export async function getMessage(app: FastifyInstance) {
         }
     })
 }
+
+export async function getDatas(app: FastifyInstance) {
+	app.get('/data', async (req, rep) => {
+		try {
+			const { id } = req.query as { id?: number };
+			const user = db.prepare("SELECT * FROM users WHERE id = ?").get(id);
+			return rep.code(200).send(user);
+		} catch(err) {
+            console.log(err);
+            return rep.code(500).send({ error: 'Failed fetch user data' });
+		}
+	});
+}
