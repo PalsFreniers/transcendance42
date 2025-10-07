@@ -327,7 +327,9 @@ export class Tournament {
         joinGameWrapper(round[1]);
         gameManager.findGame(name)!.on("game-end", ({game, _}) => {
             (game.score[0] > game.score[1]) ? onGameEnd(this, round) : onGameEnd(this, round.reverse() as [player_type, player_type]);
-        });
+        }).on("game-state", (state) => {
+			this._associatedServer.to(`game-${gameID}`).emit("game-state", state)
+		});
         // Starts, and wait until game is finished
         const errno = gameManager.startGame(name, gameID.toString(), this._associatedServer, token);
         if (errno) {
