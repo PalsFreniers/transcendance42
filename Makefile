@@ -28,9 +28,10 @@ localadress:
 	echo "VITE_LOCAL_ADDRESS=$$($(CMD_LOCAL_NETWORK_ADDR))" >> $(ENV_FILE);
 	@echo "VITE_LOCAL_ADDRESS set to $$($(CMD_LOCAL_NETWORK_ADDR)) in $(ENV_FILE)"
 
-all: localadress cli
+all: localadress
 	$(COMPOSE) -f $(COMPOSE_FILE) up -d
 	@echo "The website run at https://$$($(CMD_LOCAL_NETWORK_ADDR)):8443"
+	$(MAKE) -C . cli --no-print-directory
 
 down:
 	$(COMPOSE) -f $(COMPOSE_FILE) down
@@ -46,7 +47,7 @@ build:
 
 clean:
 	$(COMPOSE) -f $(COMPOSE_FILE) down -v --rmi all --remove-orphans
-	$(MAKE) -C cli clean
+	$(MAKE) -C cli clean --no-print-directory
 
 user:
 	$(COMPOSE) -f $(COMPOSE_FILE) up -d user-service
