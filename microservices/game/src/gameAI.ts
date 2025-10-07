@@ -78,7 +78,7 @@ export class GameAI {
         if (this._lastState!.ballDir.x > 0) {
             impactPosY = this._predictImpact().y;
             if (this._decision === "accelerate")
-                impactPosY += Math.random() > 0.5 ? (padLen2 - Paddle.speed) : -(padLen2 - Paddle.speed);
+                impactPosY += Math.random() > 0.5 ? (padLen2) : -(padLen2);
             else { // this._decision === "attack"
                 const playerPaddleY = this._lastState!.leftPaddle!.y + padLen2;
                 const shootAngle = 35;
@@ -89,7 +89,7 @@ export class GameAI {
             }
         }
         const paddleY = this._lastState!.rightPaddle!.y + padLen2;
-        const dY = paddleY - impactPosY;
+        const dY = impactPosY - paddleY;
         this._moveCycle = Math.abs(Math.round(dY / Paddle.speed));
         console.log(`impactPosY: ${impactPosY}`);
         console.log(`paddleY: ${paddleY}`);

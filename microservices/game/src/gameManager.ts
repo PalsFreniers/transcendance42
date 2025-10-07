@@ -56,6 +56,9 @@ export class GameManager {
         if (this._games.has(lobbyName))
             return 3; // lobby already exists and game isn't ended
         this._games.set(lobbyName, [new Game(gameID), [null, null]]);
+        const [game, _] = this._games.get(lobbyName)!;
+        game.setName(lobbyName);
+        console.log("game name: ", game.name);
         return 0;
     }
 
@@ -106,9 +109,7 @@ export class GameManager {
                 return;
             }
             game.update();
-            const state = this.getGameInfo(lobbyName, io);
-            game.emit("game-state", state);
-            io.to(gameId).emit("game-state", state);
+            game.emit("game-state", this.getGameInfo(lobbyName, io));
         }, 1000 / 60);
         return 0;
     }
@@ -217,6 +218,7 @@ export class GameManager {
             usernameLeftTeam: usernameLeftTeam,
             playerOneID: p1,
             playerTwoID: p2,
+            name: game.name,
         };
     }
 
