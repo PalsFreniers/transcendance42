@@ -20,7 +20,7 @@ export class Ball {
     }
 
     static get maxSpeed() {
-        return this.baseSpeed * 10;
+        return this.baseSpeed * 5;
     }
 
     static get dV() {
