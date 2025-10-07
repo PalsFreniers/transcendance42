@@ -3,7 +3,9 @@
 *.tar.*
 curl-8.16.0
 c3
-trancli
+transcli
 build
 buildCurl
 src/app/api/gen.c3
+cli.conf
+windowLog.txt

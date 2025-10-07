@@ -6,6 +6,7 @@
 #define NAME "transcli"
 #define LIBCURL "libcurl.a"
 #define LIBTB "libtermbox.a"
+#define CONFIGGEN "src/app/api/gen.c3"
 
 int c3c(bool clean) {
 	if(clean) {
@@ -63,6 +64,68 @@ int curl(bool clean) {
 	return 0;
 }
 
+int strnclen(char *str, char c, int max) {
+	int i = 0;
+	while(str[i] && str[i] != '\n' && i <= max) {
+		i++;
+	}
+	return i;
+}
+
+int conf(bool clean) {
+	if(clean) {
+		if(!rm(CONFIGGEN)) return 1;
+	} else {
+		if(!nob_file_exists("cli.conf")) {
+			nob_log(NOB_ERROR, "unable to find config file");
+			return 1;
+		}
+		int defer = 0;
+		FILE* f = fopen("cli.conf", "r");
+		FILE* out = fopen(CONFIGGEN, "w");
+		if(!f || !out) {defer = 1; goto ret;}
+		fprintf(out, "module app::api::gen;\n const String SERVER_ADDRESS = SERVER_IP +++ \":\" +++ SERVER_PORT;\n");
+		char line[256];
+		int i = 0, a = 0, b = 0;
+		while(fgets(line, sizeof(line), f)) {
+			int pos = strnclen(line, '\n', 255);
+			if(pos == 0) continue;
+			line[pos] = 0;
+			if(i >= 2) {
+				nob_log(NOB_ERROR, "config does not contain only two lines");
+				defer = 1;
+				goto ret;
+			}
+			if(line[pos - 1] != '\"') {
+				nob_log(NOB_ERROR, "bad end of string");
+				defer = 1;
+				goto ret;
+			}
+			if(strncmp(line, "addr:=\"", 6) == 0) {
+				a = 1;
+				fprintf(out, "const String SERVER_IP = %s;\n", line + 6);
+			} else if(strncmp(line, "port:=\"", 6) == 0) {
+				b = 1;
+				fprintf(out, "const String SERVER_PORT = %s;\n", line + 6);
+			} else {
+				nob_log(NOB_ERROR, "unable to parse line: %s", line);
+				defer = 1;
+				goto ret;
+			}
+			i++;
+		}
+		if(!a || !b) {
+			defer = 1;
+			nob_log(NOB_ERROR, "address or port not defined in config");
+		}
+ret:
+		if(out) fclose(out);
+		if(f) fclose(f);
+		return defer;
+	}
+	return 0;
+}
+
 int cli(bool clean) {
 	if(clean) {
 		if(!rm(NAME)) return 1;
@@ -104,7 +167,10 @@ int cli(bool clean) {
 	nob_cmd_append(&cmd, "-z", LIBTB, "-z", LIBCURL);
 	nob_cmd_append(&cmd, "-z", "-lssl", "-z", "-lcrypto", "-z", "-lz");
 	nob_cmd_append(&cmd, "-z", "-lbrotlidec", "-z", "-lbrotlienc");
-	if(!nob_cmd_run(&cmd)) return 1;
+	if(!nob_cmd_run(&cmd)) {
+		if(!rm(CONFIGGEN)) return 1;
+		return 1;
+	}
 	return 0;
 }
 
@@ -112,6 +178,7 @@ void build(bool clean) {
 	check(c3c(clean));
 	check(termbox(clean));
 	check(curl(clean));
+	check(conf(clean));
 	check(cli(clean));
 }
 
