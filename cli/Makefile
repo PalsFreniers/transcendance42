@@ -6,6 +6,7 @@ all:
 
 clean:
 	./build clean
+	rm -fr windowLog.txt cli.conf build
 
 re:
 	./build re
