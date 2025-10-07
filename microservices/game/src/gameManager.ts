@@ -142,9 +142,9 @@ export class GameManager {
         const [game, [p1, p2]] = this._games.get(lobbyName)!;
         if (game.state !== "ended")
             return 2;
-        const date = db.prepare(`SELECT * FROM games WHERE id = ? `).get(game.gameID) as GameRecord;
-        const start = date.startTime ? new Date(date.startTime).getTime() : null;
-        const end = date.endTime ? new Date(date.endTime).getTime() : Date.now();
+        const date = db.prepare(`SELECT * FROM games WHERE id = ? `).get(game.gameID) as any;
+        const start = date.start_time ? new Date(date.start_time).getTime() : null;
+        const end = Date.now();
 
         const game_time = start ? Math.round((end - start) / 1000) : 0;
         const stats = {
@@ -153,12 +153,12 @@ export class GameManager {
             part_id: game.gameID,
             player_one_id: p1,
             player_two_id: p2,
-            final_score: game.score.toString(),
+            final_score: `${game.score[0]} - ${game.score[1]}`,
             round_number: game.score[0] + game.score[1],
             game_time,
             mmr_gain_player_one: null,
             mmr_gain_player_two: null,
-            date: date.gameDate
+            date: date.date
         };
         saveStats(game, stats, token);
         db.prepare(`DELETE FROM games WHERE id = ?`).run(game.gameID);
