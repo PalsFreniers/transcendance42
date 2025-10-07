@@ -11,6 +11,17 @@ export interface GameRecord {
   gameDate?: string;
 }
 
+export interface GameRecordGet {
+  player_one_id: number;
+  player_two_id: null | number;
+  lobby_name: string;
+  game_score?: string;
+  status?: 'waiting' | 'playing' | 'finished';
+  start_time?: string;
+  end_time?: string;
+  date?: string;
+}
+
 export function createGameLobby(g: GameRecord) {
     const stmt = db.prepare(`
         INSERT INTO games (

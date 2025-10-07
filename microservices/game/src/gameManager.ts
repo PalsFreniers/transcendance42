@@ -5,7 +5,7 @@ import db from "./dbSqlite/db.js"
 import * as Vec2D from "vector2d";
 import { Server } from "socket.io";
 import { saveStats } from './gameRoutes.js';
-import { GameRecord } from './gameModel.js';
+import { GameRecordGet } from './gameModel.js';
 
 export class GameManager {
 
@@ -142,7 +142,7 @@ export class GameManager {
         const [game, [p1, p2]] = this._games.get(lobbyName)!;
         if (game.state !== "ended")
             return 2;
-        const date = db.prepare(`SELECT * FROM games WHERE id = ? `).get(game.gameID) as any;
+        const date = db.prepare(`SELECT * FROM games WHERE id = ? `).get(game.gameID) as GameRecordGet;
         const start = date.start_time ? new Date(date.start_time).getTime() : null;
         const end = Date.now();
 

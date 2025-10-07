@@ -40,22 +40,39 @@ export async function init() {
 			const gamesData = await gamesRes.json();
 
 			if (gamesData.success && gamesData.games.length > 0) {
-				gamesContainer.innerHTML = gamesData.games.map((game: any) => {
-					const isPlayerOne = game.player_one_id === data.user.id;
-					const [score1, score2] = game.final_score.split('-').map(Number);
-					const isWin = (isPlayerOne && score1 > score2) || (!isPlayerOne && score2 > score1);
-					const mmrGain = isPlayerOne ? game.mmr_gain_player_one : game.mmr_gain_player_two;
+				const gamesMapped = await Promise.all(
+					gamesData.games.map(async (game: any) => {
+						const isPlayerOne = game.player_one_id === data.user.id;
+						const [score1, score2] = game.final_score.split('-').map(Number);
+						const isWin = (isPlayerOne && score1 > score2) || (!isPlayerOne && score2 > score1);
+						const mmrGain = isPlayerOne ? game.mmr_gain_player_one : game.mmr_gain_player_two;
+						const otherId = isPlayerOne ? game.player_two_id : game.player_one_id;
+						let otherName = otherId === -1 ? 'invited' : otherId === -2 ? 'AI' : '';
+						if(otherName === '') {
+							const resName = await fetch(`/api/user/data?id=${otherId}`, {
+								method: 'GET',
+								headers: {
+									'Content-Type': 'application/json',
+									'Authorization': `Bearer ${token}`
+								},
+							});
+							const usr = await resName.json();
+							otherName = usr.username;
+						}
 
-					return `
-				<div class="game-card ${isWin ? 'win' : 'lose'}">
-					<h3>${game.game_name === 'shifumi' ? '🖐️ Shifumi' : '🏓 Pong'}</h3>
-					<p>Score: ${game.final_score}</p>
-					${game.game_name === 'shifumi' ? `<p>MMR: ${mmrGain > 0 ? '+' : ''}${mmrGain}</p>` : ''}
-					<p>Durée: ${game.game_time}s</p>
-					<p>Date: ${game.date}</p>
-				</div>
-			`;
-				}).join('');
+						return `
+						<div class="game-card ${isWin ? 'win' : 'lose'}">
+							<h3>${game.game_name === 'shifumi' ? '🖐️ Shifumi' : '🏓 Pong'}</h3>
+							<p>Against: ${otherName}</p>
+							<p>Score: ${game.final_score}</p>
+							${game.game_name === 'shifumi' ? `<p>MMR: ${mmrGain > 0 ? '+' : ''}${mmrGain}</p>` : ''}
+							<p>Durée: ${game.game_time}s</p>
+							<p>Date: ${game.date}</p>
+						</div>
+						`;
+					})
+				)
+				gamesContainer.innerHTML = gamesMapped.join('');
 			} else {
 				gamesContainer.innerHTML = `<p>Aucune partie trouvée.</p>`;
 			}
