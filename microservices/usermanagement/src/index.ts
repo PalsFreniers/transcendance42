@@ -9,7 +9,8 @@ import path from 'path';
 import {
     auth,
     register,
-    logOut
+    logOut,
+    verifyToken
 } from './authService.js';
 import {
     friendList,
@@ -117,6 +118,7 @@ app.register(getPlayerFromList, {prefix: '/api/user'});
 app.register(getHistoryGame, {prefix: '/api/user'});
 app.register(getDatas, {prefix: '/api/user'});
 // app.register(friendSendMsg, { prefix: '/api/user' });
+app.register(verifyToken, {prefix: '/api/user'});
 
 // Start Fastify server
 app.listen({ port: Number(PORT), host: `0.0.0.0` }, (err,) => {
