@@ -101,6 +101,22 @@ export async function auth(app: FastifyInstance) {
     });
 }
 
+export async function verifyToken(app: FastifyInstance) {
+    app.get('/auth/verify', async (request, reply) => {
+        try {
+            const authHeader = request.headers.authorization;
+            if (!authHeader)
+                return reply.code(401).send({ valid: false });
+            const token = authHeader.split(' ')[1];
+            const decoded = app.jwt.verify(token);
+            return reply.send({ valid: true, user: decoded });
+        } catch (err) {
+            return reply.code(401).send({ valid: false });
+        }
+    });
+}
+
+
 export async function logOut(app: FastifyInstance) {
     app.post('/logout', async (request, reply) => {
         const user = request.user as { userId: number }

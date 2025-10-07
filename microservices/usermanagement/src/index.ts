@@ -9,7 +9,8 @@ import path from 'path';
 import {
     auth,
     register,
-    logOut
+    logOut,
+    verifyToken
 } from './authService.js';
 import {
     friendList,
@@ -24,7 +25,6 @@ import {
     setMmrShifumi,
     getPlayerFromList,
     getHistoryGame,
-    // friendSendMsg
 } from './userRoutes.js';
 import { startServer } from './userSocket.js';
 
@@ -114,7 +114,7 @@ app.register(getMmrShifumi, {prefix: '/api/user'});
 app.register(setMmrShifumi, {prefix: '/api/user'});
 app.register(getPlayerFromList, {prefix: '/api/user'});
 app.register(getHistoryGame, {prefix: '/api/user'});
-// app.register(friendSendMsg, { prefix: '/api/user' });
+app.register(verifyToken, {prefix: '/api/user'});
 
 // Start Fastify server
 app.listen({ port: Number(PORT), host: `0.0.0.0` }, (err,) => {
