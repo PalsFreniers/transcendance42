@@ -2,13 +2,13 @@ COMPOSE=docker compose
 COMPOSE_FILE=docker-compose.yml
 CMD_LOCAL_NETWORK_ADDR=ip addr | grep "brd 10." | awk '{print $$2}' | cut -d'/' -f1;
 ENV_FILE=.env
-GEN_API_FILE=cli/src/app/api/gen.c3
+GEN_API_FILE=cli/cli.conf
 
 help:
 	@echo "Usage: make [TARGET]"
 	@echo ""
 	@echo "Targets:"
-	@echo "  all         Start all services"
+	@echo "  all         Start all services and compile cli"
 	@echo "  down        Stop all services"
 	@echo "  restart     Restart all services"
 	@echo "  logs        Show logs"
@@ -28,7 +28,7 @@ localadress:
 	echo "VITE_LOCAL_ADDRESS=$$($(CMD_LOCAL_NETWORK_ADDR))" >> $(ENV_FILE);
 	@echo "VITE_LOCAL_ADDRESS set to $$($(CMD_LOCAL_NETWORK_ADDR)) in $(ENV_FILE)"
 
-all: localadress
+all: localadress cli
 	$(COMPOSE) -f $(COMPOSE_FILE) up -d
 	@echo "The website run at https://$$($(CMD_LOCAL_NETWORK_ADDR)):8443"
 
@@ -57,7 +57,7 @@ front:
 	$(COMPOSE) -f $(COMPOSE_FILE) up -d frontend
 
 cli:
-	echo "module app::api::gen;\nconst String SERVER_ADDRESS = \"$$($(CMD_LOCAL_NETWORK_ADDR)):8443\";" > $(GEN_API_FILE)
+	echo "addr:=\"$$($(CMD_LOCAL_NETWORK_ADDR))\"\nport:=\"8443\"" > $(GEN_API_FILE)
 	$(MAKE) -C cli --no-print-directory
 
 .PHONY: help localadress all down restart logs build clean user nginx front cli
