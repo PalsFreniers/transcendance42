@@ -3,7 +3,6 @@ import { GameManager } from "./gameManager.js";
 import { verifTokenSocket } from "./index.js";
 import db from './dbSqlite/db.js';
 import { GameAI } from "./gameAI.js";
-import { Tournament } from "./tournament.js";
 import { TournamentManager } from "./tournamentManager.js";
 import { Paddle } from "./gameObjects/Paddle.js";
 
@@ -56,15 +55,36 @@ export function socketManagement(io: Server) {
             if (game) {
                 socket.data.gameId = `game-${game.gameID}`;
                 socket.join(socket.data.gameId);
-                const lobbyname = db.prepare(`
-                    SELECT lobby_name FROM games WHERE id = ?`
-                ).get(socket.data.gameId) as { lobbyname: string };
-                socket.data.lobbyname = lobbyname;
-                console.log(socket.data.lobbyname);
-                socket.emit('in-game');
-            }
-            else
+                const gameRow = db.prepare(`
+                    SELECT lobby_name, status, player_one_id, player_two_id
+                    FROM games WHERE id = ?`
+                ).get(game.gameID) as {lobby_name: string, status: string, player_one_id: number, player_two_id: number};
+                if (!gameRow)
+                    return;
+                const playerOneName = manager.getUsernameFromSocket(
+                    manager.getSocketId(gameRow.player_one_id)!,
+                    io
+                ) || "Unknown";
+
+                const playerTwoName = manager.getUsernameFromSocket(
+                    manager.getSocketId(gameRow.player_two_id)!,
+                    io
+                ) || "-";
+                socket.emit("lobby-info", {
+                    gameId: game.gameID,
+                    lobbyName: gameRow.lobby_name,
+                    playerOne: playerOneName,
+                    playerTwo: playerTwoName,
+                    status: gameRow.status,
+                });
+                if (gameRow.status === "playing") {
+                    socket.emit("in-game");
+                }
+
+            } else {
                 socket.data.gameId = -1;
+            }
+
             console.log(`User ${socket.data.userId} registered with socket ${socket.id}`);
         });
 
@@ -81,14 +101,22 @@ export function socketManagement(io: Server) {
                         const score: number[] = Array.from(game.score);
                         const [p1, p2] = players;
                         io.to(p1).emit("game-end", {
+                            name: game.name,
                             msg: score![0] > score![1] ? "You win" : "You loose",
                             score: [score![0], score![1]]
                         });
                         if (p2 !== "-1" || p2 !== "-2")
                             io.to(p2).emit("game-end", {
+                                name: game.name,
                                 msg: score![1] > score![0] ? "You win" : "You loose",
                                 score: [score![1], score![0]]
                             });
+                    }).on("game-state", (state) => {
+                        io.to(`game-${gameId}`).emit("game-state", state)
+                    }).on("paddle-reflect", ({name, x, y}) => {
+                        io.to(`game-${gameId}`).emit("paddle-reflect", {name, x, y})
+                    }).on("wall-reflect", ({name, x, y}) => {
+                        io.to(`game-${gameId}`).emit("wall-reflect", {name, x, y})
                     });
 
                 socket.data.lobbyName = lobbyName;

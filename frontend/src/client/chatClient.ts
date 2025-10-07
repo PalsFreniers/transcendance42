@@ -234,6 +234,18 @@ export async function msg_lobby(event: MouseEvent){
 }
 
 export	function mini_msg(friend){
+	const miniChat = document.getElementById('chat-container') as HTMLElement;
+	if (!miniChat)
+		return
+	const display = document.getElementById('chat-display') as HTMLElement;
+	const msgBtn = document.getElementById('msg-ico') as HTMLElement;
+	display.style.display = "none";
+	msgBtn.addEventListener('click', async () => {
+		if (display.style.display === 'none')
+			display.style.display = 'block';
+		else
+			display.style.display = 'none'
+	})
 	const token = localStorage.getItem('token');
 	const friendConverstaion = document.getElementById('chat-friend') as HTMLElement;
 	const friendPP = document.createElement('div');

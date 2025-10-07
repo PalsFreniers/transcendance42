@@ -56,6 +56,8 @@ export class GameManager {
         if (this._games.has(lobbyName))
             return 3; // lobby already exists and game isn't ended
         this._games.set(lobbyName, [new Game(gameID), [null, null]]);
+        const [game, _] = this._games.get(lobbyName)!;
+        game.setName(lobbyName);
         return 0;
     }
 
@@ -106,9 +108,7 @@ export class GameManager {
                 return;
             }
             game.update();
-            const state = this.getGameInfo(lobbyName, io);
-            game.emit("game-state", state);
-            io.to(gameId).emit("game-state", state);
+            game.emit("game-state", this.getGameInfo(lobbyName, io));
         }, 1000 / 60);
         return 0;
     }
@@ -143,13 +143,21 @@ export class GameManager {
         if (game.state !== "ended")
             return 2;
         const date = db.prepare(`SELECT * FROM games WHERE id = ? `).get(game.gameID) as GameRecord;
+        const start = date.startTime ? new Date(date.startTime).getTime() : null;
+        const end = date.endTime ? new Date(date.endTime).getTime() : Date.now();
+
+        const game_time = start ? Math.round((end - start) / 1000) : 0;
         const stats = {
             game_name: 'pong',
-            part_name: this._games.get(lobbyName),
+            part_name: lobbyName,
             part_id: game.gameID,
             player_one_id: p1,
             player_two_id: p2,
             final_score: game.score.toString(),
+            round_number: game.score[0] + game.score[1],
+            game_time,
+            mmr_gain_player_one: null,
+            mmr_gain_player_two: null,
             date: date.gameDate
         };
         saveStats(game, stats, token);
@@ -217,6 +225,7 @@ export class GameManager {
             usernameLeftTeam: usernameLeftTeam,
             playerOneID: p1,
             playerTwoID: p2,
+            name: game.name,
         };
     }
 
