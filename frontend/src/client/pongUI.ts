@@ -107,7 +107,7 @@ class ColorFlash extends RectangleParticle {
 
     move() {
         super.move();
-        this.alpha -= 1 / 60;
+        this.alpha -= 1 / 10;
         if (this.alpha < 0)
             this.alive = false;
     }
