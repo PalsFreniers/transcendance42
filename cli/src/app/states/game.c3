@@ -101,11 +101,17 @@ fn void drawBoard(Object* obj) {
 	w.putRect((int[<2>])paddleLeft, (int[<2>])paddleSize, {0x24, 0xd0, 0xf2});
 	DString score = dstring::new(mem);
 	defer score.free();
+	Object* unameL = obj.get("usernameLeftTeam")!!;
+	Object* unameR = obj.get("usernameRightTeam")!!;
+	String unameLS = "No one";
+	if(!unameL.is_null()) unameLS = obj.get_string("usernameLeftTeam")!!;
+	String unameRS = "No one";
+	if(!unameR.is_null()) unameRS = obj.get_string("usernameRightTeam")!!;
 	score.appendf("%s %d - %d %s",
-		obj.get_string("usernameLeftTeam")!!,
+		unameRS,
 		obj.get_int("leftScore")!!,
 		obj.get_int("rightScore")!!,
-		obj.get_string("usernameRightTeam")!!
+		unameLS
 	);
 	String s = score.str_view();
 	w.putStr(s, {w.width() / 2 - s.len / 2, 1 * win::CHAR_HEIGHT}, win::PWHITE, win::BLACK);
