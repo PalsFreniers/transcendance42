@@ -23,6 +23,7 @@ import {
     getMmrShifumi,
     setMmrShifumi,
     getPlayerFromList,
+    getHistoryGame,
     // friendSendMsg
 } from './userRoutes.js';
 import { startServer } from './userSocket.js';
@@ -112,6 +113,7 @@ app.register(getMessage, { prefix: '/api/user' });
 app.register(getMmrShifumi, {prefix: '/api/user'});
 app.register(setMmrShifumi, {prefix: '/api/user'});
 app.register(getPlayerFromList, {prefix: '/api/user'});
+app.register(getHistoryGame, {prefix: '/api/user'});
 // app.register(friendSendMsg, { prefix: '/api/user' });
 
 // Start Fastify server

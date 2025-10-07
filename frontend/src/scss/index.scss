@@ -502,13 +502,39 @@ input:-webkit-autofill {
 	row-gap: 5%;
 }
 
+#game-history {
+  display: flex;
+  flex-direction: column;
+  width: 45%;
+  row-gap: 12px;
+}
+
+.game-card {
+  padding: 12px;
+}
+
+.game-card.win {
+  background-color: #2e8b57; /* vert victoire */
+}
+
+.game-card.lose {
+  background-color: #b22222; /* rouge défaite */
+}
+
+.profil{
+	width: 45%;
+}
+
 .profil-wrapper {
+	display: flex;
+	flex-direction: row;
+	justify-content: space-between;
 	background: rgba($color-black, 0.6);
 	border: 1px solid rgba($color-white, 0.3);
 	backdrop-filter: $blur-strong;
 	border-radius: $radius-lg;
 	padding: 30px 40px;
-	width: 500px;
+	width: 50%;
 	text-align: center;
 	color: $color-white;
 	box-shadow: 0 4px 10px rgba($color-black, 0.6);
@@ -540,6 +566,7 @@ input:-webkit-autofill {
 
 .profil-card {
 	display: flex;
+	flex-direction: column;
 	align-items: center;
 	gap: 20px;
 	padding: 20px 30px;
@@ -560,7 +587,7 @@ input:-webkit-autofill {
 .profil-info {
 	display: flex;
 	flex-direction: column;
-	align-items: flex-start;
+	align-items: center;
 	gap: 6px;
 
 	.profil-username {
@@ -590,22 +617,6 @@ input:-webkit-autofill {
 
 	input {
 		font-family: $font-main;
-	}
-}
-
-#phoneNumber {
-	background: transparent;
-	color: $color-white;
-	text-align: center;
-	border: 1px solid rgba($color-white, 0.2);
-	font-size: $font-size-xs;
-	width: 100%;
-	padding: 10px;
-
-	&:focus {
-		outline: none;
-		border-color: $color-accent;
-		box-shadow: 0 0 5px $color-accent;
 	}
 }
 
@@ -915,36 +926,13 @@ input:-webkit-autofill {
 		gap: 15px;
 	}
 
+
 	.shifumi-buttons {
 		display: flex;
 		flex-wrap: wrap;
 		justify-content: center;
-		gap: 10px;
-
-		button {
-			background: $btn-bg;
-			color: $btn-text;
-			padding: 10px 16px;
-			font-size: $font-size-xs;
-			border-radius: $radius-md;
-			border: 2px solid transparent;
-			cursor: pointer;
-			transition: $transition-fast;
-
-			&:focus {
-				outline: none;
-				border-color: $color-accent-alt;
-				box-shadow: 0 0 6px $color-accent-alt;
-			}
-		}
-
-		.shifumi-buttons {
-			display: flex;
-			flex-wrap: wrap;
-			justify-content: center;
-			column-gap: 5px;
-			row-gap: 15px;
-		}
+		column-gap: 5px;
+		row-gap: 15px;
 	}
 }
 

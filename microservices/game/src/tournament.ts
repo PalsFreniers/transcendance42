@@ -310,7 +310,8 @@ export class Tournament {
         if (gameManager.createLobby(name, gameID))
             throw new Error("Couldn't create the lobby");
         const joinGameWrapper = (playerInfo) => {
-            const errno = gameManager.joinLobby(name, playerInfo[0])
+            const errno = gameManager.joinLobby(name, playerInfo[0]);
+            (this._associatedServer.sockets.sockets as any).get(playerInfo[1]).join(`game-${gameID}`);
             const playerUsername = gameManager.getUsernameFromSocket(playerInfo[1], this._associatedServer);
             if (errno) {
                 switch (errno) {
@@ -328,7 +329,7 @@ export class Tournament {
         gameManager.findGame(name)!.on("game-end", ({game, _}) => {
             (game.score[0] > game.score[1]) ? onGameEnd(this, round) : onGameEnd(this, round.reverse() as [player_type, player_type]);
         }).on("game-state", (state) => {
-			this._associatedServer.to(`game-${gameID}`).emit("game-state", state)
+			this._associatedServer.to(`game-${gameID}`).emit("game-state", state);
 		});
         // Starts, and wait until game is finished
         const errno = gameManager.startGame(name, gameID.toString(), this._associatedServer, token);

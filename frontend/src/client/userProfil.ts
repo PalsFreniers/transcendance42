@@ -28,6 +28,38 @@ export async function init() {
        				<p class="profil-bio">${data.user.bio || 'No bio yet.'}</p>
       			</div>
     		</div>`
+		const gamesContainer = document.getElementById('game-history') as HTMLElement;
+		if (gamesContainer) {
+			const gamesRes = await fetch(`/api/user/history`, {
+				method: 'GET',
+				headers: {
+					'Content-Type': 'application/json',
+					'Authorization': `Bearer ${token}`
+				},
+			});
+			const gamesData = await gamesRes.json();
+
+			if (gamesData.success && gamesData.games.length > 0) {
+				gamesContainer.innerHTML = gamesData.games.map((game: any) => {
+					const isPlayerOne = game.player_one_id === data.user.id;
+					const [score1, score2] = game.final_score.split('-').map(Number);
+					const isWin = (isPlayerOne && score1 > score2) || (!isPlayerOne && score2 > score1);
+					const mmrGain = isPlayerOne ? game.mmr_gain_player_one : game.mmr_gain_player_two;
+
+					return `
+				<div class="game-card ${isWin ? 'win' : 'lose'}">
+					<h3>${game.game_name === 'shifumi' ? '🖐️ Shifumi' : '🏓 Pong'}</h3>
+					<p>Score: ${game.final_score}</p>
+					${game.game_name === 'shifumi' ? `<p>MMR: ${mmrGain > 0 ? '+' : ''}${mmrGain}</p>` : ''}
+					<p>Durée: ${Math.round(game.game_time / 1000)}s</p>
+					<p>Date: ${game.date}</p>
+				</div>
+			`;
+				}).join('');
+			} else {
+				gamesContainer.innerHTML = `<p>Aucune partie trouvée.</p>`;
+			}
+		}
 		const editProfile = document.getElementById('edit-profil') as HTMLButtonElement;
 		const form = document.getElementById('form-profil') as HTMLFormElement;
 		editProfile.addEventListener('click', async (e) => {

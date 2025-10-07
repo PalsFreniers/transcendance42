@@ -54,7 +54,7 @@ export function socketManagement(io: Server) {
             const game = manager.findGame(socket.data.userId?.toString());
             if (game) {
                 socket.data.gameId = `game-${game.gameID}`;
-                socket.join(socket.data.gameId);
+                
                 const gameRow = db.prepare(`
                     SELECT lobby_name, status, player_one_id, player_two_id
                     FROM games WHERE id = ?`
@@ -164,12 +164,13 @@ export function socketManagement(io: Server) {
 
         socket.on('create-tournament', ({ lobbyName }) => {
             try {
-
                 TmManager.createTournament(lobbyName, 8, io);
-                const errno = TmManager.joinTournament(lobbyName, [socket.data.playerId, socket.data.socketId]);
+                console.log(`${socket.data.userId, socket.id}`);
+                const errno = TmManager.joinTournament(lobbyName, [socket.data.userId, socket.id]);
                 if (errno)
                     throw new Error(`joinTournament(tournamentName, p): ${errno}`);
                 socket.data.lobbyName = lobbyName;
+                console.log(`${lobbyName} was joined`);
                 TmManager.getTournament(lobbyName)!.on("game-start", ({ round, name, game }) => {
                     console.log(`${name}: ${round[0][0]} vs ${round[1][0]}`)
                 }).on("won", ({ t, result }) => { // We can chain event listener for better code
@@ -238,12 +239,15 @@ export function socketManagement(io: Server) {
             }
         });
 
-        socket.on('start-tournament', () => {
+        socket.on('tournament-start', () => {
             try {
                 const lobbyName = socket.data.lobbyName;
-                TmManager.startTournament(lobbyName, (t) => {
+                console.log(`${lobbyName}`);
+                const errno = TmManager.startTournament(lobbyName, (t) => {
                     console.log(t.leaderboard);
                 }, socket.handshake.auth.token);
+                if (errno)
+                    throw new Error(`Failed to start tournament ${errno}`);
             }
             catch (err) {
                 console.error(err);

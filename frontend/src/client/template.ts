@@ -135,12 +135,16 @@ const templates: Record<string, () => string> = {
 	profil: () => `
 				<div id="back-profil">
 					<div class="profil-wrapper">
-						<h2 id="profil">Your Profil</h2>
-						<a href="/lobby" data-link>Lobby</a>
-						<button id="edit-profil">Edit Profil</button>
-						<form id="form-profil"></form>
-						<h3>List of friends</h3>
-						<ul id="friend-list"></ul>
+						<div class="profil">
+							<h2 id="profil">Your Profil</h2>
+							<a href="/lobby" data-link>Lobby</a>
+							<button id="edit-profil">Edit Profil</button>
+							<form id="form-profil"></form>
+							<h3>List of friends</h3>
+							<ul id="friend-list"></ul>
+						</div>
+						<div id="game-history">
+						</div>
 					</div>
 					${templates.chat()}
 				</div>`,
