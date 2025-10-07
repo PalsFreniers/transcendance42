@@ -51,7 +51,7 @@ export async function init() {
 					<h3>${game.game_name === 'shifumi' ? '🖐️ Shifumi' : '🏓 Pong'}</h3>
 					<p>Score: ${game.final_score}</p>
 					${game.game_name === 'shifumi' ? `<p>MMR: ${mmrGain > 0 ? '+' : ''}${mmrGain}</p>` : ''}
-					<p>Durée: ${Math.round(game.game_time / 1000)}s</p>
+					<p>Durée: ${game.game_time}s</p>
 					<p>Date: ${game.date}</p>
 				</div>
 			`;
