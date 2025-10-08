@@ -130,7 +130,7 @@ class CircleParticle extends Particle {
         ctx.save();
         ctx.beginPath();
         ctx.arc(this.pos.x, this.pos.y, this.radius, 0, Math.PI * 2);
-        ctx.fillStyle = `hsla(${this.color}, 89%, 55%, ${this.alpha})`;
+        ctx.fillStyle = `hsla(${this.color}, 59%, 35%, ${this.alpha})`;
         ctx.fill();
         ctx.restore();
     }
