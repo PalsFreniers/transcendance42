@@ -103,9 +103,9 @@ class ColorFlash extends RectangleParticle {
         super(pos, dir, color, speed, alpha, lifetime, size);
     }
 
-    move() {
+    move()  {
         super.move();
-        this.alpha -= 1 / 10;
+        this.alpha -= 1 / 30;
         if (this.alpha < 0)
             this.alive = false;
     }
@@ -155,7 +155,7 @@ export function handlePaddleReflect(x: number, y: number) {
         dir = -1;
         color = rightPaddleColor[2];
     }
-    for (let i = 0; i < 50; i++) {
+    for (let i = 0; i < 35; i++) {
         const angle = Math.PI / 2 * Math.random() - Math.PI / 4;
         pongInfo.particles.push(new CircleParticle(
             { x: x + 10 + (Math.random() - 0.5) * 0.1, y: y + 5 + (Math.random() - 0.5) * 0.5 }, // pos
@@ -181,17 +181,17 @@ export function handlePaddleReflect(x: number, y: number) {
         )
     );
 
-    pongInfo.particles.push(
-        new ColorFlash(
-            {x: 0, y: 0}, // pos
-            {x: 0, y: 0}, // dir
-            color,
-            0, // speed
-            0.5, // alpha
-            120, // lifetime
-            { x: 20, y: 10 }, // size
-        )
-    );
+    // pongInfo.particles.push(
+    //     new ColorFlash(
+    //         {x: 0, y: 0}, // pos
+    //         {x: 0, y: 0}, // dir
+    //         color,
+    //         0, // speed
+    //         0.3, // alpha
+    //         120, // lifetime
+    //         { x: 20, y: 10 }, // size
+    //     )
+    // );
 }
 
 export function handleWallReflect(x: number, y: number) {
@@ -201,7 +201,7 @@ export function handleWallReflect(x: number, y: number) {
         dir = -1;
     else
         dir = 1;
-    for (let i = 0; i < 50; i++) {
+    for (let i = 0; i < 35; i++) {
         const angle = Math.PI / 2 * Math.random() - Math.PI * 3 / 4;
         pongInfo.particles.push(new CircleParticle(
             { x: x + 10 + (Math.random() - 0.5) * 0.5, y: y + 5 + (Math.random() - 0.5) * 0.1 }, // pos
@@ -233,7 +233,7 @@ export function handleWallReflect(x: number, y: number) {
             {x: 0, y: 0}, // dir
             color.toString(), // color
             0, // speed
-            0.5, // alpha
+            0.3, // alpha
             120, // lifetime
             { x: 20, y: 10 }, // size
         )

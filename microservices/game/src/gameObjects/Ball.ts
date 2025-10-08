@@ -16,7 +16,7 @@ export class Ball {
     }
 
     static get baseSpeed() {
-        return 0.15;
+        return 0.18;
     }
 
     static get maxSpeed() {

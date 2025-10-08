@@ -15,7 +15,7 @@ export class Paddle {
     }
 
     static get speed() {
-        return 0.15; // this is speed per move() call
+        return 0.18; // this is speed per move() call
     }
 
     // Static member Workaround
