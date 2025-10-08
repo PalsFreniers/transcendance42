@@ -207,7 +207,7 @@ export function handleWallReflect(x: number, y: number) {
             { x: x + 10 + (Math.random() - 0.5) * 0.5, y: y + 5 + (Math.random() - 0.5) * 0.1 }, // pos
             { x: Math.cos(angle), y: dir * Math.sin(angle) }, // dir
             2 + 8 * Math.random(), // radius
-            color, // color
+            color.toString(), // color
             6 + 10 * Math.random(), // speed
             0.9, // alpha
             2.5 * 60, // LIFETIME
@@ -219,7 +219,7 @@ export function handleWallReflect(x: number, y: number) {
         new ColorFlash(
             { x: 0, y: y + 5 }, // pos
             ( y < 0 ? { x: 0, y: 1 } : { x: 0, y: -1 }), // dir
-            color, // color
+            color.toString(), // color
             7, // speed
             1, // alpha
             120, // lifetime
@@ -231,7 +231,7 @@ export function handleWallReflect(x: number, y: number) {
         new ColorFlash(
             {x: 0, y: 0}, // pos
             {x: 0, y: 0}, // dir
-            color,
+            color.toString(), // color
             0, // speed
             0.5, // alpha
             120, // lifetime
@@ -247,7 +247,7 @@ function ballTrail(ballPos: { x: number, y: number }, ballSize: number) {
             { x: ballPos.x + 10, y: ballPos.y + 5 },
             { x: 0, y: 0 }, // dir
             ballSize,
-            color,
+            color.toString(), // color
             0, // speed
             0.5, // alpha
             15, // lifetime
@@ -419,8 +419,4 @@ export function drawPong(state: any) {
         ctx.fillText(`GAME RESUMING IN ${state.resumeTimer}`, 150, 70);
         pongInfo.particles = [];
     }
-}
-
-export function clearPong(name: string) {
-    pongInfo.delete(name)
 }
