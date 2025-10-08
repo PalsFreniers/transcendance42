@@ -114,12 +114,12 @@ export function createPongSocket(socketPong: Socket | null) {
         drawPong(state);
     });
 
-    socketPong.on('paddle-reflect', ({name, x, y}) => {
-        handlePaddleReflect(name, x, y);
+    socketPong.on('paddle-reflect', ({x, y}) => {
+        handlePaddleReflect(x, y);
     });
 
-    socketPong.on('wall-reflect', ({name, x, y}) => {
-        handleWallReflect(name, x, y);
+    socketPong.on('wall-reflect', ({x, y}) => {
+        handleWallReflect(x, y);
     });
 
     document.addEventListener("keydown", (e) => {

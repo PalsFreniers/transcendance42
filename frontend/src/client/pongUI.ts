@@ -10,10 +10,8 @@ const rightPaddleColor = [
 ];
 
 class PongInfo {
-    constructor(
-        public particles: Particle[],
-        public frames: number,
-    ) {}
+    public particles: Particle[] = [];
+    public frames: number = 0;
 }
 
 abstract class Particle {
@@ -137,21 +135,17 @@ class CircleParticle extends Particle {
     }
 }
 
-let allGames: Map<string, PongInfo> = new Map();
+let pongInfo: PongInfo = new PongInfo();
 
-function drawAllParticles(game: string, ctx: CanvasRenderingContext2D) {
-    if (!allGames.has(game))
-        return ;
-    allGames.get(game)!.particles.forEach((p: Particle) => {
+function drawAllParticles(ctx: CanvasRenderingContext2D) {
+    pongInfo.particles.forEach((p: Particle) => {
         p.draw(ctx);
         p.move();
     });
-    allGames.get(game)!.particles = allGames.get(game)!.particles.filter((p) => { return p.alive; });
+    pongInfo.particles = pongInfo.particles.filter((p) => { return p.alive; });
 }
 
-export function handlePaddleReflect(game: string, x: number, y: number) {
-    if (!allGames.has(game))
-        return ;
+export function handlePaddleReflect(x: number, y: number) {
     let dir;
     let color;
     if (x < 0) {
@@ -163,7 +157,7 @@ export function handlePaddleReflect(game: string, x: number, y: number) {
     }
     for (let i = 0; i < 50; i++) {
         const angle = Math.PI / 2 * Math.random() - Math.PI / 4;
-        allGames.get(game)!.particles.push(new CircleParticle(
+        pongInfo.particles.push(new CircleParticle(
             { x: x + 10 + (Math.random() - 0.5) * 0.1, y: y + 5 + (Math.random() - 0.5) * 0.5 }, // pos
             { x: dir * Math.cos(angle), y: Math.sin(angle) }, // dir
             2 + 8 * Math.random(), // radius
@@ -175,7 +169,7 @@ export function handlePaddleReflect(game: string, x: number, y: number) {
     }
 
     const size = 0.4;
-    allGames.get(game)!.particles.push(
+    pongInfo.particles.push(
         new ColorFlash(
             { x: (x < 0 ? -size : 20 + size), y: 0 }, // pos
             ( x < 0 ? { x: 1, y: 0 } : { x: -1, y: 0 }), // dir
@@ -187,7 +181,7 @@ export function handlePaddleReflect(game: string, x: number, y: number) {
         )
     );
 
-    allGames.get(game)!.particles.push(
+    pongInfo.particles.push(
         new ColorFlash(
             {x: 0, y: 0}, // pos
             {x: 0, y: 0}, // dir
@@ -200,9 +194,7 @@ export function handlePaddleReflect(game: string, x: number, y: number) {
     );
 }
 
-export function handleWallReflect(game: string, x: number, y: number) {
-    if (!allGames.has(game))
-        return ;
+export function handleWallReflect(x: number, y: number) {
     const color = mapRange(x, -8, 8, 190, 356);
     let dir;
     if (y < 0)
@@ -211,7 +203,7 @@ export function handleWallReflect(game: string, x: number, y: number) {
         dir = 1;
     for (let i = 0; i < 50; i++) {
         const angle = Math.PI / 2 * Math.random() - Math.PI * 3 / 4;
-        allGames.get(game)!.particles.push(new CircleParticle(
+        pongInfo.particles.push(new CircleParticle(
             { x: x + 10 + (Math.random() - 0.5) * 0.5, y: y + 5 + (Math.random() - 0.5) * 0.1 }, // pos
             { x: Math.cos(angle), y: dir * Math.sin(angle) }, // dir
             2 + 8 * Math.random(), // radius
@@ -223,7 +215,7 @@ export function handleWallReflect(game: string, x: number, y: number) {
     }
 
     const size = 0.4;
-    allGames.get(game)!.particles.push(
+    pongInfo.particles.push(
         new ColorFlash(
             { x: 0, y: y + 5 }, // pos
             ( y < 0 ? { x: 0, y: 1 } : { x: 0, y: -1 }), // dir
@@ -235,7 +227,7 @@ export function handleWallReflect(game: string, x: number, y: number) {
         )
     );
 
-    allGames.get(game)!.particles.push(
+    pongInfo.particles.push(
         new ColorFlash(
             {x: 0, y: 0}, // pos
             {x: 0, y: 0}, // dir
@@ -248,11 +240,9 @@ export function handleWallReflect(game: string, x: number, y: number) {
     );
 }
 
-function ballTrail(game: string, ballPos: { x: number, y: number }, ballSize: number) {
-    if (!allGames.has(game))
-        return ;
+function ballTrail(ballPos: { x: number, y: number }, ballSize: number) {
     const color = mapRange(ballPos.x, -8, 8, 190, 356);
-    allGames.get(game)!.particles.push(
+    pongInfo.particles.push(
         new CircleParticle(
             { x: ballPos.x + 10, y: ballPos.y + 5 },
             { x: 0, y: 0 }, // dir
@@ -325,10 +315,8 @@ function mapRange(
 
 
 export function drawPong(state: any) {
-    if (!allGames.has(state.name))
-        allGames.set(state.name, new PongInfo([], 0));
-    if (allGames.get(state.name)!.frames >= 60)
-        allGames.get(state.name)!.frames = 0;
+    if (pongInfo.frames >= 60)
+        pongInfo.frames = 0;
     const canvas = document.getElementById("pong-canvas") as HTMLCanvasElement;
     const startBtn = document.getElementById("pong-wrapper") as HTMLButtonElement;
     startBtn.style.display = "none";
@@ -363,8 +351,8 @@ export function drawPong(state: any) {
     const ballX = state.ballPos.x * scaleX + offsetX;
     const ballY = state.ballPos.y * scaleY + offsetY;
 
-    ballTrail(state.name, state.ballPos, ballRadius);
-    drawAllParticles(state.name, ctx);
+    ballTrail(state.ballPos, ballRadius);
+    drawAllParticles(ctx);
 
     ctx.save();
     const ballColor = `hsl(${mapRange(state.ballPos.x, state.leftPaddle.x + 0.5, state.rightPaddle.x, 190, 356)}, 89%, 55%)`;
@@ -425,15 +413,14 @@ export function drawPong(state: any) {
 
     if (state.state === "idling") {
         ctx.fillText(`GAME PAUSED - WAITING FOR OPPONENT`, 25, 70);
-        allGames.get(state.name)!.particles = [];
+        pongInfo.particles = [];
     }
     else if (state.state === "resume") {
         ctx.fillText(`GAME RESUMING IN ${state.resumeTimer}`, 150, 70);
-        allGames.get(state.name)!.particles = [];
+        pongInfo.particles = [];
     }
-    console.log(allGames.get(state.name)!.particles.length);
 }
 
 export function clearPong(name: string) {
-    allGames.delete(name)
+    pongInfo.delete(name)
 }

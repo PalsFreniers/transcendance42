@@ -19,7 +19,6 @@ export class Game {
         ],
         private _ball: Ball = new Ball(),
     ) { }
-    private _name: string = "";
     private _leftTeam: Paddle[] = [];
     private _rightTeam: Paddle[] = [];
     private _allTeams: Paddle[] = [];
@@ -31,19 +30,6 @@ export class Game {
     private _localPlayer: string | null = null;
 
     // Accessors
-
-    public get name() {
-        return this._name;
-    }
-
-    public set name(name: string) {
-        this._name = name;
-    }
-
-    public setName(name: string) {
-        this._name = name;
-        return this;
-    }
 
     public get ball() {
         return this._ball;
@@ -183,9 +169,9 @@ export class Game {
                     if (paddle.hitbox.name !== ballCollision.name) continue;
                     this.ball.paddleReflect(paddle);
                     if (this.ball.pos.x < 0)
-                        this.emit("paddle-reflect", { name: this._name, x: this.ball.pos.x - this.ball.size, y: this.ball.pos.y });
+                        this.emit("paddle-reflect", { x: this.ball.pos.x - this.ball.size, y: this.ball.pos.y });
                     else
-                        this.emit("paddle-reflect", { name: this._name, x: this.ball.pos.x + this.ball.size, y: this.ball.pos.y });
+                        this.emit("paddle-reflect", { x: this.ball.pos.x + this.ball.size, y: this.ball.pos.y });
                     break;
                 }
             } else if (ballCollision.name.startsWith("map")) {
@@ -199,9 +185,9 @@ export class Game {
                     default:
                         this.ball.dir.y = -this.ball.dir.y;
                         if (this.ball.pos.y < 0)
-                            this.emit("wall-reflect", { name: this._name, x: this.ball.pos.x, y: this.ball.pos.y - this.ball.size });
+                            this.emit("wall-reflect", { x: this.ball.pos.x, y: this.ball.pos.y - this.ball.size });
                         else
-                            this.emit("wall-reflect", { name: this._name, x: this.ball.pos.x, y: this.ball.pos.y + this.ball.size});
+                            this.emit("wall-reflect", { x: this.ball.pos.x, y: this.ball.pos.y + this.ball.size});
                         this.ball.advance();
                         i++;
                 }

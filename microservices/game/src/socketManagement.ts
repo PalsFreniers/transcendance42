@@ -113,10 +113,10 @@ export function socketManagement(io: Server) {
                             });
                     }).on("game-state", (state) => {
                         io.to(`game-${gameId}`).emit("game-state", state)
-                    }).on("paddle-reflect", ({name, x, y}) => {
-                        io.to(`game-${gameId}`).emit("paddle-reflect", {name, x, y})
-                    }).on("wall-reflect", ({name, x, y}) => {
-                        io.to(`game-${gameId}`).emit("wall-reflect", {name, x, y})
+                    }).on("paddle-reflect", ({x, y}) => {
+                        io.to(`game-${gameId}`).emit("paddle-reflect", {x, y})
+                    }).on("wall-reflect", ({x, y}) => {
+                        io.to(`game-${gameId}`).emit("wall-reflect", {x, y})
                     });
 
                 socket.data.lobbyName = lobbyName;

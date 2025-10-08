@@ -57,7 +57,6 @@ export class GameManager {
             return 3; // lobby already exists and game isn't ended
         this._games.set(lobbyName, [new Game(gameID), [null, null]]);
         const [game, _] = this._games.get(lobbyName)!;
-        game.setName(lobbyName);
         return 0;
     }
 
@@ -225,7 +224,6 @@ export class GameManager {
             usernameLeftTeam: usernameLeftTeam,
             playerOneID: p1,
             playerTwoID: p2,
-            name: game.name,
         };
     }
 
