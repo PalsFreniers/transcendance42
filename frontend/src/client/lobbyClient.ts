@@ -139,7 +139,13 @@ export function init(){
 				// optional: redirect to login page
 				handleRoute();
 			} else {
-				alert("Logout failed: " + (data.error || "Unknown error"));
+				if (localStorage)
+				{
+					localStorage.removeItem("token");
+					handleRoute();
+				}
+				else
+					alert("Logout failed: " + (data.error || "Unknown error"));
 			}
 		});
 	}

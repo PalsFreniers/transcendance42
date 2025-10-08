@@ -39,8 +39,7 @@ db.exec(`
 		created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 		updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 		FOREIGN KEY(sender_id) REFERENCES users(id) ON DELETE CASCADE,
-		FOREIGN KEY(receiver_id) REFERENCES users(id) ON DELETE CASCADE,
-		UNIQUE(sender_id, receiver_id)
+		FOREIGN KEY(receiver_id) REFERENCES users(id) ON DELETE CASCADE
 	);
 `);
 

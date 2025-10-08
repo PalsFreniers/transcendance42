@@ -148,9 +148,16 @@ export function navigateTo(url: string) {
 
 export function backToPreviousPage() {
 	const backBtn = document.getElementById('return');
-	if (backBtn) {
+	const path = window.location.pathname;
+	if (backBtn){
 		backBtn.addEventListener('click', () => {
-			history.back();
+			if (path.startsWith("/shifumi"))
+			{
+				history.pushState(null, '', '/lobby');
+				handleRoute();
+			}
+			else
+				history.back();
 		})
 	}
 }
