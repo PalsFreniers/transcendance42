@@ -23,6 +23,7 @@ export class IaManager
     }
 
     public deleteIaByGameId(gameId: number) {
+        this._ia.get(gameId)?.destructor();
         this._ia.delete(gameId);
     }
 

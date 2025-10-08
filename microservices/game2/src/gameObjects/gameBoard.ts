@@ -30,7 +30,6 @@ export class GameBoard {
                 else
                     random++;
             }
-            // console.log(`carte [${random}] = ${id}.${number}`);
             this.drawPile[random] = tmp;
             if (id == 0 && number == 1)
                 number = -1, id++;
@@ -42,7 +41,6 @@ export class GameBoard {
     public drawCard(player :number) {
         if (this.drawPile.length <= 0)
         {
-            console.log('fail to draw card !');
             return ;
         }
         if (player == 1) {

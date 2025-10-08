@@ -34,7 +34,6 @@ export async function matchmaking(playerId: number, token) : Promise<number> {
     while (range < maxRange)
     {
         mmrMap.forEach((mmr, id, map) => {
-            console.log(`mmr = ${mmr}`);
             if (mmr >= (PlayerMmr - range) && mmr <= (PlayerMmr + range)) {
                 idGame = playerMap.get(id);
             }
@@ -49,7 +48,10 @@ export async function matchmaking(playerId: number, token) : Promise<number> {
 export async function calculMmr(gameId: number, player: Player, opponent: Player, token): Promise<number> {
 
     if (gameIsPrivate(gameId))
-        return -1;
+        return -2000;
+
+    if (player.Forfeit)
+        return -10;
 
     const playerMmr = await getMmrFromId(player.Id, token);
     const opponentMmr = await getMmrFromId(opponent.Id, token);
@@ -57,8 +59,13 @@ export async function calculMmr(gameId: number, player: Player, opponent: Player
     const expectedScore = 1 / (1 + Math.pow(10, (opponentMmr - playerMmr) / 200));
     const k = 15 + Math.round(Math.abs(playerMmr - opponentMmr) / 10);
 
-    const totalPoints = player.Point + opponent.Point;
-    const score = totalPoints > 0 ? player.Point / totalPoints : 0.5;
+    let score;
+    if (opponent.Forfeit)
+        score = 1;
+    else  {
+        const totalPoints = player.Point + opponent.Point;
+        score = totalPoints > 0 ?  player.Point / totalPoints : 0.5;
+    }
 
     const mmrGain = Math.trunc(k * (score - expectedScore));
 
@@ -94,7 +101,6 @@ async function getMmrFromId(id: number, token): Promise<number> {
 
 async function setMmrFromId(id: number, token, newMmr: number)  {
     try {
-        console.log(`newMmr = ${newMmr}`);
         const res = await fetch('http://user-service:3001/api/user/set-mmr-shifumi', {
             method: 'POST',
             headers: {

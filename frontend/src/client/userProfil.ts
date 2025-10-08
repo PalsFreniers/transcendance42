@@ -1,7 +1,6 @@
-import { getUserIdFromToken } from "./loginClient.js";
-import { getSocket } from "./socketClient.js";
 import { handleRoute } from "./navClient.js";
 import { notify } from "./notify.js";
+import { mini_msg } from "./chatClient.js";
 
 export async function init() {
 	try {
@@ -29,6 +28,55 @@ export async function init() {
        				<p class="profil-bio">${data.user.bio || 'No bio yet.'}</p>
       			</div>
     		</div>`
+		const gamesContainer = document.getElementById('game-history') as HTMLElement;
+		if (gamesContainer) {
+			const gamesRes = await fetch(`/api/user/history`, {
+				method: 'GET',
+				headers: {
+					'Content-Type': 'application/json',
+					'Authorization': `Bearer ${token}`
+				},
+			});
+			const gamesData = await gamesRes.json();
+
+			if (gamesData.success && gamesData.games.length > 0) {
+				const gamesMapped = await Promise.all(
+					gamesData.games.map(async (game: any) => {
+						const isPlayerOne = game.player_one_id === data.user.id;
+						const [score1, score2] = game.final_score.split('-').map(Number);
+						const isWin = (isPlayerOne && score1 > score2) || (!isPlayerOne && score2 > score1);
+						const mmrGain = isPlayerOne ? game.mmr_gain_player_one : game.mmr_gain_player_two;
+						const otherId = isPlayerOne ? game.player_two_id : game.player_one_id;
+						let otherName = otherId === -1 ? 'invited' : otherId === -2 ? 'AI' : '';
+						if(otherName === '') {
+							const resName = await fetch(`/api/user/data?id=${otherId}`, {
+								method: 'GET',
+								headers: {
+									'Content-Type': 'application/json',
+									'Authorization': `Bearer ${token}`
+								},
+							});
+							const usr = await resName.json();
+							otherName = usr.username;
+						}
+
+						return `
+						<div class="game-card ${isWin ? 'win' : 'lose'}">
+							<h3>${game.game_name === 'shifumi' ? '🖐️ Shifumi' : '🏓 Pong'}</h3>
+							<p>Against: ${otherName}</p>
+							<p>Score: ${game.final_score}</p>
+							${game.game_name === 'shifumi' ? `<p>MMR: ${mmrGain > 0 ? '+' : ''}${mmrGain}</p>` : ''}
+							<p>Durée: ${game.game_time}s</p>
+							<p>Date: ${game.date}</p>
+						</div>
+						`;
+					})
+				)
+				gamesContainer.innerHTML = gamesMapped.join('');
+			} else {
+				gamesContainer.innerHTML = `<p>Aucune partie trouvée.</p>`;
+			}
+		}
 		const editProfile = document.getElementById('edit-profil') as HTMLButtonElement;
 		const form = document.getElementById('form-profil') as HTMLFormElement;
 		editProfile.addEventListener('click', async (e) => {
@@ -102,9 +150,7 @@ export async function init() {
 		});
 		const dataFriend = await resFriends.json();
 		const friendListContainer = document.getElementById('friend-list') as HTMLUListElement;
-		const imgFriend = document.getElementById('friend-img') as HTMLElement;
-		const usernameFriend = document.getElementById('data-friendusername') as HTMLElement;
-		if (dataFriend && Array.isArray(dataFriend.friends)) {
+		if (dataFriend && Array.isArray(dataFriend.friends) && dataFriend.friends.length > 0) {
 			dataFriend.friends.forEach(friend => {
 				const li = document.createElement('li');
 				li.textContent = friend.username;
@@ -130,105 +176,16 @@ export async function init() {
 				});
 				li.appendChild(button);
 				friendListContainer.appendChild(li);
-				const friendConverstaion = document.getElementById('chat-friend') as HTMLElement;
-				const friendPP = document.createElement('div');
-				friendPP.classList.add('friend-pp');
-				const imgDiv = document.createElement('div');
-				const ppFriend = document.createElement('img');
-				ppFriend.src = friend.profile_image_url;
-				imgDiv.appendChild(ppFriend);
-				const nameDiv = document.createElement('div');
-				const nameFriend = document.createElement('p');
-				nameFriend.textContent = friend.username;
-				nameDiv.appendChild(nameFriend);
-				friendPP.appendChild(imgDiv);
-				friendPP.appendChild(nameDiv);
-				friendConverstaion.appendChild(friendPP);
-				ppFriend.dataset.friendusername = friend.username;
-				ppFriend.addEventListener('click', async (e) => {
-					e.preventDefault();
-					document.querySelectorAll('.friend-pp').forEach(el => el.classList.remove('selected'));
-					const usernameTarget = (e.currentTarget as HTMLImageElement).dataset.friendusername;
-					const friendPPDiv = (e.currentTarget as HTMLElement).closest('.friend-pp');
-					friendPPDiv?.classList.add('selected');
-					console.log("Image cliquée => username:", usernameTarget);
-					const messages = await fetch(`/api/user/get-message`, {
-						method: 'POST',
-						headers: {
-							'Content-Type': 'application/json',
-							'Authorization': `Bearer ${token}`
-						},
-						body: JSON.stringify({ friendUsername: usernameTarget })
-					});
-					const data = await messages.json();
-					if (data.messages) {
-						const boxMsg = document.getElementById('display-msg') as HTMLElement;
-						boxMsg.innerHTML = ``;
-						data.messages.forEach(msg => {
-							if (!msg)
-								return;
-							const msgElement = document.createElement('p');
-							msgElement.textContent = msg.text;
-							if (msg.userId === getUserIdFromToken())
-								msgElement.className = "user-msg";
-							else
-								msgElement.className = "user-target-msg";
-							boxMsg.appendChild(msgElement);
-						});
-						boxMsg.scrollTop = boxMsg.scrollHeight;
-					}
-					const formMsg = document.getElementById('chat-input') as HTMLFormElement;
-					const msgsend = document.getElementById('msg-send') as HTMLInputElement; 
-					if (formMsg) {
-						formMsg.addEventListener('submit', async (e) => {
-							e.preventDefault();
-							const server = getSocket(0);
-							if (msgsend.value.length != 0)
-							{
-								server!.emit('message', msgsend.value, getUserIdFromToken(), friend.username)
-								msgsend.value = '';
-							}
-						})
-					}
-				});
-				
+				mini_msg(friend);
+
 			});
 		} else {
+			const display = document.getElementById('chat-display') as HTMLElement;
+			display.style.display = "none";
 			const msg = document.createElement('p');
 			msg.textContent = 'No friends found.';
 			friendListContainer.appendChild(msg);
 		}
-		const nameFriend = document.getElementById('friend-username') as HTMLInputElement;
-		const addFriend = document.getElementById('add-friend-button') as HTMLButtonElement;
-		addFriend.addEventListener('click', async (e) => {
-			e.preventDefault();
-			const friendUsername = nameFriend.value;
-			if (!friendUsername) {
-				console.error('Friend username is empty');
-				return;
-			}
-			try {
-				const res = await fetch(`/api/user/add-friend`, {
-					method: 'POST',
-					headers: {
-						'Content-Type': 'application/json',
-						'Authorization': `Bearer ${token}`
-					},
-					body: JSON.stringify({ friendUsername })
-				});
-				const data = await res.json();
-				if (res.ok) {
-					console.log('friend added:', data.message);
-					handleRoute();
-				}
-				else
-					console.log('Failed to add friend', data.error);
-			}
-			catch (err) {
-				console.error('Error:', err);
-			}
-		});
-
 	} catch (err) {
 		console.error('Error:', err);
 	}

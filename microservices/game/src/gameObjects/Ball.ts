@@ -5,25 +5,48 @@ import { clamp } from "../utils.js";
 
 export class Ball {
 
-    // Const member
+    // Static member
+
+    static get size() {
+        return 0.15;
+    }
+
+    static get acceleration() {
+        return 1 / 100;
+    }
+
+    static get baseSpeed() {
+        return 0.15;
+    }
+
+    static get maxSpeed() {
+        return this.baseSpeed * 5;
+    }
+
+    static get dV() {
+        return 0.05;
+    }
+
+    // Static Member Workaround
 
     public get size() {
-        return 0.15;
-    };
+        return Ball.size;
+    }
 
     public get acceleration() {
-        return 1 / 100
+        return Ball.acceleration;
     }
 
     public get baseSpeed() {
-        return 0.2;
+        return Ball.baseSpeed;
     }
+
     public get maxSpeed() {
-        return this.baseSpeed * 10;
+        return Ball.maxSpeed;
     }
 
     public get dV() {
-        return 0.05;
+        return Ball.dV;
     }
 
     // Constructor
@@ -64,10 +87,10 @@ export class Ball {
     }
 
     public paddleReflect(paddle: Paddle) {
-        const relativeY = (this.pos.y - paddle.pos.y) / (paddle.length / 2);
+        const relativeY = (this.pos.y - paddle.pos.y) / (paddle.len / 2);
         const dY = clamp(relativeY, -1, 1);
 
-        const maxAngle = 75 * Math.PI / 180;
+        const maxAngle = 70 * Math.PI / 180;
         const angle = dY * maxAngle;
 
         if (paddle.pos.x < 0)
@@ -76,7 +99,6 @@ export class Ball {
             this.dir = new Vec2D.Vector(-Math.cos(angle), Math.sin(angle)).unit();
         this.advance();
     }
-
 
     public ballTouchPaddle(ballPos: Vec2D.AbstractVector, r: number, rectPos: Vec2D.AbstractVector, rectW: number, rectH: number): boolean {
         const halfW = rectW / 2;
@@ -102,7 +124,7 @@ export class Ball {
             }
         }
         for (const paddle of paddles) {
-            if (this.ballTouchPaddle(this.pos, this.size, paddle.pos, paddle.width, paddle.length))
+            if (this.ballTouchPaddle(this.pos, this.size, paddle.pos, paddle.width, paddle.len))
                 return paddle.hitbox;
         }
         return null;

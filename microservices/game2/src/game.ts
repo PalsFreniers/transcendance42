@@ -13,6 +13,7 @@ export interface Player {
     Card : playedCard | null;
     usedCoin : boolean;
     IsOnline : boolean;
+    Forfeit: boolean;
 }
 
 export async function clearRoom(room: string)
@@ -47,13 +48,8 @@ export class game
     constructor(playerOneInfo :Player, playerTwoInfo :Player, gameId: number)
     {
         this.playerOne = playerOneInfo;
-        console.log(`player one = ${this.playerOne.Id}`);
-
         this.playerTwo = playerTwoInfo;
-        console.log(`player two = ${this.playerTwo.Id}`);
-
         this.gameId = gameId;
-        console.log(`game id = ${this.gameId}`);
     }
 
     public async spectate(player: number, socket)
@@ -65,7 +61,7 @@ export class game
             await this.sleep(this.delay / 20);
             io.to(socket.id).emit('card', this.gameBoard.getPlayerCard(1));
             io.to(socket.id).emit('score', this.playerOne.Point, this.playerTwo.Point);
-            io.to(`${this.gameId}.1`).emit('roomInfo', `${socket.data.userName} spectate`)
+            socket.to(`${this.gameId}.1`).emit('roomInfo', `${socket.data.userName} spectate`)
         }
         else if (player == 2)
         {
@@ -73,13 +69,12 @@ export class game
             await this.sleep(this.delay / 20);
             io.to(socket.id).emit('card', this.gameBoard.getPlayerCard(2));
             io.to(socket.id).emit('score', this.playerTwo.Point, this.playerOne.Point);
-            io.to(`${this.gameId}.2`).emit('roomInfo', `${socket.data.userName} spectate`)
+            socket.to(`${this.gameId}.2`).emit('roomInfo', `${socket.data.userName} spectate`)
         }
     }
 
     public start(token: string)
     {
-        console.log('game started');
         io.to(`${this.gameId}.1`).emit('started-game', this.gameId, this.playerTwo.Id);
         io.to(`${this.gameId}.2`).emit('started-game', this.gameId ,this.playerOne.Id);
         timeStart(this.gameId);
@@ -92,7 +87,7 @@ export class game
         
             if (!this.playerOne.IsOnline || !this.playerTwo.IsOnline) {
                 if (await this.playerIsOffline()) {
-                    saveStats(this.gameId, token, calculMmr(this.gameId, this.playerOne, this.playerTwo, token), calculMmr(this.gameId, this.playerTwo, this.playerOne, token));
+                    saveStats(this.gameId, token, await calculMmr(this.gameId, this.playerOne, this.playerTwo, token), await calculMmr(this.gameId, this.playerTwo, this.playerOne, token));
                     return deleteGameFromDB(this.gameId);
                 }
             }
@@ -103,7 +98,6 @@ export class game
 
             if (this.playerOne.Card && this.playerTwo.Card) { // faire une fonction/plusieurs a mettre a cote
                 
-                console.log('start check cards !');
                 io.to(`${this.gameId}.1`).emit('opponent-played-card', [this.playerTwo.Card.cardId, this.playerTwo.Card.cardNumber]);
                 io.to(`${this.gameId}.1`).emit('played-card', [this.playerOne.Card.cardId, this.playerOne.Card.cardNumber]);
 
@@ -126,8 +120,7 @@ export class game
                 
                 io.to(`${this.gameId}.1`).emit('card', this.gameBoard.getPlayerCard(1));
                 io.to(`${this.gameId}.2`).emit('card', this.gameBoard.getPlayerCard(2));
-                console.log('end check cards !');
-                
+
                 this.playerOne.Card = null;
                 this.playerTwo.Card = null;
             }
@@ -141,6 +134,7 @@ export class game
                 await clearRoom(`${this.gameId}.2`);
                 saveStats(this.gameId, token, await calculMmr(this.gameId, this.playerOne, this.playerTwo, token), await calculMmr(this.gameId, this.playerTwo, this.playerOne, token));
                 deleteGameFromDB(this.gameId);
+                IaManager.getInstance().deleteIaByGameId(this.gameId);
                 return ;
             }
 
@@ -192,7 +186,7 @@ export class game
         player.IsOnline = true;
         socket.join(roomName);
         io.to(socket.id).emit('reconnect', player.usedCoin);
-        io.to(`${this.gameId}.1`).to(`${this.gameId}.2`).emit('opponent-reconnected', getUsernameFromToken(socket.handshake.auth.token));
+        socket.to(`${this.gameId}.1`).to(`${this.gameId}.2`).emit('opponent-reconnected', getUsernameFromToken(socket.handshake.auth.token));
         await this.sleep(this.delay / 20);
         io.to(socket.id).emit('started-game', this.gameId);
         await this.sleep(this.delay / 20);
@@ -202,7 +196,6 @@ export class game
 
     public chooseCard(card: playedCard)
     {
-        console.log(`player (${card.userId}) choose is card !`)
         if (card.userId == this.playerOne.Id) {
             card.userId = 1;
             this.playerOne.Card = card;
@@ -311,34 +304,37 @@ export class game
                 if (!this.playerTwo.IsOnline && this.PlayerTwoTime > 0)
                     this.PlayerTwoTime--;
 
-                if (this.PlayerOneTime == 0 && this.playerTwo.IsOnline)
+                if (this.PlayerOneTime == 0 && this.PlayerTwoTime == 0)
                 {
-                    io.to(`${this.gameId}.1`).to(`${this.gameId}.2`).emit('forfeit', getPlayerName(this.gameId)?.playerOneName);
-                    forfeit(this.gameId, 1, this.playerTwo.Point, this.gameTime);
+                    this.playerOne.Forfeit = true;
+                    this.playerTwo.Forfeit = true;
+                    io.to(`${this.gameId}.1`).to(`${this.gameId}.2`).emit('forfeit', 'all player');
+                    forfeit(this.gameId, 0, 0, this.gameTime, this.round_nmb);
                     clearInterval(interval);
                     this.sleep(5000);
                     io.to(`${this.gameId}.1`).to(`${this.gameId}.2`).emit('game-ended');
                     playerOffline(true);
                 }
-                if (this.PlayerTwoTime == 0 && this.playerOne.IsOnline)
+                else if (this.PlayerOneTime == 0 && this.playerTwo.IsOnline)
                 {
-                    forfeit(this.gameId, 2, this.playerOne.Point, this.gameTime);
+                    this.playerOne.Forfeit = true;
+                    io.to(`${this.gameId}.1`).to(`${this.gameId}.2`).emit('forfeit', getPlayerName(this.gameId)?.playerOneName);
+                    forfeit(this.gameId, 1, this.playerTwo.Point, this.gameTime, this.round_nmb);
+                    clearInterval(interval);
+                    this.sleep(5000);
+                    io.to(`${this.gameId}.1`).to(`${this.gameId}.2`).emit('game-ended');
+                    playerOffline(true);
+                }
+                else if (this.PlayerTwoTime == 0 && this.playerOne.IsOnline)
+                {
+                    this.playerTwo.Forfeit = true;
+                    forfeit(this.gameId, 2, this.playerOne.Point, this.gameTime, this.round_nmb);
                     io.to(`${this.gameId}.1`).to(`${this.gameId}.2`).emit('forfeit', getPlayerName(this.gameId)?.playerTwoName);
                     clearInterval(interval);
                     this.sleep(5000);
                     io.to(`${this.gameId}.1`).to(`${this.gameId}.2`).emit('game-ended');
                     playerOffline(true);
                 }
-                if (this.PlayerOneTime == 0 && this.PlayerTwoTime == 0)
-                {
-                    io.to(`${this.gameId}.1`).to(`${this.gameId}.2`).emit('forfeit', 'all player');
-                    forfeit(this.gameId, 0, 0, this.gameTime);
-                    clearInterval(interval);
-                    this.sleep(5000);
-                    io.to(`${this.gameId}.1`).to(`${this.gameId}.2`).emit('game-ended');
-                    playerOffline(true);
-                }
-
             }, this.delay / 4);
         });
     }

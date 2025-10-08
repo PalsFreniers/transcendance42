@@ -1,7 +1,15 @@
 import io, { Socket } from 'socket.io-client';
-import { handleRoute } from './navClient.js';
+import { navigateTo } from './navClient.js';
+import { getUsernameFromToken } from './loginClient.js';
+import {clearPong, drawPong, handlePaddleReflect, handleWallReflect} from "./pongUI.js";
 
 let lobbyname: String | null = null;
+let keysPressed = {
+    up: false,
+    down: false,
+    upP2: false,
+    downP2: false,
+};
 
 export function getUserIdFromToken(): number {
     const token = localStorage.getItem('token');
@@ -34,9 +42,8 @@ export function createPongSocket(socketPong: Socket | null) {
     socketPong.on("room-created", (data) => {
         console.log("Room created event:", data);
         const lobbyGame = document.getElementById("game-salon") as HTMLDivElement;
-        lobbyname = data.lobbyName;
         lobbyGame.innerHTML = `
-        <p><strong>Lobby name:</strong> ${data.lobbyName}</p>
+        <p id="lobbyname"><strong>Lobby name:</strong> ${data.lobbyName}</p>
         <p><strong>Player 1:</strong> ${data.userName}</p>
         <p><strong>Player 2:</strong> ${data.playerTwo ?? "-"}</p>
         <p><strong>Status:</strong> ${data.status}</p>`;
@@ -44,152 +51,112 @@ export function createPongSocket(socketPong: Socket | null) {
 
     socketPong.on('player-joined', (data) => {
         console.log("Player joined event:", data);
+        const startBtn = document.getElementById('start-game-btn') as HTMLButtonElement;
+        if (!startBtn)
+            return;
         // Update UI with both players
         lobbyname = data.lobbyName;
+        if (data.playerTwo === '-')
+            startBtn.style.display = 'block';
         const lobbyGame = document.getElementById("game-salon") as HTMLDivElement;
         lobbyGame.innerHTML = `
-        <p><strong>Lobby name:</strong> ${data.lobbyName}</p>
+        <p id="lobbyname"><strong>Lobby name:</strong> ${data.lobbyName}</p>
         <p><strong>Player 1:</strong> ${data.playerOne}</p>
         <p><strong>Player 2:</strong> ${data.playerTwo}</p>
         <p><strong>Status:</strong> ${data.status}</p>`;
     });
 
+    socketPong.on("lobby-info", (data) => {
+        const path = window.location.pathname;
+        if (path !== '/pong')
+            navigateTo('/pong')
+        const lobbyGame = document.getElementById("game-salon") as HTMLDivElement;
+        const startBtn = document.getElementById('start-game-btn') as HTMLButtonElement;
+        const quitBtn = document.getElementById('quit-game-button') as HTMLButtonElement;
+        const createGameButton = document.getElementById('game-button') as HTMLButtonElement;
+        const iaBtn = document.getElementById('game-vs-ia') as HTMLElement;
+        const localGameBtn = document.getElementById('game-local') as HTMLElement;
+        const joinGameButton = document.getElementById('join-button') as HTMLButtonElement;
+        const specBtn = document.getElementById('spectator-btn') as HTMLButtonElement;
+        const customBtn = document.getElementById('custom-button') as HTMLButtonElement;
+        const tournamentBtn = document.getElementById('tournament-button') as HTMLButtonElement;
+        const startTournament = document.getElementById('tournament-start') as HTMLButtonElement;
+
+        lobbyGame.style.display = 'block';
+        startTournament.style.display = "none";
+        iaBtn.style.display = 'none';
+        localGameBtn.style.display = 'none';
+        tournamentBtn.style.display = "none";
+        startTournament.style.display = "none";
+        createGameButton.style.display = "none";
+        joinGameButton.style.display = "none";
+        specBtn.style.display = "none";
+        customBtn.style.display = "none"
+        if (getUsernameFromToken() === data.playerOne)
+            startBtn.style.display = "block";
+        quitBtn.style.display = 'block';
+
+        lobbyGame.innerHTML = `
+            <p id="lobbyname"><strong>Lobby name:</strong> ${data.lobbyName}</p>
+            <p><strong>Player 1:</strong> ${data.playerOne}</p>
+            <p><strong>Player 2:</strong> ${data.playerTwo ?? "-"}</p>
+            <p><strong>Status:</strong> ${data.status}</p>`;
+    });
+
+
     socketPong.on('in-game', () => {
         const path = window.location.pathname;
-        if (path === '/lobby') {
-            history.pushState(null, '', '/pong')
-            handleRoute();
-        }
+        if (path !== '/pong')
+            navigateTo('/pong')
     });
 
     socketPong.on('game-state', (state) => {
-        const canvas = document.getElementById("pong-canvas") as HTMLCanvasElement;
-        const startBtn = document.getElementById("pong-controls") as HTMLButtonElement;
-        startBtn.style.display = "none";
-        canvas.style.display = "block";
-        if (!canvas)
-            return;
-        const ctx = canvas.getContext("2d");
-        if (!ctx)
-            return;
-        const scale = 20;
-        const gameWidth = 20;
-        const gameHeight = 10;
+        drawPong(state);
+    });
 
-        const offsetX = canvas.width / 2;
-        const offsetY = canvas.height / 2;
+    socketPong.on('paddle-reflect', ({name, x, y}) => {
+        handlePaddleReflect(name, x, y);
+    });
 
-        ctx.fillStyle = "#000000";
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
+    socketPong.on('wall-reflect', ({name, x, y}) => {
+        handleWallReflect(name, x, y);
+    });
 
-        ctx.strokeStyle = "rgba(187, 16, 158, 0.4)";
-        for (let x = 0; x < canvas.width; x += scale) {
-            ctx.beginPath();
-            ctx.moveTo(x, 0);
-            ctx.lineTo(x, canvas.height);
-            ctx.stroke();
+    document.addEventListener("keydown", (e) => {
+        if (e.key === "ArrowUp" && !keysPressed.up) {
+            keysPressed.up = true;
+            socketPong!.emit("input", { key: "up", action: "keydown" });
         }
-        for (let y = 0; y < canvas.height; y += scale) {
-            ctx.beginPath();
-            ctx.moveTo(0, y);
-            ctx.lineTo(canvas.width, y);
-            ctx.stroke();
+        else if (e.key === "ArrowDown" && !keysPressed.down) {
+            keysPressed.down = true;
+            socketPong!.emit("input", { key: "down", action: "keydown" });
         }
-
-        ctx.strokeStyle = "#0034de";
-        ctx.lineWidth = 4;
-        ctx.strokeRect(
-            offsetX - (gameWidth / 2) * scale,
-            offsetY - (gameHeight / 2) * scale,
-            gameWidth * scale,
-            gameHeight * scale
-        );
-
-        const ballRadius = 0.15 * scale;
-        const ballX = state.ballPos.x * scale + offsetX;
-        const ballY = state.ballPos.y * scale + offsetY;
-
-        // Halo néon
-        ctx.save();
-        ctx.shadowColor = "#ffdd00";
-        ctx.shadowBlur = 15;
-
-        // Cercle principal
-        ctx.beginPath();
-        ctx.arc(ballX, ballY, ballRadius, 0, Math.PI * 2);
-        ctx.fillStyle = "#ffdd00";
-        ctx.fill();
-        ctx.strokeStyle = "#ffffff";
-        ctx.lineWidth = 2;
-        ctx.stroke();
-        ctx.restore();
-
-        ctx.beginPath();
-        ctx.arc(ballX, ballY, ballRadius / 2, 0, Math.PI * 2);
-        ctx.fillStyle = "#ffffff";
-        ctx.fill();
-
-        const paddleWidth = 0.5 * scale;
-        const paddleHeight = 2 * scale;
-
-        ctx.fillStyle = "#ffdd00";
-        ctx.fillRect(
-            state.leftPaddle.x * scale + offsetX,
-            state.leftPaddle.y * scale + offsetY,
-            paddleWidth,
-            paddleHeight
-        );
-
-        ctx.fillStyle = "#ffdd00";
-        ctx.fillRect(
-            state.rightPaddle.x * scale + offsetX,
-            state.rightPaddle.y * scale + offsetY,
-            paddleWidth,
-            paddleHeight
-        );
-
-        ctx.fillStyle = "#ffdd00";
-        ctx.font = "20px 'Public Pixel'";
-        ctx.textAlign = "center";
-        ctx.fillText(`${state.leftScore} - ${state.rightScore}`, canvas.width / 2, 40);
-
-        ctx.fillStyle = "#ffdd00";
-        ctx.font = "20px 'Public Pixel'";
-        ctx.textAlign = "center";
-        ctx.fillText(`${state.usernameLeftTeam}`, canvas.width / 5, 40);
-
-        ctx.fillStyle = "#ffdd00";
-        ctx.font = "20px 'Public Pixel'";
-        ctx.textAlign = "center";
-        ctx.fillText(`${state.usernameRightTeam}`, canvas.width - canvas.width / 5 , 40);
-
-        ctx.fillStyle = "#ffdd00";
-        ctx.font = "16px 'Public Pixel'";
-        ctx.textAlign = "left";
-
-        if (state.state === "idling") {
-            ctx.fillText(`GAME PAUSED - WAITING FOR OPPONENT`, 25, 70);
+        else if (e.key.toLowerCase() === "w" && !keysPressed.upP2) {
+            keysPressed.upP2 = true;
+            socketPong!.emit("input", { key: "up", action: "keydown", localPlayer: true });
         }
-
-        if (state.state === "resume") {
-            ctx.fillText(`GAME RESUMING IN ${state.resumeTimer}`, 150, 70);
+        else if (e.key.toLowerCase() === "s" && !keysPressed.downP2) {
+            keysPressed.downP2 = true;
+            socketPong!.emit("input", { key: "down", action: "keydown", localPlayer: true });
         }
     });
 
-
-    document.addEventListener('keydown', (e) => {
-        if (e.key === "ArrowUp" || e.key === "ArrowDown") {
-            const payload = { key: e.key === "ArrowUp" ? "up" : "down", action: "keydown" };
-            console.log("Emit input:", payload);
-            socketPong!.emit("input", payload);
+    document.addEventListener("keyup", (e) => {
+        if (e.key === "ArrowUp" && keysPressed.up) {
+            keysPressed.up = false;
+            socketPong!.emit("input", { key: "up", action: "keyup" });
         }
-    });
-
-    document.addEventListener('keyup', (e) => {
-        if (e.key === "ArrowUp" || e.key === "ArrowDown") {
-            const payload = { key: e.key === "ArrowUp" ? "up" : "down", action: "keyup", trueKey: e.key };
-            console.log("Emit input:", payload);
-            socketPong!.emit("input", payload);
+        else if (e.key === "ArrowDown" && keysPressed.down) {
+            keysPressed.down = false;
+            socketPong!.emit("input", { key: "down", action: "keyup" });
+        }
+        else if (e.key.toLowerCase() === "w" && keysPressed.upP2) {
+            keysPressed.upP2 = false;
+            socketPong!.emit("input", { key: "up", action: "keyup", localPlayer: true });
+        }
+        else if (e.key.toLowerCase() === "s" && keysPressed.downP2) {
+            keysPressed.downP2 = false;
+            socketPong!.emit("input", { key: "down", action: "keyup", localPlayer: true });
         }
     });
 
@@ -201,6 +168,7 @@ export function createPongSocket(socketPong: Socket | null) {
         if (!canvas)
             return;
         canvas.style.display = "none";
+        clearPong(data.name);
     })
 
     socketPong.on('disconnect', (reason) => {
@@ -210,5 +178,6 @@ export function createPongSocket(socketPong: Socket | null) {
     socketPong.on('connect_error', (err) => {
         console.error('Connection error:', err.message);
     });
+
     return socketPong;
 }

@@ -1,32 +1,6 @@
 import { FastifyInstance } from 'fastify';
 import db from './dbSqlite/db.js';
 
-// export async function createRoom(app: FastifyInstance) {
-//   app.post('/create-game', async (request, reply) => {
-//     const user = request.user as { id: number };
-//     const { lobbyName, opponentId } = request.body as {
-//       lobbyName: string;
-//       opponentId: number;
-//     };
-//     // Prepare game object according to your interface
-//     const newGame: GameData = {
-//       playerOne: user.id,
-//       playerTwo: opponentId,
-//       lobbyName,
-//       finalScore: '0-0',
-//       status: 'waiting',
-//       gameDate: new Date().toISOString(),
-//     };
-//     // Use createGameLobby to insert and get the ID
-//     const gameId = createGameLobby(newGame);
-//     return {
-//       success: true,
-//       gameId,
-//     };
-//   });
-// }
-
-
 export async function awaitforOpponent(app: FastifyInstance) {
     app.post('/find-lobbies', async (request, reply) => {
         const stmt = db.prepare(`
@@ -99,7 +73,7 @@ export async function getAllGame(app: FastifyInstance)
 {
     app.post('/api/game2/get-games', async (request, reply) => {
         const names = db.prepare(`
-            SELECT lobby_name, status FROM games2 WHERE status='waiting' OR status='playing'
+            SELECT lobby_name, status FROM games2 WHERE is_spectable = 1
         `).all();
 
         if (names)

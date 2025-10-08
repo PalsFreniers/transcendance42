@@ -4,6 +4,8 @@ import { TournamentManager } from "./tournamentManager.js"
 import db from "./dbSqlite/db.js"
 import * as Vec2D from "vector2d";
 import { Server } from "socket.io";
+import { saveStats } from './gameRoutes.js';
+import { GameRecordGet } from './gameModel.js';
 
 export class GameManager {
 
@@ -52,20 +54,24 @@ export class GameManager {
 
     createLobby(lobbyName: string, gameID: number): number {
         if (this._games.has(lobbyName))
-            return 1; // lobby already exists and game isn't ended
+            return 3; // lobby already exists and game isn't ended
         this._games.set(lobbyName, [new Game(gameID), [null, null]]);
+        const [game, _] = this._games.get(lobbyName)!;
+        game.setName(lobbyName);
         return 0;
     }
 
     joinLobby(lobbyName: string, playerID: number): number {
         if (!this._games.has(lobbyName))
             return 1; // lobby doesnt exist
-        if (lobbyName.startsWith("tournament") && !TournamentManager.getInstance().isPlayerRegistered(playerID))
-            return 5; // player cannot participate in tournament if not registered
-        if (!lobbyName.startsWith("tournament") && TournamentManager.getInstance().isPlayerRegistered(playerID))
-            return 6; // player cannot participate in a non tournament game if registered
-        if (this.isPlayerInGame(playerID))
-            return 4; // player already in a game
+        if (playerID !== -1 && playerID !== -2) { // IF player joining isn't the AI nor a local player
+            if (lobbyName.startsWith("tournament") && !TournamentManager.getInstance().isPlayerRegistered(playerID))
+                return 5; // player cannot participate in tournament if not registered
+            if (!lobbyName.startsWith("tournament") && TournamentManager.getInstance().isPlayerRegistered(playerID))
+                return 6; // player cannot participate in a non tournament game if registered
+            if (this.isPlayerInGame(playerID))
+                return 4; // player already in a game
+        }
         const [game, [p1, p2]] = this._games.get(lobbyName)!;
         if (p1 === playerID || p2 === playerID)
             return 2; // player is already in the lobby
@@ -78,7 +84,7 @@ export class GameManager {
         return 0; // worked just fine
     }
 
-    startGame(lobbyName: string, gameId: string, io: any)   {
+    startGame(lobbyName: string, gameId: string, io: any, token: string) {
         if (!this._games.has(lobbyName))
             return 1; // lobby doesn't exist
         const [game, [p1, p2]] = this._games.get(lobbyName)!;
@@ -86,7 +92,7 @@ export class GameManager {
             return 2; // lobby isn't full
         game.start();
         const loop = setInterval(() => {
-            this.playerIsOffline(p1, p2, io, lobbyName).then(isOffline => {
+            this.playerIsOffline(p1, p2, io, lobbyName, token).then(isOffline => {
                 if (isOffline) {
                     clearInterval(loop);
                     return 0;
@@ -96,14 +102,13 @@ export class GameManager {
                 clearInterval(loop);
                 game.emit("game-end", {
                     game: game,
-                    players: [this.getSocketId(p1), this.getSocketId(p2)]}
-                );
-                this.deleteGame(lobbyName);
-                return ;
+                    players: [this.getSocketId(p1), this.getSocketId(p2)]
+                });
+                this.deleteGame(lobbyName, token);
+                return;
             }
             game.update();
-            const state = this.getGameInfo(lobbyName, io);
-            io.to(gameId).emit("game-state", state);
+            game.emit("game-state", this.getGameInfo(lobbyName, io));
         }, 1000 / 60);
         return 0;
     }
@@ -131,15 +136,63 @@ export class GameManager {
         return game.score;
     }
 
-    deleteGame(lobbyName: string): number {
+    deleteGame(lobbyName: string, token: string): number {
         if (!this._games.has(lobbyName))
             return 1; // lobby doesnt exist
-        const [game, _] = this._games.get(lobbyName)!;
+        const [game, [p1, p2]] = this._games.get(lobbyName)!;
         if (game.state !== "ended")
             return 2;
+        const date = db.prepare(`SELECT * FROM games WHERE id = ? `).get(game.gameID) as GameRecordGet;
+        const start = date.start_time ? new Date(date.start_time).getTime() : null;
+        const end = Date.now();
+
+        const game_time = start ? Math.round((end - start) / 1000) : 0;
+        const stats = {
+            game_name: 'pong',
+            part_name: lobbyName,
+            part_id: game.gameID,
+            player_one_id: p1,
+            player_two_id: p2,
+            final_score: `${game.score[0]} - ${game.score[1]}`,
+            round_number: game.score[0] + game.score[1],
+            game_time,
+            mmr_gain_player_one: null,
+            mmr_gain_player_two: null,
+            date: date.date
+        };
+        saveStats(game, stats, token);
         db.prepare(`DELETE FROM games WHERE id = ?`).run(game.gameID);
         this._games.delete(lobbyName);
         return 0;
+    }
+
+    leaveGame(lobbyName: string, playerId: number, token: string) {
+        console.log(playerId);
+        if (!this._games.has(lobbyName))
+            return 1; // lobby doesnt exist
+        for (const [_, [game, [p1, p2]]] of this._games) {
+            if (playerId === p1) {
+                this._games.set(lobbyName, [game, [p2, null]]);
+                if (!p2 || p2 === -2 || p2 === -1) {
+                    this.findGame(lobbyName)!.state = "ended";
+                    this.deleteGame(lobbyName, token);
+                    return 0;
+                }
+                db.prepare(`UPDATE games SET player_one_id = player_two_id, player_two_id = NULL WHERE id = ?`).run(game.gameID);
+                game.leaveTeam(playerId);
+                return 0;
+            } else if (playerId === p2) {
+                if (!p1) {
+                    this.findGame(lobbyName)!.state = "ended";
+                    this.deleteGame(lobbyName, token);
+                    return 0;
+                }
+                this._games.set(lobbyName, [game, [p1, null]])
+                db.prepare(`UPDATE games SET player_two_id = NULL WHERE id = ?`).run(game.gameID);
+                game.leaveTeam(playerId);
+                return 0;
+            }
+        }
     }
 
     getGameInfo(lobbyName: string, io: Server) {
@@ -149,13 +202,21 @@ export class GameManager {
         if (game === undefined)
             return null;
         const usernameLeftTeam = this.getUsernameFromSocket(this.getSocketId(p1!)!, io);
-        const usernameRightTeam = this.getUsernameFromSocket(this.getSocketId(p2!)!, io);
-
+        let usernameRightTeam = this.getUsernameFromSocket(this.getSocketId(p2!)!, io);
+        if (p2 === -2)
+            usernameRightTeam = 'ia';
+        else if (p2 === -1)
+            usernameRightTeam = game.localPlayer;
         return {
             ballPos: { x: game.ball.pos.x, y: game.ball.pos.y },
             ballDir: { x: game.ball.dir.x, y: game.ball.dir.y },
-            leftPaddle: { x: game.leftTeam[0].hitbox.getPoint(0).x, y: game.leftTeam[0].hitbox.getPoint(0).y },
-            rightPaddle: { x: game.rightTeam[0].hitbox.getPoint(0).x, y: game.rightTeam[0].hitbox.getPoint(0).y },
+            ballSpd: game.ball.speed,
+            leftPaddle: (game.leftTeam.length !== 0
+                ? { x: game.leftTeam[0].hitbox.getPoint(0).x, y: game.leftTeam[0].hitbox.getPoint(0).y }
+                : null),
+            rightPaddle: (game.rightTeam.length !== 0
+                ? { x: game.rightTeam[0].hitbox.getPoint(0).x, y: game.rightTeam[0].hitbox.getPoint(0).y }
+                : null),
             leftScore: game.score[0],
             rightScore: game.score[1],
             state: game.state,
@@ -163,11 +224,12 @@ export class GameManager {
             usernameRightTeam: usernameRightTeam,
             usernameLeftTeam: usernameLeftTeam,
             playerOneID: p1,
-            playerTwoID: p2
+            playerTwoID: p2,
+            name: game.name,
         };
     }
 
-    playerIsOffline(p1: number, p2: number, io: any, lobbyName: string): Promise<boolean> {
+    playerIsOffline(p1: number, p2: number, io: any, lobbyName: string, token: string): Promise<boolean> {
         return new Promise(resolve => {
             let PlayerOneTime = 15;
             let PlayerTwoTime = 15;
@@ -178,7 +240,7 @@ export class GameManager {
                 const socketp2 = this.getSocketId(p2);
 
                 const p1IsOnline = p1 && io.sockets.sockets.get(socketp1);
-                const p2IsOnline = p2 && io.sockets.sockets.get(socketp2);
+                const p2IsOnline = (p2 && io.sockets.sockets.get(socketp2) || socketp2 === "-2" || p2 == -1);
 
                 if (p1IsOnline && p2IsOnline) {
                     PlayerOneTime = 15;
@@ -210,7 +272,7 @@ export class GameManager {
                     }
                 }
                 if (!p1IsOnline && !p2IsOnline) {
-                    this.deleteGame(lobbyName);
+                    this.deleteGame(lobbyName, token);
                     clearInterval(socketCheck);
                     resolve(true);
                 }

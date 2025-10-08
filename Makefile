@@ -2,12 +2,13 @@ COMPOSE=docker compose
 COMPOSE_FILE=docker-compose.yml
 CMD_LOCAL_NETWORK_ADDR=ip addr | grep "brd 10." | awk '{print $$2}' | cut -d'/' -f1;
 ENV_FILE=.env
+GEN_API_FILE=cli/cli.conf
 
 help:
 	@echo "Usage: make [TARGET]"
 	@echo ""
 	@echo "Targets:"
-	@echo "  all         Start all services"
+	@echo "  all         Start all services and compile cli"
 	@echo "  down        Stop all services"
 	@echo "  restart     Restart all services"
 	@echo "  logs        Show logs"
@@ -18,6 +19,7 @@ help:
 	@echo "  game-prod   Run game service in prod mode"
 	@echo "  nginx       Run only nginx"
 	@echo "  front       Run only frontend"
+	@echo "  cli         compile the cli and open pdf documentation"
 
 localadress:
 	@if grep -q "^VITE_LOCAL_ADDRESS=" $(ENV_FILE); then \
@@ -29,6 +31,7 @@ localadress:
 all: localadress
 	$(COMPOSE) -f $(COMPOSE_FILE) up -d
 	@echo "The website run at https://$$($(CMD_LOCAL_NETWORK_ADDR)):8443"
+	$(MAKE) -C . cli --no-print-directory
 
 down:
 	$(COMPOSE) -f $(COMPOSE_FILE) down
@@ -44,6 +47,7 @@ build:
 
 clean:
 	$(COMPOSE) -f $(COMPOSE_FILE) down -v --rmi all --remove-orphans
+	$(MAKE) -C cli clean --no-print-directory
 
 user:
 	$(COMPOSE) -f $(COMPOSE_FILE) up -d user-service
@@ -54,3 +58,10 @@ nginx:
 front:
 	$(COMPOSE) -f $(COMPOSE_FILE) up -d frontend
 
+re: clean all
+
+cli:
+	echo "addr:=\"$$($(CMD_LOCAL_NETWORK_ADDR))\"\nport:=\"8443\"" > $(GEN_API_FILE)
+	$(MAKE) -C cli --no-print-directory
+
+.PHONY: help localadress all down restart logs build clean user nginx front cli re

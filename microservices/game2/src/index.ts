@@ -51,7 +51,6 @@ app.register(jwt, { secret: process.env.JWT_SECRET! });
 export function verifTokenSocket(socket: Socket)
 {
     try {
-        console.log(socket.handshake.auth.token);
         if (socket.handshake.auth.token == "ia")
             return true;
         const tmp = app.jwt.verify(socket.handshake.auth.token);

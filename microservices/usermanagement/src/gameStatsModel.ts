@@ -16,9 +16,6 @@ export interface GameStats {
 }
 
 export function addStats(game: GameStats) {
-
-    console.log(game.part_name);
-
     const stmt = db.prepare(`
     INSERT INTO gameStats (
       game_name, part_name, part_id, player_one_id, player_two_id, final_score, round_number, game_time, mmr_gain_player_one, mmr_gain_player_two, date

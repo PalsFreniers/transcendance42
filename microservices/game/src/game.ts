@@ -4,7 +4,7 @@ import { Collidable, createRectangle } from "./gameObjects/Collidable.js"
 import { Paddle } from "./gameObjects/Paddle.js"
 import { clamp } from "./utils.js"
 
-type Listener<T = any> = (data: T) => void;
+export type Listener<T = any> = (data: T) => void;
 
 export class Game {
 
@@ -19,6 +19,7 @@ export class Game {
         ],
         private _ball: Ball = new Ball(),
     ) { }
+    private _name: string = "";
     private _leftTeam: Paddle[] = [];
     private _rightTeam: Paddle[] = [];
     private _allTeams: Paddle[] = [];
@@ -27,8 +28,22 @@ export class Game {
     private _resumeTimer: number = 3;
     private _countdown: boolean = false;
     private _events: Map<string, Listener[]> = new Map();
+    private _localPlayer: string | null = null;
 
     // Accessors
+
+    public get name() {
+        return this._name;
+    }
+
+    public set name(name: string) {
+        this._name = name;
+    }
+
+    public setName(name: string) {
+        this._name = name;
+        return this;
+    }
 
     public get ball() {
         return this._ball;
@@ -40,6 +55,14 @@ export class Game {
 
     public get rightTeam() {
         return this._rightTeam;
+    }
+
+    public get allTeams() {
+        return this._allTeams;
+    }
+
+    public get map() {
+        return this._map;
     }
 
     public get score() {
@@ -78,6 +101,16 @@ export class Game {
         this._countdown = bool;
     }
 
+    public get localPlayer(): string | null {
+        if (this._localPlayer)
+            return this._localPlayer;
+        return null;
+    }
+
+    public set localPlayer(localPlayer: string) {
+        this._localPlayer = localPlayer;
+    }
+
     getPaddle(playerID: number) {
         const paddleName = "paddle." + playerID.toString();
         for (const paddle of this._allTeams)
@@ -102,6 +135,15 @@ export class Game {
         return this;
     }
 
+    leaveTeam(playerID: number) {
+        this._leftTeam = this._leftTeam.filter((paddle) => {
+            return paddle.hitbox.name !== `paddle.${playerID}`;
+        });
+        this._rightTeam = this._rightTeam.filter((paddle) => {
+            return paddle.hitbox.name !== `paddle.${playerID}`;
+        });
+    }
+    
     start() {
         this._leftTeam.forEach((paddle) => { this._allTeams.push(paddle); });
         this._rightTeam.forEach((paddle) => { this._allTeams.push(paddle); });
@@ -111,6 +153,7 @@ export class Game {
         this._state = "starting";
 
         setTimeout(() => {
+            this.emit("point-start");
             this._state = "running";
         }, 2000);
     }
@@ -139,6 +182,10 @@ export class Game {
                 for (const paddle of this._allTeams) {
                     if (paddle.hitbox.name !== ballCollision.name) continue;
                     this.ball.paddleReflect(paddle);
+                    if (this.ball.pos.x < 0)
+                        this.emit("paddle-reflect", { name: this._name, x: this.ball.pos.x - this.ball.size, y: this.ball.pos.y });
+                    else
+                        this.emit("paddle-reflect", { name: this._name, x: this.ball.pos.x + this.ball.size, y: this.ball.pos.y });
                     break;
                 }
             } else if (ballCollision.name.startsWith("map")) {
@@ -151,6 +198,10 @@ export class Game {
                         return;
                     default:
                         this.ball.dir.y = -this.ball.dir.y;
+                        if (this.ball.pos.y < 0)
+                            this.emit("wall-reflect", { name: this._name, x: this.ball.pos.x, y: this.ball.pos.y - this.ball.size });
+                        else
+                            this.emit("wall-reflect", { name: this._name, x: this.ball.pos.x, y: this.ball.pos.y + this.ball.size});
                         this.ball.advance();
                         i++;
                 }
@@ -170,7 +221,7 @@ export class Game {
     }
 
     private incomingBall() {
-        if (this._countdown) // coutdown need to be launch just one time
+        if (this._countdown) // countdown need to be launch just one time
             return;
         this._countdown = true;
         this._resumeTimer = 3;
@@ -181,37 +232,42 @@ export class Game {
                 clearInterval(countdown); // CLEAR INTERVAL AND SET RUNNING BECAUSE GAME RESTART
                 this._state = "running";
                 this._countdown = false; // RESET FALSE FOR NEXT PAUSE
+                this.emit("point-start");
             }
         }, 1000);
     }
 
     private onScore(scoringTeam: number) {
-    this._ball.pos = new Vec2D.Vector(0, 0);
-    this._ball.speed = 0;
-    ++this._score[scoringTeam];
-    this._allTeams.forEach(paddle => {
-        let dY = paddle.hitbox.pos.y;
-        paddle.hitbox.pos.y = clamp(paddle.hitbox.pos.y - paddle.hitbox.pos.y, -5 + paddle.length / 2, 5 - paddle.length / 2);
-        dY = paddle.hitbox.pos.y - dY;
-        paddle.hitbox.getPoints().forEach((point) => { point.y += dY });
-    })
-    if (this._score[scoringTeam] == 3) {
-        this._state = "ended";
-        return;
+        this.emit("score", { ballSpeed: this._ball.speed, ballDir: this._ball.dir, scoringTeam});
+        this._ball.pos = new Vec2D.Vector(0, 0);
+        this._ball.speed = 0;
+        ++this._score[scoringTeam];
+        this._allTeams.forEach(paddle => {
+            let dY = paddle.hitbox.pos.y;
+            paddle.hitbox.pos.y = clamp(paddle.hitbox.pos.y - paddle.hitbox.pos.y, -5 + paddle.len / 2, 5 - paddle.len / 2);
+            dY = paddle.hitbox.pos.y - dY;
+            paddle.hitbox.getPoints().forEach((point) => { point.y += dY });
+            paddle.shouldMove = [false, false];
+        })
+        if (this._score[scoringTeam] == 3) {
+            this._state = "ended";
+            return;
+        }
+        this._state = "idling";
+        setTimeout(() => {
+            this._ball.speed = this._ball.baseSpeed;
+            this._ball.dir = new Vec2D.Vector(0.5 - scoringTeam, 0);
+            this._state = "running";
+            this.emit("point-start");
+        }, 2.5 * 1e3);
     }
-    this._state = "idling";
-    setTimeout(() => {
-        this._ball.speed = this._ball.baseSpeed;
-        this._ball.dir = new Vec2D.Vector(0.5 - scoringTeam, 0);
-        this._state = "running";
-    }, 2.5 * 1e3);
-}
 
     // Event Manager
     on(event: string, listener: Listener) {
         if (!this._events.has(event))
             this._events.set(event, []);
         this._events.get(event)!.push(listener);
+        return this;
     }
 
     off(event: string, listener: Listener) {
@@ -224,6 +280,7 @@ export class Game {
                 return l !== listener;
             })
         );
+        return this;
     }
 
     emit(event: string, data?: any) {
@@ -233,6 +290,7 @@ export class Game {
         listeners.forEach((listener) => {
             listener(data);
         });
+        return this;
     }
 
 }

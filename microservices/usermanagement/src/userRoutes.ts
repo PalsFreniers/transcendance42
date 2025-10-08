@@ -36,6 +36,17 @@ export async function profil(app: FastifyInstance) {
     });
 }
 
+export async function acceptFriend(app: FastifyInstance){
+	app.post('accept-friend', async (request, reply) => {
+		try {
+			
+		}
+		catch (err) {
+            return reply.code(500).send({ error: 'Failed to add friend' });
+        }
+	});
+}
+
 export async function friendAdd(app: FastifyInstance) {
     app.post('/add-friend', async (request, reply) => { // a changer pour ajouter la demande dans la db et envoyr un msg a la target
         try {
@@ -197,6 +208,37 @@ export async function deleteProfile(app: FastifyInstance) {
     });
 }
 
+export async function getHistoryGame(app: FastifyInstance) {
+    app.get('/history', async (request, reply) => {
+        try {
+            const user = request.user as {userId: number};
+			const games = db.prepare(`
+				SELECT 
+					id,
+					player_one_id,
+					player_two_id,
+					game_name,
+					final_score,
+					game_time,
+					mmr_gain_player_one,
+					mmr_gain_player_two,
+					date
+				FROM gameStats
+				WHERE player_one_id = ? OR player_two_id = ?
+				ORDER BY date DESC
+			`).all(user.userId, user.userId);
+
+			if (!games || games.length === 0)
+				return reply.code(404).send({ success: false, message: "No games found" });
+
+			return reply.code(200).send({ success: true, games });
+		} catch (err) {
+			console.error(err);
+			return reply.code(500).send({ success: false, error: "Failed to fetch player games" });
+		}
+    });
+}
+
 export async function addStatsInDB(app: FastifyInstance) {
     app.post('/add-stats', async (request, reply) => {
         console.log(`start save stats`);
@@ -297,4 +339,17 @@ export async function getMessage(app: FastifyInstance) {
             return reply.code(500).send({ error: 'Failed to get message' });
         }
     })
+}
+
+export async function getDatas(app: FastifyInstance) {
+	app.get('/data', async (req, rep) => {
+		try {
+			const { id } = req.query as { id?: number };
+			const user = db.prepare("SELECT * FROM users WHERE id = ?").get(id);
+			return rep.code(200).send(user);
+		} catch(err) {
+            console.log(err);
+            return rep.code(500).send({ error: 'Failed fetch user data' });
+		}
+	});
 }

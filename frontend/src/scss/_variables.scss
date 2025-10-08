@@ -37,3 +37,18 @@ $btn-bg: $bg-light;
 $btn-text: $color-primary;
 $btn-hover-bg: rgba(255, 255, 255, 0.15);
 $btn-hover-border: $color-secondary;
+
+@mixin slider {
+  -webkit-appearance: none;
+  border: #000000 1px solid;
+  border-radius: 16px;
+  height: 16px;
+}
+
+@mixin sliderThumb {
+  width: 16px;
+  background-color: #c0c0c0;
+}
+
+$browsersSlider: -webkit-slider, -moz-range;
+$browsersSlider2: -webkit-slider-runnable, -moz-range;

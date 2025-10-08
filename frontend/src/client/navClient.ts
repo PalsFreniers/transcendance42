@@ -1,5 +1,6 @@
 import { getSockets } from './socketClient.js';
 import { routes } from './template.js';
+import { notify } from './notify.js';
 
 import * as loginClient from './loginClient.js';
 import * as registerClient from './registerClient.js';
@@ -10,20 +11,40 @@ import * as shifumiLobbyClient from './game2Lobby.js';
 import * as shifumiStartClient from './shifumiStart.js';
 
 const pageModules: Record<string, any> = {
-  '/login': loginClient,
-  '/register': registerClient,
-  '/lobby': lobbyClient,
-  '/profil': profilClient,
-  '/pong': pongClient,
-  '/shifumi-lobby': shifumiLobbyClient,
-  '/shifumi': shifumiStartClient,
+	'/login': loginClient,
+	'/register': registerClient,
+	'/lobby': lobbyClient,
+	'/profil': profilClient,
+	'/pong': pongClient,
+	'/shifumi-lobby': shifumiLobbyClient,
+	'/shifumi': shifumiStartClient,
 };
 
-window.addEventListener('DOMContentLoaded', () => {
+async function isTokenValid(token: string): Promise<boolean> {
+	try {
+		const res = await fetch('/auth/verify', {
+			headers: { Authorization: `Bearer ${token}` }
+		});
+		const data = await res.json();
+		return !!data.valid;
+	} catch {
+		return false;
+	}
+}
+
+window.addEventListener('DOMContentLoaded', async () => {
 	const token = localStorage.getItem('token');
 	console.log('socket');
 	if (token) {
-		getSockets();
+		if (await isTokenValid(token)) {
+			getSockets();
+		}
+		else {
+			notify('Token invalid or expire, token was suppress.');
+			localStorage.removeItem('token');
+			navigateTo('/login');
+			return;
+		}
 	}
 	document.body.addEventListener('click', (e) => {
 		const target = e.target as HTMLElement;
@@ -123,4 +144,20 @@ export async function handleRoute() {
 export function navigateTo(url: string) {
 	history.pushState(null, '', url);
 	handleRoute();
+}
+
+export function backToPreviousPage() {
+	const backBtn = document.getElementById('return');
+	const path = window.location.pathname;
+	if (backBtn){
+		backBtn.addEventListener('click', () => {
+			if (path.startsWith("/shifumi"))
+			{
+				history.pushState(null, '', '/lobby');
+				handleRoute();
+			}
+			else
+				history.back();
+		})
+	}
 }

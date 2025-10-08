@@ -12,13 +12,14 @@ export interface GameData {
     game_time?: number,
     round_nmb: number,
     is_private: number,
+    is_spectable: number,
     date?: string,
 }
 
 export function createGameLobby(game: GameData) {
   const stmt = db.prepare(`
-    INSERT INTO games2 (player_one_id, player_one_name, player_two_id, player_two_name, lobby_name, game_score, status, start_time, game_time, round_nmb, is_private, date)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    INSERT INTO games2 (player_one_id, player_one_name, player_two_id, player_two_name, lobby_name, game_score, status, start_time, game_time, round_nmb, is_private, is_spectable, date)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `);
 
   const result = stmt.run(
@@ -33,6 +34,7 @@ export function createGameLobby(game: GameData) {
     game.game_time ?? null,
     game.round_nmb,
     game.is_private,
+    game.is_spectable,
     game.date ?? new Date().toISOString()
   );
   return result.lastInsertRowid;

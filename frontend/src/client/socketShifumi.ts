@@ -24,6 +24,8 @@ export let spectate: {
     spec: false
 }
 
+const cardTypes = ["Joker", "Rock", "Paper", "Scissors"];
+
 export function createShifumiSocket(socketShifumi: Socket | null) {
     
     const token = localStorage.getItem('token');
@@ -43,7 +45,6 @@ export function createShifumiSocket(socketShifumi: Socket | null) {
     });
 
     socketShifumi.on('connect', () => {
-      console.log(`Socket (${socketShifumi!.id}) connected!`);
       // On first connect and reconnects, emit register
       socketShifumi!.emit('register-socket', userId);
     });
@@ -55,9 +56,7 @@ export function createShifumiSocket(socketShifumi: Socket | null) {
     socketShifumi.on('reconnect', (coinUse: boolean) => {
       history.pushState(null, '', '/shifumi');
       handleRoute();
-      console.log('reconnect !');
       usedCoin = coinUse;
-      notify(coinUse.toString());
     });
 
     /******************************************************************************/
@@ -74,10 +73,10 @@ export function createShifumiSocket(socketShifumi: Socket | null) {
       history.pushState(null, '', '/shifumi');
       handleRoute();
       socketShifumi.emit('ready');
-      console.log(`you join room ${roomId}`)
     });
 
     socketShifumi.on('opponent-found', (numPlayer: number, opponentName : string) => {
+        console.log(`${opponentName} found`)
       const button = document.getElementById('start-button');
       const kick = document.getElementById('kick-opponent');
       const opponent = document.getElementById('opponent-name');
@@ -126,7 +125,6 @@ export function createShifumiSocket(socketShifumi: Socket | null) {
 
     socketShifumi.on('started-game', (gameId: number) => {
         gameIdShifumi = gameId; // a mettre aussi dans la fonction pour rerejoindre un partie
-        console.log(`game (${gameId}) started`);
 
         // a passer dans un fonction a appeler pour rendre le code plus propre 
         const start = document.getElementById('start-button');
@@ -162,7 +160,6 @@ export function createShifumiSocket(socketShifumi: Socket | null) {
     });
 
     socketShifumi.on('game-ended', () => {
-        console.log(`game ended`);
         gameIdShifumi = 0;
         usedCoin = false;
         spectate = {
@@ -178,6 +175,7 @@ export function createShifumiSocket(socketShifumi: Socket | null) {
 
     socketShifumi.on('game-spectate', (gameId, player, opponentName) => {
         const opponent = document.getElementById('opponent-name')
+        const next = document.getElementById('change-player');
 
         gameIdShifumi = gameId;
         spectate = {
@@ -187,8 +185,11 @@ export function createShifumiSocket(socketShifumi: Socket | null) {
             playedCard: null,
             spec: true
         };
-        if (opponent)
+        if (opponent) {
             opponent.textContent = `${player.name} versus ${opponentName}`;
+            if (next)
+                next.hidden = false;
+        }
     });
 
     /******************************************************************************/
@@ -271,16 +272,14 @@ export function createShifumiSocket(socketShifumi: Socket | null) {
             spectate.playerCard = cards;
         else
             myCard = cards;
-
+        const cardTypes = ["Joker", "Rock", "Paper", "Scissors"];
         cards.forEach((card, index) => {
             const button = document.getElementById(`card${index + 1}-button`);
             if (button) {
-                button.textContent = `[${card[0]}][${card[1]}]`;
+                button.textContent = `${cardTypes[card[0]]}`;
             }
         });
-
         const len = cards.length;
-
         for (let i = 0; i < 3; i++)
         {
             const button = document.getElementById(`card${i + 1}-button`)
@@ -291,7 +290,6 @@ export function createShifumiSocket(socketShifumi: Socket | null) {
                     button.hidden = true;
             }
         }
-        console.log('received card !');
     });
 
     socketShifumi.on('end-time', () => {
@@ -311,19 +309,19 @@ export function createShifumiSocket(socketShifumi: Socket | null) {
         const playedCard = document.getElementById('opponent-card-played') as HTMLElement;
 
         if (playedCard)
-            playedCard.textContent = `[${card[0]}][${card[1]}]`;
+            playedCard.textContent = `${cardTypes[card[0]]}`;
     });
 
-    socketShifumi.on('played-card', ( cards: [ number, number ] ) => {
+    socketShifumi.on('played-card', ( card: [ number, number ] ) => {
         const playedCard = document.getElementById('card-played') as HTMLElement;
 
         if (playedCard)
-            playedCard.textContent = `[${cards[0]}][${cards[1]}]`;
+            playedCard.textContent = `${cardTypes[card[0]]}`;
 
         if (spectate.spec)
         {
             spectate.playerCard?.forEach((card, index) => {
-                if (card[0] == cards[0] && card[1] == cards[1]) {
+                if (card[0] == card[0] && card[1] == card[1]) {
                     const button = document.getElementById(`card${index + 1}-button`);
                     if (button)
                         button.textContent = '[][]';
