@@ -22,24 +22,29 @@ const pageModules: Record<string, any> = {
 
 async function isTokenValid(token: string): Promise<boolean> {
 	try {
-		const res = await fetch('/auth/verify', {
-			headers: { Authorization: `Bearer ${token}` }
+		const res = await fetch('/api/user/auth/verify', {
+			method: 'POST',
+			headers: {'Content-Type': 'application/json' },
+			body: JSON.stringify({ token: token })
 		});
+
+		if (!res.ok) 
+			return false;
 		const data = await res.json();
-		return !!data.valid;
-	} catch {
+		return data?.valid === true;
+	} catch (err) {
+		console.error('Token validation error:', err);
 		return false;
 	}
 }
 
+
 window.addEventListener('DOMContentLoaded', async () => {
 	const token = localStorage.getItem('token');
-	console.log('socket');
 	if (token) {
 		if (await isTokenValid(token)) {
 			getSockets();
-		}
-		else {
+		} else {
 			notify('Token invalid or expire, token was suppress.');
 			localStorage.removeItem('token');
 			navigateTo('/login');
@@ -101,6 +106,16 @@ export async function handleRoute() {
 	if (!token && !['/', '/login', '/register'].includes(path)) {
 		history.replaceState(null, '', '/login');
 		return handleRoute();
+	}
+	if (token) {
+		if (await isTokenValid(token)) {
+			getSockets();
+		} else {
+			notify('Token invalid or expire, token was suppress.');
+			localStorage.removeItem('token');
+			navigateTo('/login');
+			return;
+		}
 	}
 	if (token && ['/login', '/register'].includes(path)) {
 		history.replaceState(null, '', '/lobby');

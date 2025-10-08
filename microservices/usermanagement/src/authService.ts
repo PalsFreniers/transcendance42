@@ -71,7 +71,7 @@ export async function auth(app: FastifyInstance) {
             console.log('User is already connected');
             return reply.code(401).send({ error: 'You are already connected on another device' });
         }
-        //SIGN TOKEN FOR THAT SESSION ANOTHER IS GENERATE AT EACH CONNECTION
+        //SIGN 2FA TOKEN FOR THAT SESSION ANOTHER IS GENERATE AT EACH CONNECTION
         if (twofaCheckBox) {
             const otp = Math.floor(100000 + Math.random() * 900000);
             otpStore.set(user.id, { otp, expires: Date.now() + 5 * 60 * 1000 });
@@ -85,7 +85,7 @@ export async function auth(app: FastifyInstance) {
             // RETURN IT FOR OTHERS SERVICES CAN BE USED IT!
             return reply.send({ message: 'OTP sent', userId: user.id, username: user.username });
         }
-        const token = app.jwt.sign({ userId: user.id, username: user.username });
+        const token = app.jwt.sign({ userId: user.id, username: user.username }, { expiresIn: '2h' });
         return reply.send({ token: token });
     });
     app.post('/verify-email', async (request, reply) => {
@@ -95,26 +95,27 @@ export async function auth(app: FastifyInstance) {
         if (!record || record.expires < Date.now() || record.otp !== parseInt(otp))
             return reply.code(401).send({ error: 'Invalid or expired otp' });
         otpStore.delete(userId);
-        const token = app.jwt.sign({ userId: userId, username: username });
+        const token = app.jwt.sign({ userId: userId, username: username }, { expiresIn: '2h' });
 
         return reply.send({ token: token });
     });
 }
 
 export async function verifyToken(app: FastifyInstance) {
-    app.get('/auth/verify', async (request, reply) => {
-        try {
-            const authHeader = request.headers.authorization;
-            if (!authHeader)
-                return reply.code(401).send({ valid: false });
-            const token = authHeader.split(' ')[1];
-            const decoded = app.jwt.verify(token);
-            return reply.send({ valid: true, user: decoded });
-        } catch (err) {
-            return reply.code(401).send({ valid: false });
-        }
-    });
+	app.post('/auth/verify', async (request, reply) => {
+		const { token } = request.body as { token: string }
+		try {
+			const decoded = app.jwt.verify(token) as { userId: number; username: string };
+			db.prepare(`UPDATE users SET is_online = 1 WHERE id = ?`).run(decoded.userId);
+			return reply.send({ valid: true, user: decoded });
+		} catch (err) {
+			console.error('JWT verification failed:', err);
+			return reply.code(401).send({ valid: false });
+		}
+	});
 }
+
+
 
 
 export async function logOut(app: FastifyInstance) {

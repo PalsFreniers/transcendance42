@@ -71,7 +71,7 @@ export function startServer(io) {
                     target: targetId.id,
                     text: txt,
                     timestamp: Date.now().toString(),
-                    isRead : 0
+                    isRead: 0
                 }
                 saveMessage(msg);
 
@@ -81,7 +81,9 @@ export function startServer(io) {
         });
 
         socket.on('disconnect', () => {
-            const stmt = db.prepare(`UPDATE users SET socket = NULL AND is_online = 0 WHERE socket = ?`);
+            const stmt = db.prepare(`
+            UPDATE users SET socket = NULL, is_online = 0 WHERE socket = ?
+        `);
             stmt.run(socket.id);
             console.log(`Socket ${socket.id} disconnected`);
         });

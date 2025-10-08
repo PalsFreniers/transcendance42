@@ -85,7 +85,7 @@ io.use(async (socket, next) => {
 // JWT auth hook
 app.addHook('onRequest', async (request, reply) => {
     const url = request.raw.url || '';
-    const publicRoutes = ['/api/user/login', '/api/user/register', '/api/user/verify-email', '/uploads/'];
+    const publicRoutes = ['/api/user/login', '/api/user/register', '/api/user/verify-email', '/uploads/', '/api/user/auth/verify'];
 
     if (publicRoutes.some(route => url.startsWith(route))) return;
 

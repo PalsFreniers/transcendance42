@@ -511,14 +511,17 @@ input:-webkit-autofill {
 
 .game-card {
   padding: 12px;
+  p {
+	font-size: $font-size-xs;
+  }
 }
 
 .game-card.win {
-  background-color: #2e8b57; /* vert victoire */
+  background-color: #2e8b57;
 }
 
 .game-card.lose {
-  background-color: #b22222; /* rouge défaite */
+  background-color: #b22222;
 }
 
 .profil{
