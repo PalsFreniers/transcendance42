@@ -5,8 +5,9 @@ import fs from 'fs';
 import path from 'path';
 import { ChatMessage } from './userSocket.js';
 import { Message } from './chatModel.js'
+import { FriendRequests, createRequests } from './friendRequestsModel.js';
+import { io } from './index.js'
 //import { ChatMessage } from './userSocket.js';
-//import { io } from './index.js'
 
 export async function profil(app: FastifyInstance) {
     app.get('/profil', async (request, reply) => {
@@ -36,21 +37,30 @@ export async function profil(app: FastifyInstance) {
 }
 
 export async function friendAdd(app: FastifyInstance) {
-    app.post('/add-friend', async (request, reply) => {
+    app.post('/add-friend', async (request, reply) => { // a changer pour ajouter la demande dans la db et envoyr un msg a la target
         try {
             const user = request.user as { userId: number };
             const { friendUsername } = request.body as { friendUsername: string };
-            const friend = db.prepare('SELECT id FROM users WHERE username = ?').get(friendUsername) as { id: number };
+            const friend = db.prepare('SELECT id, socket FROM users WHERE username = ?').get(friendUsername) as { id: number, socket: string };
+
             if (!friend)
                 return reply.code(404).send({ error: 'Friend not found' });
-			if(user.userId == friend.id)
+			
+            if(user.userId == friend.id)
 				return reply.code(403).send({ error: 'Unable to be friend with yourself'});
-            const currentUser = db.prepare('SELECT friends FROM users WHERE id = ?').get(user.userId) as { friends: string };
-            let friends = JSON.parse(currentUser.friends || '[]');
-            if (friends.includes(friend.id))
-                return reply.code(400).send({ error: 'Already friends' });
-            friends.push(friend.id);
-            db.prepare('UPDATE users SET friends = ? WHERE id = ?').run(JSON.stringify(friends), user.userId);
+            
+            const newRequests: FriendRequests = {
+                id: 0,
+                sender_id: user.userId,
+                receiver_id: friend.id,
+                status: '',
+                created_at: Date.toString(),
+                updated_at: Date.toString()
+            }
+            createRequests(newRequests);
+
+            io.to(friend.socket).emit('new-friend-request');
+
             return { success: true, message: `${friendUsername} added as a friend` };
         } catch (err) {
             return reply.code(500).send({ error: 'Failed to add friend' });
@@ -58,62 +68,68 @@ export async function friendAdd(app: FastifyInstance) {
     });
 }
 
+interface frontFriendRequest {
+    id: number
+    sender_username: string,
+    status: string,
+    created_at: string,
+}
+
+export async function getFriendRequest(app: FastifyInstance) {
+    app.get('/get-friend-requests', async (request, reply) => {
+        try {
+            const user = request.user as { userId: number };
+            const res = db.prepare(`SELECT * FROM friend_requests WHERE receiver_id = ?`).all(user.userId) as FriendRequests[];
+            if (!res)
+                return reply.code(500).send('fail to get friend request');
+
+            let tabRequest: frontFriendRequest[] = [];
+            res.forEach(request => {
+                const name = db.prepare(`SELECT username FROM users WHERE id = ?`).get(request.sender_id) as {username: string}
+                if (!name)
+                    return;
+                tabRequest.push({
+                    id : request.id,
+                    sender_username: name.username,
+                    status: request.status,
+                    created_at: request.created_at
+                });
+            })
+            return { success: true, friendRequest: tabRequest};
+        } catch {
+
+        }
+    });
+}
 
 export async function friendDelete(app: FastifyInstance) {
-    app.post('/delete-friend', async (request, reply) => {
+    app.post('/delete-friend', async (request, reply) => { // a appeler deux fois pour supr des deux coter
         try {
             const user = request.user as { userId: number };
             const { friendUsername } = request.body as { friendUsername: string };
             const friend = db.prepare('SELECT id FROM users WHERE username = ?').get(friendUsername) as { id: number };
             if (!friend)
                 return reply.code(404).send({ error: 'Friend not found' });
+            
+            
             const currentUser = db.prepare('SELECT friends FROM users WHERE id = ?').get(user.userId) as { friends: string };
             let friends = JSON.parse(currentUser.friends || '[]');
             friends = friends.filter((fid: number) => fid !== friend.id);
             db.prepare('UPDATE users SET friends = ? WHERE id = ?').run(JSON.stringify(friends), user.userId);
+            
+            const FriendUser = db.prepare('SELECT friends FROM users WHERE id = ?').get(friend.id) as { friends: string };
+            friends = JSON.parse(currentUser.friends || '[]');
+            friends = friends.filter((fid: number) => fid !== user.userId);
+            db.prepare('UPDATE users SET friends = ? WHERE id = ?').run(JSON.stringify(friends), friend.id);
+            
+            
+
             return { success: true, message: `${friendUsername} removed from friends` };
         } catch (err) {
             return reply.code(500).send({ error: 'Failed to remove friend' });
         }
     });
 }
-/*
-export async function friendSendMsg(app: FastifyInstance) {
-    app.post('/priv-msg/:username', async (request, reply) => {
-    console.log('message load !');
-    try {
-        const user = request.user as { username: string, userId: number };
-        const { message } = request.body as { message: string };
-        const { username: targetUsername } = request.params as { username: string };
-        const target = db.prepare('SELECT socket FROM users WHERE username = ?').get(targetUsername) as { socket: string};
-        const targetId = db.prepare('SELECT id FROM users WHERE username = ?').get(targetUsername) as { id: number};
-        const isOnline = db.prepare('SELECT is_online FROM users WHERE username = ?').get(targetUsername) as { is_online: number};
-        // ajouter un verification de target.onLine;
-        if (!target) 
-            return reply.code(404).send({ error: 'User not found' });
-        console.log('userId = ', user, ' target = ', target.socket);
-        const msg: ChatMessage = {
-          from: user.username,
-          userId: user.userId,
-          target: targetId.id,
-          for: target.socket,
-          text: message,
-          timestamp: Date.now().toString() // a garder ?
-        };
-        console.log(`target = ${target.socket}`);
-        // ajouter une save des X dernier messages
-        if (!isOnline.is_online)
-          saveMessage(msg);
-        else
-          io.to(target.socket).emit('message', msg); // envoie du message au client 
-        console.log('message emit !');
-
-        return { success: true, from: user.userId, to: targetId.id, message };
-    } catch (err) {
-        return reply.code(500).send({ error: 'Failed to send message' });
-    }
-  });
-}*/
 
 export async function friendList(app: FastifyInstance) {
     app.get('/friend-list', async (request, reply) => {

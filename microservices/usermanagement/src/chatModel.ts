@@ -1,15 +1,15 @@
 import db from './dbSqlite/db.js';
-import { z } from 'zod';
+// import { z } from 'zod';
 
 
-export const ConversationSchema = z.object({
-    id: z.number(),
-    username: z.string(),
-    userId: z.number(),
-    targetId: z.number(),
-    date: z.string(),
-    message: z.string(),
-});
+// export const ConversationSchema = z.object({
+//     id: z.number(),
+//     username: z.string(),
+//     userId: z.number(),
+//     targetId: z.number(),
+//     date: z.string(),
+//     message: z.string(),
+// });
 
 
 export interface Message {
