@@ -133,13 +133,11 @@ export async function init() {
 						body: formData,
 					}
 				);
-
 				if (!changeProfil.ok) {
 					const err = await changeProfil.json();
-					notify(`Failed to update profile: Error ${err}`);
+					notify(`Failed to update profile: Error ${err.error}`);
 					return;
 				}
-
 				const data = await changeProfil.json();
 				notify(`profile well updated !`)
 				profil.innerHTML = `

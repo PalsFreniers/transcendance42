@@ -168,6 +168,9 @@ export async function updateProfile(app: FastifyInstance) {
                 SELECT * FROM users WHERE id = ?
             `).get(user.userId) as User;
             const username = body.username.value || currentUser.username;
+            const verifyUsername = db.prepare(`SELECT * FROM users WHERE username = ?`).get(username) as User;
+            if (verifyUsername)
+                return reply.code(401).send({ error: 'Username already use' });
             const oldPassword = body.oldPassword.value || null;
             let newPassword = body.newPassword.value || currentUser.password_hash;
             const confirmPassword = body.confirmPassword.value || null;
@@ -189,6 +192,8 @@ export async function updateProfile(app: FastifyInstance) {
                 fileUrl = `/uploads/${file.filename}`;
                 console.log('File saved at:', fileUrl);
             }
+            else
+                fileUrl = currentUser.profile_image_url || ''
             db.prepare(`
           UPDATE users
           SET bio = ?, profile_image_url = ?, username = ?, password_hash = ?, updated_at = CURRENT_TIMESTAMP
