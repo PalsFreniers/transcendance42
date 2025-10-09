@@ -111,6 +111,19 @@ export function createPongSocket(socketPong: Socket | null) {
     });
 
     socketPong.on('game-state', (state) => {
+    	const ffBtn = document.getElementById("pong-ff") as HTMLButtonElement;
+		if(ffBtn.style.display != "block") {
+			ffBtn.style.display = "block";
+			ffBtn.addEventListener("click", async (e) => {
+				e.preventDefault();
+				try {
+					const socket = getSocket(1);
+					socket!.emit("ff");
+				} catch (err) {
+					console.error("Error while forfeiting: ", err);
+				}
+			});
+		}
         drawPong(state);
     });
 
@@ -162,12 +175,14 @@ export function createPongSocket(socketPong: Socket | null) {
 
     socketPong.on('game-end', (data) => {
         const canvas = document.getElementById("pong-canvas") as HTMLCanvasElement;
+        const ffBtn = document.getElementById("pong-ff") as HTMLButtonElement;
         const msgGameEnd = document.getElementById("msg-end") as HTMLElement;
         msgGameEnd.innerHTML = `
             <p>${data.msg} with score of ${data.score[0]} - ${data.score[1]}</p>`
         if (!canvas)
             return;
         canvas.style.display = "none";
+        ffBtn.style.display = "none";
     })
 
     socketPong.on('disconnect', (reason) => {
