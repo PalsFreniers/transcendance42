@@ -1,4 +1,4 @@
-import { getSockets } from './socketClient.js';
+import { getSocket, getSockets } from './socketClient.js';
 import { routes } from './template.js';
 import { notify } from './notify.js';
 
@@ -24,11 +24,11 @@ async function isTokenValid(token: string): Promise<boolean> {
 	try {
 		const res = await fetch('/api/user/auth/verify', {
 			method: 'POST',
-			headers: {'Content-Type': 'application/json' },
+			headers: { 'Content-Type': 'application/json' },
 			body: JSON.stringify({ token: token })
 		});
 
-		if (!res.ok) 
+		if (!res.ok)
 			return false;
 		const data = await res.json();
 		return data?.valid === true;
@@ -44,11 +44,6 @@ window.addEventListener('DOMContentLoaded', async () => {
 	if (token) {
 		if (await isTokenValid(token)) {
 			getSockets();
-		} else {
-			notify('Token invalid or expire, token was suppress.');
-			localStorage.removeItem('token');
-			navigateTo('/login');
-			return;
 		}
 	}
 	document.body.addEventListener('click', (e) => {
@@ -107,21 +102,24 @@ export async function handleRoute() {
 		history.replaceState(null, '', '/login');
 		return handleRoute();
 	}
-	if (token) {
-		if (await isTokenValid(token)) {
-			getSockets();
-		} else {
-			notify('Token invalid or expire, token was suppress.');
-			localStorage.removeItem('token');
-			navigateTo('/login');
-			return;
-		}
-	}
 	if (token && ['/login', '/register'].includes(path)) {
 		history.replaceState(null, '', '/lobby');
 		return handleRoute();
 	}
-
+	if (token && !await isTokenValid(token)) {
+		await fetch(`/api/user/logout`, {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json",
+				Authorization: `Bearer ${token}`
+			},
+			body: JSON.stringify({}),
+		});
+		notify('Token invalid or expire, token was suppress.');
+		localStorage.removeItem('token');
+		navigateTo('/login');
+		return;
+	}
 	// --- template injection ---
 	const app = document.getElementById('app');
 	if (!app)
@@ -164,10 +162,9 @@ export function navigateTo(url: string) {
 export function backToPreviousPage() {
 	const backBtn = document.getElementById('return');
 	const path = window.location.pathname;
-	if (backBtn){
+	if (backBtn) {
 		backBtn.addEventListener('click', () => {
-			if (path.startsWith("/shifumi"))
-			{
+			if (path.startsWith("/shifumi")) {
 				history.pushState(null, '', '/lobby');
 				handleRoute();
 			}

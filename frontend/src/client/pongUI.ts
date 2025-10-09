@@ -98,8 +98,8 @@ class ColorFlash extends RectangleParticle {
         speed: number,
         alpha: number,
         lifetime: number = Number.MAX_VALUE,
-        size: { x: number, y: number }
-        public rate: number = 1 / 30;
+        size: { x: number, y: number },
+        public rate: number = 1 / 30,
     ) {
         super(pos, dir, color, speed, alpha, lifetime, size);
     }

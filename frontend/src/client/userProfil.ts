@@ -48,7 +48,7 @@ export async function init() {
 						const mmrGain = isPlayerOne ? game.mmr_gain_player_one : game.mmr_gain_player_two;
 						const otherId = isPlayerOne ? game.player_two_id : game.player_one_id;
 						let otherName = otherId === -1 ? 'invited' : otherId === -2 ? 'AI' : '';
-						if(otherName === '') {
+						if (otherName === '') {
 							const resName = await fetch(`/api/user/data?id=${otherId}`, {
 								method: 'GET',
 								headers: {
@@ -83,6 +83,10 @@ export async function init() {
 			e.preventDefault();
 			form.innerHTML = `
 				<input id="bio" type="text" bio="bio" placeholder="bio" />
+				<input id="username" type="text" placeholder="change username"/>
+				<input id="old-password" type="password" placeholder="old password"/>
+				<input id="new-password" type="password" placeholder="new password">
+				<input id="confirm-password" type"password" placeholder="confirm new password"/>
 				<div class="file-upload">
 					<label for="img-profil">📷 Upload profile picture</label>
 					<input id="img-profil" type="file" accept="image/*"/>
@@ -91,6 +95,10 @@ export async function init() {
 				<img id="preview-profil" src="${data.user.profile_image_url || '/assets/default-avatar.png'}"/>
 				<button type="submit">Save</button>
 			`;
+			const newUsername = document.getElementById('username') as HTMLInputElement;
+			const oldPassword = document.getElementById('old-password') as HTMLInputElement;
+			const newPassword = document.getElementById('new-password') as HTMLInputElement;
+			const confirmPassword = document.getElementById('confirm-password') as HTMLInputElement;
 			const bio = document.getElementById('bio') as HTMLInputElement;
 			const pp = document.getElementById('img-profil') as HTMLInputElement;
 			const fileName = document.querySelector(".file-name") as HTMLElement;
@@ -106,6 +114,10 @@ export async function init() {
 				e.preventDefault();
 
 				const formData = new FormData();
+				formData.append("username", newUsername.value);
+				formData.append("oldPassword", oldPassword.value);
+				formData.append("newPassword", newPassword.value);
+				formData.append("confirmPassword", confirmPassword.value);
 				formData.append("bio", bio.value);
 				if (pp.files?.[0]) {
 					formData.append("profile_image_url", pp.files[0]);
