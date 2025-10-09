@@ -47,8 +47,8 @@ export async function init() {
 						const isWin = (isPlayerOne && score1 > score2) || (!isPlayerOne && score2 > score1);
 						const mmrGain = isPlayerOne ? game.mmr_gain_player_one : game.mmr_gain_player_two;
 						const otherId = isPlayerOne ? game.player_two_id : game.player_one_id;
-						let otherName = otherId === -1 ? 'invited' : otherId === -2 ? 'AI' : '';
-						if(otherName === '') {
+						let otherName = otherId === -1 ? 'invited' : otherId === -2 ? 'AI' : null;
+						if(!otherName) {
 							const resName = await fetch(`/api/user/data?id=${otherId}`, {
 								method: 'GET',
 								headers: {
@@ -59,12 +59,13 @@ export async function init() {
 							const usr = await resName.json();
 							otherName = usr.username;
 						}
+						let fScore = score1 === 11 || score2 === 11 ? "forfeit" : game.final_score;
 
 						return `
 						<div class="game-card ${isWin ? 'win' : 'lose'}">
 							<h3>${game.game_name === 'shifumi' ? '🖐️ Shifumi' : '🏓 Pong'}</h3>
 							<p>Against: ${otherName}</p>
-							<p>Score: ${game.final_score}</p>
+							<p>Score: ${fScore}</p>
 							${game.game_name === 'shifumi' ? `<p>MMR: ${mmrGain > 0 ? '+' : ''}${mmrGain}</p>` : ''}
 							<p>Durée: ${game.game_time}s</p>
 							<p>Date: ${game.date}</p>
