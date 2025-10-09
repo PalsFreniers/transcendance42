@@ -303,6 +303,19 @@ export function socketManagement(io: Server) {
             });
         });
 
+		socket.on('ff', () => {
+            const playerId = socket.data.userId;
+            if (!playerId)
+                return;
+            const name = manager.findGameName(playerId.toString());
+            if (!name)
+                return console.warn(`No active game for player ${playerId}`);
+			const game = manager.findGame(name)!;
+            if (game.state !== 'running')
+                return;
+			manager.forfeit(name, playerId);
+		});
+
         socket.on('disconnect', () => {
             manager.unregisterSocket(socket.data.userId);
             console.log(`Socket disconnected: ${socket.id}`);

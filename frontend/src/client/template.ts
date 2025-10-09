@@ -197,6 +197,7 @@ const templates: Record<string, () => string> = {
     </div>
     <p id="msg-end" class="pong-message"></p>
     </div>
+	<button id="pong-ff">Forfeit</button>
   <canvas id="pong-canvas" width="1600" height="800"></canvas>
 </div>`,
 	shifumiLobby: () => `

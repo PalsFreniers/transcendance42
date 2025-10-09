@@ -52,6 +52,14 @@ export class GameManager {
         return null;
     }
 
+	findGameName(info: string): string | null {
+        for (const [name, [_, [p1, p2]]] of this._games) {
+            if (p1?.toString() === info || p2?.toString() === info)
+                return name;
+        }
+        return null;
+	}
+
     createLobby(lobbyName: string, gameID: number): number {
         if (this._games.has(lobbyName))
             return 3; // lobby already exists and game isn't ended
@@ -224,6 +232,7 @@ export class GameManager {
             usernameLeftTeam: usernameLeftTeam,
             playerOneID: p1,
             playerTwoID: p2,
+			isLocal: game.localPlayer != null,
         };
     }
 

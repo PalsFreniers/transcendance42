@@ -549,6 +549,7 @@ input:-webkit-autofill {
 	text-align: center;
 	color: $color-white;
 	box-shadow: 0 4px 10px rgba($color-black, 0.6);
+    height: 50%;
 
 	h2,
 	h3 {
@@ -557,6 +558,29 @@ input:-webkit-autofill {
 		color: $color-accent-alt;
 		text-shadow: 0 0 5px $color-black;
 	}
+
+    #game-history {
+        height: 100%;
+    	overflow-y: scroll;
+    	overflow-x: hidden;
+    	scroll-behavior: smooth;
+    	scrollbar-width: thin;
+    	scrollbar-color: $color-secondary transparent;
+    
+        ::-webkit-scrollbar-track {
+        	background: transparent;
+        }
+        
+        ::-webkit-scrollbar {
+        	width: 6px;
+        	background-color: transparent;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+        	border-radius: 10px;
+        	background-color: #555;
+        }
+    }
 }
 
 
@@ -857,6 +881,10 @@ input:-webkit-autofill {
 	display: none;
 	border: 4px solid $bg-light;
 	border-radius: $radius-lg;
+}
+
+#pong-ff {
+  display: none;
 }
 
 /******************************************************************************/
@@ -1299,6 +1327,7 @@ input:-webkit-autofill {
 		}
 	}
 }
+
 
 #boddy_chat {
 	position: absolute;
