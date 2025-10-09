@@ -52,7 +52,7 @@ export class GameManager {
         return null;
     }
 
-	getGameName(info: string): string | null {
+	findGameName(info: string): string | null {
         for (const [name, [_, [p1, p2]]] of this._games) {
             if (p1?.toString() === info || p2?.toString() === info)
                 return name;

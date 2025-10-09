@@ -117,8 +117,7 @@ export function createPongSocket(socketPong: Socket | null) {
 			ffBtn.addEventListener("click", async (e) => {
 				e.preventDefault();
 				try {
-					const socket = getSocket(1);
-					socket!.emit("ff");
+					socketPong!.emit("ff");
 				} catch (err) {
 					console.error("Error while forfeiting: ", err);
 				}
