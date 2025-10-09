@@ -112,7 +112,7 @@ export function createPongSocket(socketPong: Socket | null) {
 
     socketPong.on('game-state', (state) => {
     	const ffBtn = document.getElementById("pong-ff") as HTMLButtonElement;
-		if(ffBtn.style.display != "block") {
+		if(!state.isLocal && ffBtn.style.display != "block") {
 			ffBtn.style.display = "block";
 			ffBtn.addEventListener("click", async (e) => {
 				e.preventDefault();

@@ -232,6 +232,7 @@ export class GameManager {
             usernameLeftTeam: usernameLeftTeam,
             playerOneID: p1,
             playerTwoID: p2,
+			isLocal: game.localPlayer != null,
         };
     }
 
