@@ -288,12 +288,12 @@ export function socketManagement(io: Server) {
             if (!game)
                 return;
             console.log(`you left the room game-${game.gameID}`);
-            const playerOneUsername = manager.getUsernameFromSocket(manager.getSocketId(manager.getGameInfo(lobbyname, io)!.playerOneID!)!, io);
             manager.leaveGame(lobbyname, socket.data.userId, socket.handshake.auth.token);
             socket.leave(socket.data.gameId);
-            const state = manager.getGameInfo(lobbyname, io);
-            if (!state)
+            const gameInfo = manager.getGameInfo(lobbyname, io);
+            if (!gameInfo)
                 return;
+            const playerOneUsername = manager.getUsernameFromSocket(manager.getSocketId(gameInfo.playerOneID!)!, io);
             io.to(socket.data.gameId).emit('player-joined', {
                 gameId: game.gameID,
                 lobbyName: lobbyname,

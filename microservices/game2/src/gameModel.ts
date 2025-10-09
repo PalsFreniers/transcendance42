@@ -35,7 +35,7 @@ export function createGameLobby(game: GameData) {
     game.round_nmb,
     game.is_private,
     game.is_spectable,
-    game.date ?? new Date().toISOString()
+    game.date ?? new Date().toISOString().split('T')[0],
   );
   return result.lastInsertRowid;
 }

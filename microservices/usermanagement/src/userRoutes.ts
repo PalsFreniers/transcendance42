@@ -259,7 +259,6 @@ export async function getHistoryGame(app: FastifyInstance) {
 
 export async function addStatsInDB(app: FastifyInstance) {
     app.post('/add-stats', async (request, reply) => {
-        console.log(`start save stats`);
         try {
             const { stats } = request.body as { stats: GameStats };
             addStats(stats);

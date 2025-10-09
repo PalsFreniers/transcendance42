@@ -37,7 +37,7 @@ export function createGameLobby(g: GameRecord) {
         g.status ?? 'waiting',
         g.startTime ?? null,
         g.endTime ?? null,
-        g.gameDate ?? new Date().toISOString(),
+        g.gameDate ?? new Date().toISOString().split('T')[0],
     );
     return result.lastInsertRowid as number;
 }
