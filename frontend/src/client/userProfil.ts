@@ -67,8 +67,8 @@ export async function init() {
 							<p>Against: ${otherName}</p>
 							<p>Score: ${fScore}</p>
 							${game.game_name === 'shifumi' ? `<p>MMR: ${mmrGain > 0 ? '+' : ''}${mmrGain}</p>` : ''}
-							<p>Duree: ${game.game_time}s</p>
-							<p>Date: ${game.date}</p>
+							<p>Durée: ${game.game_time}s</p>
+							<p>Date: ${game.date.split('T')[0]}</p>
 						</div>
 						`;
 					})
