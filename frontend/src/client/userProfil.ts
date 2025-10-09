@@ -84,6 +84,10 @@ export async function init() {
 			e.preventDefault();
 			form.innerHTML = `
 				<input id="bio" type="text" bio="bio" placeholder="bio" />
+				<input id="username" type="text" placeholder="change username"/>
+				<input id="old-password" type="password" placeholder="old password"/>
+				<input id="new-password" type="password" placeholder="new password">
+				<input id="confirm-password" type"password" placeholder="confirm new password"/>
 				<div class="file-upload">
 					<label for="img-profil">📷 Upload profile picture</label>
 					<input id="img-profil" type="file" accept="image/*"/>
@@ -92,6 +96,10 @@ export async function init() {
 				<img id="preview-profil" src="${data.user.profile_image_url || '/assets/default-avatar.png'}"/>
 				<button type="submit">Save</button>
 			`;
+			const newUsername = document.getElementById('username') as HTMLInputElement;
+			const oldPassword = document.getElementById('old-password') as HTMLInputElement;
+			const newPassword = document.getElementById('new-password') as HTMLInputElement;
+			const confirmPassword = document.getElementById('confirm-password') as HTMLInputElement;
 			const bio = document.getElementById('bio') as HTMLInputElement;
 			const pp = document.getElementById('img-profil') as HTMLInputElement;
 			const fileName = document.querySelector(".file-name") as HTMLElement;
@@ -107,6 +115,10 @@ export async function init() {
 				e.preventDefault();
 
 				const formData = new FormData();
+				formData.append("username", newUsername.value);
+				formData.append("oldPassword", oldPassword.value);
+				formData.append("newPassword", newPassword.value);
+				formData.append("confirmPassword", confirmPassword.value);
 				formData.append("bio", bio.value);
 				if (pp.files?.[0]) {
 					formData.append("profile_image_url", pp.files[0]);
@@ -122,13 +134,11 @@ export async function init() {
 						body: formData,
 					}
 				);
-
 				if (!changeProfil.ok) {
 					const err = await changeProfil.json();
-					notify(`Failed to update profile: Error ${err}`);
+					notify(`Failed to update profile: Error ${err.error}`);
 					return;
 				}
-
 				const data = await changeProfil.json();
 				notify(`profile well updated !`)
 				profil.innerHTML = `

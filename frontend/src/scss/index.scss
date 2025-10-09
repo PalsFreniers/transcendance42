@@ -503,28 +503,36 @@ input:-webkit-autofill {
 }
 
 #game-history {
-  display: flex;
-  flex-direction: column;
-  width: 45%;
-  row-gap: 12px;
+	display: flex;
+	flex-direction: column;
+	width: 45%;
+	row-gap: 12px;
 }
 
 .game-card {
-  padding: 12px;
-  p {
-	font-size: $font-size-xs;
-  }
+	padding: 12px;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	row-gap: 7px;
+	border: 1px solid $color-primary;
+	border-radius: $radius-lg;
+	box-shadow: 0 4px 12px rgba($color-black, 0.4);
+
+	p {
+		font-size: $font-size-xs;
+	}
 }
 
 .game-card.win {
-  background-color: #2e8b57;
+	background: rgba($color-accent-alt, 0.5);
 }
 
 .game-card.lose {
-  background-color: #b22222;
+	background: rgba($color-accent, 0.5);
 }
 
-.profil{
+.profil {
 	width: 45%;
 }
 
@@ -644,22 +652,19 @@ input:-webkit-autofill {
 
 	input {
 		font-family: $font-main;
-	}
-}
+		background: transparent;
+		color: $color-white;
+		text-align: center;
+		border: 1px solid rgba($color-white, 0.2);
+		font-size: $font-size-xs;
+		width: 100%;
+		padding: 10px;
 
-#bio {
-	background: transparent;
-	color: $color-white;
-	text-align: center;
-	border: 1px solid rgba($color-white, 0.2);
-	font-size: $font-size-xs;
-	width: 100%;
-	padding: 10px;
-
-	&:focus {
-		outline: none;
-		border-color: $color-accent;
-		box-shadow: 0 0 5px $color-accent;
+		&:focus {
+			outline: none;
+			border-color: $color-accent;
+			box-shadow: 0 0 5px $color-accent;
+		}
 	}
 }
 

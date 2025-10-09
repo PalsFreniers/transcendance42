@@ -11,15 +11,17 @@ export interface FriendRequests {
 
 export function createRequests(requests: FriendRequests) {
     const stmt = db.prepare(`
-    INSERT INTO conversation (
-      sender_id, receiver_id, created_at, updated_at
+    INSERT INTO friend_requests (
+      sender_id, receiver_id, status, created_at, updated_at
     ) VALUES (?, ?, ?, ?, ?)
   `);
 
     const result = stmt.run(
         requests.sender_id,
         requests.receiver_id,
+        requests.status,
         requests.created_at,
+        requests.updated_at,
     );
     return result.lastInsertRowid;
 }

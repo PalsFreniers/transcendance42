@@ -69,7 +69,7 @@ export function getSockets(): [Socket, Socket, Socket] {
         });
 
         socketChat.on('new-friend-request', () => {
-            // fait ce que tu veux ici, si tu a besoin du useraname du sender dit le moi
+            // fait ce que tu veux ici, si tu a besoin du username du sender dit le moi
         });
 
         // SOCKET PONG

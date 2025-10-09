@@ -84,6 +84,7 @@ export function startServer(io) {
             const stmt = db.prepare(`
             UPDATE users SET socket = NULL, is_online = 0 WHERE socket = ?
         `);
+            console.log(socket.id, socket.data.userId);
             stmt.run(socket.id);
             console.log(`Socket ${socket.id} disconnected`);
         });

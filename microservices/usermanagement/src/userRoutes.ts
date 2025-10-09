@@ -3,32 +3,31 @@ import db from './dbSqlite/db.js';
 import { GameStats, addStats } from './gameStatsModel.js';
 import fs from 'fs';
 import path from 'path';
+import bcrypt from 'bcrypt';
 import { ChatMessage } from './userSocket.js';
 import { Message } from './chatModel.js'
 import { FriendRequests, createRequests } from './friendRequestsModel.js';
 import { io } from './index.js'
-//import { ChatMessage } from './userSocket.js';
+import { User } from './userModel.js';
 
 export async function profil(app: FastifyInstance) {
     app.get('/profil', async (request, reply) => {
         try {
             const user = request.user as { userId: number };
-			const { username } = request.query as { username?: string};
-			let result : any;
-			if (username)
-			{
-				result = db
-					.prepare('SELECT id, username, bio, profile_image_url FROM users WHERE username = ?')
-					.get(username) as { username: string };
-			}
-			else
-			{
-				result = db
-					.prepare('SELECT id, username, email, bio, profile_image_url FROM users WHERE id = ?')
-					.get(user.userId);
-			}
+            const { username } = request.query as { username?: string };
+            let result: any;
+            if (username) {
+                result = db
+                    .prepare('SELECT id, username, bio, profile_image_url FROM users WHERE username = ?')
+                    .get(username) as { username: string };
+            }
+            else {
+                result = db
+                    .prepare('SELECT id, username, email, bio, profile_image_url FROM users WHERE id = ?')
+                    .get(user.userId);
+            }
             if (!result)
-				return reply.code(404).send({ error: 'Profil not found' });
+                return reply.code(404).send({ error: 'Profil not found' });
             return { success: true, user: result };
         } catch (err) {
             return reply.code(401).send({ error: 'Unauthorized' });
@@ -36,15 +35,15 @@ export async function profil(app: FastifyInstance) {
     });
 }
 
-export async function acceptFriend(app: FastifyInstance){
-	app.post('accept-friend', async (request, reply) => {
-		try {
-			
-		}
-		catch (err) {
+export async function acceptFriend(app: FastifyInstance) {
+    app.post('accept-friend', async (request, reply) => {
+        try {
+
+        }
+        catch (err) {
             return reply.code(500).send({ error: 'Failed to add friend' });
         }
-	});
+    });
 }
 
 export async function friendAdd(app: FastifyInstance) {
@@ -56,15 +55,15 @@ export async function friendAdd(app: FastifyInstance) {
 
             if (!friend)
                 return reply.code(404).send({ error: 'Friend not found' });
-			
-            if(user.userId == friend.id)
-				return reply.code(403).send({ error: 'Unable to be friend with yourself'});
-            
+
+            if (user.userId == friend.id)
+                return reply.code(403).send({ error: 'Unable to be friend with yourself' });
+
             const newRequests: FriendRequests = {
                 id: 0,
                 sender_id: user.userId,
                 receiver_id: friend.id,
-                status: '',
+                status: 'pending',
                 created_at: Date.toString(),
                 updated_at: Date.toString()
             }
@@ -74,6 +73,7 @@ export async function friendAdd(app: FastifyInstance) {
 
             return { success: true, message: `${friendUsername} added as a friend` };
         } catch (err) {
+            console.log(err);
             return reply.code(500).send({ error: 'Failed to add friend' });
         }
     });
@@ -96,17 +96,17 @@ export async function getFriendRequest(app: FastifyInstance) {
 
             let tabRequest: frontFriendRequest[] = [];
             res.forEach(request => {
-                const name = db.prepare(`SELECT username FROM users WHERE id = ?`).get(request.sender_id) as {username: string}
+                const name = db.prepare(`SELECT username FROM users WHERE id = ?`).get(request.sender_id) as { username: string }
                 if (!name)
                     return;
                 tabRequest.push({
-                    id : request.id,
+                    id: request.id,
                     sender_username: name.username,
                     status: request.status,
                     created_at: request.created_at
                 });
             })
-            return { success: true, friendRequest: tabRequest};
+            return { success: true, friendRequest: tabRequest };
         } catch {
 
         }
@@ -121,19 +121,17 @@ export async function friendDelete(app: FastifyInstance) {
             const friend = db.prepare('SELECT id FROM users WHERE username = ?').get(friendUsername) as { id: number };
             if (!friend)
                 return reply.code(404).send({ error: 'Friend not found' });
-            
-            
             const currentUser = db.prepare('SELECT friends FROM users WHERE id = ?').get(user.userId) as { friends: string };
             let friends = JSON.parse(currentUser.friends || '[]');
             friends = friends.filter((fid: number) => fid !== friend.id);
             db.prepare('UPDATE users SET friends = ? WHERE id = ?').run(JSON.stringify(friends), user.userId);
-            
-            const FriendUser = db.prepare('SELECT friends FROM users WHERE id = ?').get(friend.id) as { friends: string };
+
+            //const FriendUser = db.prepare('SELECT friends FROM users WHERE id = ?').get(friend.id) as { friends: string };
             friends = JSON.parse(currentUser.friends || '[]');
             friends = friends.filter((fid: number) => fid !== user.userId);
             db.prepare('UPDATE users SET friends = ? WHERE id = ?').run(JSON.stringify(friends), friend.id);
-            
-            
+
+
 
             return { success: true, message: `${friendUsername} removed from friends` };
         } catch (err) {
@@ -164,8 +162,27 @@ export async function updateProfile(app: FastifyInstance) {
             const user = request.user as { userId: number };
             let fileUrl: string | null = null;
 
-            const body = request.body as any; // avec attachFieldsToBody: true
-            const bio = body.bio || '';
+            const body = request.body as any;
+            console.log(body);
+            const currentUser = db.prepare(`
+                SELECT * FROM users WHERE id = ?
+            `).get(user.userId) as User;
+            const username = body.username.value || currentUser.username;
+            const verifyUsername = db.prepare(`SELECT * FROM users WHERE username = ?`).get(username) as User;
+            if (verifyUsername)
+                return reply.code(401).send({ error: 'Username already use' });
+            const oldPassword = body.oldPassword.value || null;
+            let newPassword = body.newPassword.value || currentUser.password_hash;
+            const confirmPassword = body.confirmPassword.value || null;
+            if (oldPassword && newPassword && confirmPassword) {
+                const valid = await bcrypt.compare(oldPassword, currentUser.password_hash);
+                if (!valid)
+                    return reply.code(401).send({ error: 'Wrong password' });
+                if (newPassword !== confirmPassword)
+                    return reply.code(401).send({ error: 'New password && confirm new not match' });
+                newPassword = await bcrypt.hash(newPassword, 10);
+            }
+            const bio = body.bio.value || '';
             if (body.profile_image_url) {
                 const file = body.profile_image_url;
                 const uploadDir = path.join('./', 'uploads');
@@ -175,12 +192,13 @@ export async function updateProfile(app: FastifyInstance) {
                 fileUrl = `/uploads/${file.filename}`;
                 console.log('File saved at:', fileUrl);
             }
-
+            else
+                fileUrl = currentUser.profile_image_url || ''
             db.prepare(`
           UPDATE users
-          SET bio = ?, profile_image_url = ?, updated_at = CURRENT_TIMESTAMP
+          SET bio = ?, profile_image_url = ?, username = ?, password_hash = ?, updated_at = CURRENT_TIMESTAMP
           WHERE id = ?
-        `).run(bio.value, fileUrl, user.userId);
+        `).run(bio, fileUrl, username, newPassword, user.userId);
 
             const updatedUser = db
                 .prepare('SELECT id, username, email, bio, profile_image_url FROM users WHERE id = ?')
@@ -211,8 +229,8 @@ export async function deleteProfile(app: FastifyInstance) {
 export async function getHistoryGame(app: FastifyInstance) {
     app.get('/history', async (request, reply) => {
         try {
-            const user = request.user as {userId: number};
-			const games = db.prepare(`
+            const user = request.user as { userId: number };
+            const games = db.prepare(`
 				SELECT 
 					id,
 					player_one_id,
@@ -228,14 +246,14 @@ export async function getHistoryGame(app: FastifyInstance) {
 				ORDER BY date DESC
 			`).all(user.userId, user.userId);
 
-			if (!games || games.length === 0)
-				return reply.code(404).send({ success: false, message: "No games found" });
+            if (!games || games.length === 0)
+                return reply.code(404).send({ success: false, message: "No games found" });
 
-			return reply.code(200).send({ success: true, games });
-		} catch (err) {
-			console.error(err);
-			return reply.code(500).send({ success: false, error: "Failed to fetch player games" });
-		}
+            return reply.code(200).send({ success: true, games });
+        } catch (err) {
+            console.error(err);
+            return reply.code(500).send({ success: false, error: "Failed to fetch player games" });
+        }
     });
 }
 
@@ -253,33 +271,33 @@ export async function addStatsInDB(app: FastifyInstance) {
     });
 }
 
-export async function getMmrShifumi(app: FastifyInstance)  {
+export async function getMmrShifumi(app: FastifyInstance) {
     app.post('/get-mmr-shifumi', async (request, reply) => {
         try {
-            const { id } = request.body as {id: number};
-            const mmr = db.prepare(`SELECT shifumi_mmr FROM users WHERE id = ?`).get(id) as { shifumi_mmr: number};
-            reply.code(200).send({ success: true, mmr: ( mmr ? mmr.shifumi_mmr : 0 ) })
+            const { id } = request.body as { id: number };
+            const mmr = db.prepare(`SELECT shifumi_mmr FROM users WHERE id = ?`).get(id) as { shifumi_mmr: number };
+            reply.code(200).send({ success: true, mmr: (mmr ? mmr.shifumi_mmr : 0) })
         } catch (err) {
-            reply.code(399).send({ success: false})
+            reply.code(399).send({ success: false })
         }
     })
 }
 
-export async function setMmrShifumi(app: FastifyInstance)  {
+export async function setMmrShifumi(app: FastifyInstance) {
     app.post('/set-mmr-shifumi', async (request, reply) => {
         try {
-            const { id, newMmr } = request.body as {id: number; newMmr: number};
+            const { id, newMmr } = request.body as { id: number; newMmr: number };
 
             db.prepare(`UPDATE users SET shifumi_mmr = ? WHERE id = ?`).run(newMmr, id);
 
-            reply.code(200).send({ success: true})
+            reply.code(200).send({ success: true })
         } catch (err) {
-            reply.code(370).send({ success: false})
+            reply.code(370).send({ success: false })
         }
     })
 }
 
-export async function getPlayerFromList(app: FastifyInstance)  {
+export async function getPlayerFromList(app: FastifyInstance) {
     type Player = { id: number; mmr: number };
     app.post('/get-list-player', async (request, reply) => {
         try {
@@ -294,7 +312,7 @@ export async function getPlayerFromList(app: FastifyInstance)  {
 
             reply.code(200).send({ success: true, players });
         } catch (err) {
-            reply.code(400).send({error: `fail to load players mmr !`});
+            reply.code(400).send({ error: `fail to load players mmr !` });
         }
     })
 }
@@ -342,14 +360,14 @@ export async function getMessage(app: FastifyInstance) {
 }
 
 export async function getDatas(app: FastifyInstance) {
-	app.get('/data', async (req, rep) => {
-		try {
-			const { id } = req.query as { id?: number };
-			const user = db.prepare("SELECT * FROM users WHERE id = ?").get(id);
-			return rep.code(200).send(user);
-		} catch(err) {
+    app.get('/data', async (req, rep) => {
+        try {
+            const { id } = req.query as { id?: number };
+            const user = db.prepare("SELECT * FROM users WHERE id = ?").get(id);
+            return rep.code(200).send(user);
+        } catch (err) {
             console.log(err);
             return rep.code(500).send({ error: 'Failed fetch user data' });
-		}
-	});
+        }
+    });
 }
