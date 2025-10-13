@@ -1,7 +1,7 @@
 import io, { Socket } from 'socket.io-client';
 import { navigateTo } from './navClient.js';
 import { getUsernameFromToken } from './loginClient.js';
-import { drawPong, handlePaddleReflect, handleWallReflect } from "./pongUI.js";
+import { clearPong, drawPong, handlePaddleReflect, handleWallReflect } from "./pongUI.js";
 
 let lobbyname: String | null = null;
 let keysPressed = {
@@ -126,12 +126,12 @@ export function createPongSocket(socketPong: Socket | null) {
         drawPong(state);
     });
 
-    socketPong.on('paddle-reflect', ({x, y}) => {
-        handlePaddleReflect(x, y);
+    socketPong.on('paddle-reflect', ({ballPos, ballDir}) => {
+        handlePaddleReflect(ballPos, ballDir);
     });
 
-    socketPong.on('wall-reflect', ({x, y}) => {
-        handleWallReflect(x, y);
+    socketPong.on('wall-reflect', ({ballPos, ballDir}) => {
+        handleWallReflect(ballPos, ballDir);
     });
 
     document.addEventListener("keydown", (e) => {
@@ -182,6 +182,7 @@ export function createPongSocket(socketPong: Socket | null) {
             return;
         canvas.style.display = "none";
         ffBtn.style.display = "none";
+        clearPong();
     })
 
     socketPong.on('disconnect', (reason) => {

@@ -90,7 +90,7 @@ class RectangleParticle extends Particle {
     }
 }
 
-class ColorFlash extends RectangleParticle {
+class RectangleColorFlash extends RectangleParticle {
     constructor(
         pos: { x: number, y: number },
         dir: { x: number, y: number },
@@ -110,7 +110,6 @@ class ColorFlash extends RectangleParticle {
         if (this.alpha < 0)
             this.alive = false;
     }
-
 }
 
 class CircleParticle extends Particle {
@@ -130,7 +129,7 @@ class CircleParticle extends Particle {
         ctx.save();
         ctx.beginPath();
         ctx.arc(this.pos.x, this.pos.y, this.radius, 0, Math.PI * 2);
-        ctx.fillStyle = `hsla(${this.color}, 59%, 35%, ${this.alpha})`;
+        ctx.fillStyle = `hsla(${this.color}, 89%, 55%, ${this.alpha})`;
         ctx.fill();
         ctx.restore();
     }
@@ -146,10 +145,10 @@ function drawAllParticles(ctx: CanvasRenderingContext2D) {
     pongInfo.particles = pongInfo.particles.filter((p) => { return p.alive; });
 }
 
-export function handlePaddleReflect(x: number, y: number) {
+export function handlePaddleReflect(ballPos: { x: number, y: number }, ballDir: { x: number, y: number }) {
     let dir;
     let color;
-    if (x < 0) {
+    if (ballPos.x < 0) {
         dir = 1;
         color = leftPaddleColor[2];
     } else {
@@ -159,21 +158,30 @@ export function handlePaddleReflect(x: number, y: number) {
     for (let i = 0; i < 50; i++) {
         const angle = Math.PI / 2 * Math.random() - Math.PI / 4;
         pongInfo.particles.push(new CircleParticle(
-            { x: x + 10 + (Math.random() - 0.5) * 0.1, y: y + 5 + (Math.random() - 0.5) * 0.5 }, // pos
+            { x: ballPos.x + 10 + (Math.random() - 0.5) * 0.1, y: ballPos.y + 5 + (Math.random() - 0.5) * 0.5 }, // pos
             { x: dir * Math.cos(angle), y: Math.sin(angle) }, // dir
             2 + 80 * Math.random(), // radius
             color, // color
             0.5 + 19.5 * Math.random(), // speed
-            0.6 + 0.25 * Math.random(), // alpha
+            0.1, // alpha
             4 * 60, // LIFETIME
+        ));
+	    pongInfo.particles.push(new CircleParticle(
+            { x: ballPos.x + 10 + (Math.random() - 0.5) * 0.5, y: ballPos.y + 5 + (Math.random() - 0.5) * 0.1 }, // pos
+            { x: Math.cos(angle), y: dir * Math.sin(angle) }, // dir
+            2 + 8 * Math.random(), // radius
+            color.toString(), // color
+            5 + 15 * Math.random(), // speed
+            0.9, // alpha
+            2 * 60, // LIFETIME
         ));
     }
 
     const size = 0.15;
     pongInfo.particles.push(
-        new ColorFlash(
-            { x: (x < 0 ? -size : 20 + size), y: 0 }, // pos
-            ( x < 0 ? { x: 1, y: 0 } : { x: -1, y: 0 }), // dir
+        new RectangleColorFlash(
+            { x: (ballPos.x < 0 ? -size : 20 + size), y: 0 }, // pos
+            ( ballPos.x < 0 ? { x: 1, y: 0 } : { x: -1, y: 0 }), // dir
             color, // color
             12, // speed
             1, // alpha
@@ -184,7 +192,19 @@ export function handlePaddleReflect(x: number, y: number) {
     );
 
     pongInfo.particles.push(
-        new ColorFlash(
+        new RectangleColorFlash(
+            {x: 0, y: 0}, // pos
+            {x: 0, y: 0}, // dir
+            color.toString(), // color
+            0, // speed
+            0.2, // alpha
+            120, // lifetime
+            { x: 20, y: 10 }, // size
+        )
+    );
+
+    pongInfo.particles.push(
+        new RectangleColorFlash(
             {x: 0, y: 0}, // pos
             {x: 0, y: 0}, // dir
             color.toString(), // color
@@ -196,31 +216,40 @@ export function handlePaddleReflect(x: number, y: number) {
     );
 }
 
-export function handleWallReflect(x: number, y: number) {
-    const color = mapRange(x, -8, 8, 190, 356);
+export function handleWallReflect(ballPos: { x: number, y: number }, ballDir: { x: number, y: number }) {
+    const color = mapRange(ballPos.x, -8, 8, 190, 356);
     let dir;
-    if (y < 0)
+    if (ballPos.y < 0)
         dir = -1;
     else
         dir = 1;
     for (let i = 0; i < 50; i++) {
         const angle = Math.PI / 2 * Math.random() - Math.PI * 3 / 4;
         pongInfo.particles.push(new CircleParticle(
-            { x: x + 10 + (Math.random() - 0.5) * 0.5, y: y + 5 + (Math.random() - 0.5) * 0.1 }, // pos
+            { x: ballPos.x + 10 + (Math.random() - 0.5) * 0.5, y: ballPos.y + 5 + (Math.random() - 0.5) * 0.1 }, // pos
             { x: Math.cos(angle), y: dir * Math.sin(angle) }, // dir
             2 + 80 * Math.random(), // radius
             color.toString(), // color
             0.5 + 19.5 * Math.random(), // speed
-            0.6 + 0.25 * Math.random(), // alpha
+            0.1, // alpha
             4 * 60, // LIFETIME
+        ));
+        pongInfo.particles.push(new CircleParticle(
+            { x: ballPos.x + 10 + (Math.random() - 0.5) * 0.5, y: ballPos.y + 5 + (Math.random() - 0.5) * 0.1 }, // pos
+            { x: Math.cos(angle), y: dir * Math.sin(angle) }, // dir
+            2 + 8 * Math.random(), // radius
+            color.toString(), // color
+            5 + 15 * Math.random(), // speed
+            0.9, // alpha
+            2 * 60, // LIFETIME
         ));
     }
 
     const size = 0.15;
     pongInfo.particles.push(
-        new ColorFlash(
-            { x: 0, y: y + 5 }, // pos
-            ( y < 0 ? { x: 0, y: 1 } : { x: 0, y: -1 }), // dir
+        new RectangleColorFlash(
+            { x: 0, y: ballPos.y + 5 }, // pos
+            ( ballPos.y < 0 ? { x: 0, y: 1 } : { x: 0, y: -1 }), // dir
             color.toString(), // color
             7, // speed
             1, // alpha
@@ -410,4 +439,9 @@ export function drawPong(state: any) {
         ctx.fillText(`GAME RESUMING IN ${state.resumeTimer}`, 150, 70);
         pongInfo.particles = [];
     }
+}
+
+export function clearPong() {
+	pongInfo.particles = [];
+	pongInfo.frames = 0;
 }

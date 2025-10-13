@@ -169,9 +169,11 @@ export class Game {
                     if (paddle.hitbox.name !== ballCollision.name) continue;
                     this.ball.paddleReflect(paddle);
                     if (this.ball.pos.x < 0)
-                        this.emit("paddle-reflect", { x: this.ball.pos.x - this.ball.size, y: this.ball.pos.y });
+                        this.emit("paddle-reflect", { ballPos: { x: this.ball.pos.x - this.ball.size, y: this.ball.pos.y },
+                                                      ballDir: { x: this.ball.dir.x, y: this.ball.dir.y }});
                     else
-                        this.emit("paddle-reflect", { x: this.ball.pos.x + this.ball.size, y: this.ball.pos.y });
+                        this.emit("paddle-reflect", { ballPos: { x: this.ball.pos.x + this.ball.size, y: this.ball.pos.y },
+                                                      ballDir: { x: this.ball.dir.x, y: this.ball.dir.y }});
                     break;
                 }
             } else if (ballCollision.name.startsWith("map")) {
@@ -185,9 +187,11 @@ export class Game {
                     default:
                         this.ball.dir.y = -this.ball.dir.y;
                         if (this.ball.pos.y < 0)
-                            this.emit("wall-reflect", { x: this.ball.pos.x, y: this.ball.pos.y - this.ball.size });
+                            this.emit("wall-reflect", { ballPos: { x: this.ball.pos.x, y: this.ball.pos.y - this.ball.size },
+                                                        ballDir: { x: this.ball.dir.x, y: this.ball.dir.y }});
                         else
-                            this.emit("wall-reflect", { x: this.ball.pos.x, y: this.ball.pos.y + this.ball.size});
+                            this.emit("wall-reflect", { ballPos: { x: this.ball.pos.x, y: this.ball.pos.y + this.ball.size },
+                                                        ballDir: { x: this.ball.dir.x, y: this.ball.dir.y }});
                         this.ball.advance();
                         i++;
                 }
