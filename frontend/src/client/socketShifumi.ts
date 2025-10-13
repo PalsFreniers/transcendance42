@@ -69,13 +69,33 @@ export function createShifumiSocket(socketShifumi: Socket | null) {
       notify(info);
     });
 
-    socketShifumi.on('roomJoined', (roomId: number) => {
-      history.pushState(null, '', '/shifumi');
-      handleRoute();
-      socketShifumi.emit('ready');
+    function sleep(ms: number): Promise<void>
+    {
+        return new Promise((resolve) => setTimeout(resolve, ms));
+    }
+
+    socketShifumi.on('roomJoined', async (roomId: number) => {
+        history.pushState(null, '', '/shifumi');
+        handleRoute();
+
+        await sleep(50);
+
+        const card1 = document.getElementById('card1-button');
+        const card2 = document.getElementById('card2-button');
+        const card3 = document.getElementById('card3-button');
+        const coin = document.getElementById('coin-button');
+
+        card1!.style.display = 'none';
+        card2!.style.display = 'none';
+        card3!.style.display = 'none';
+        coin!.style.display = 'none';
+
+        socketShifumi.emit('ready');
     });
 
-    socketShifumi.on('opponent-found', (numPlayer: number, opponentName : string) => {
+    socketShifumi.on('opponent-found', async (numPlayer: number, opponentName : string) => {
+        await sleep(50);
+
         console.log(`${opponentName} found`)
       const button = document.getElementById('start-button');
       const kick = document.getElementById('kick-opponent');
@@ -88,7 +108,7 @@ export function createShifumiSocket(socketShifumi: Socket | null) {
           opponent.textContent = `your opponent is ${opponentName}`;
 
       if (button && numPlayer == 1) {
-        button.hidden = false;
+        button.style.display = 'block';
       }
 
       if (kick && numPlayer == 1)
@@ -108,13 +128,13 @@ export function createShifumiSocket(socketShifumi: Socket | null) {
         const opponent = document.getElementById('opponent-name');
 
         if (start)
-            start.hidden = true;
+            start.style.display = 'none';
         if (kick)
             kick.hidden = true;
         if (opponent) {
             if (reason === 'kick')
                 opponent.textContent = 'opponent kicked';
-        }// desafichier le bouton start et le bouton kick
+        }
     });
 
     /******************************************************************************/
@@ -138,17 +158,17 @@ export function createShifumiSocket(socketShifumi: Socket | null) {
         if (pointsText)
             pointsText.textContent = `0 - 0`
         if (quit)
-            quit.hidden = true;
+            quit.style.display = 'none';
         if (start)
-            start.hidden = true;
+            start.style.display = 'none';
         if (card1)
-            card1.hidden = false;
+            card1.style.display = 'block';
         if (card2)
-            card2.hidden = false;
+            card2.style.display = 'block';
         if (card3)
-            card3.hidden = false;
+            card3.style.display = 'block';
         if (coin && !spectate.spec)
-            coin.hidden = false;
+            coin.style.display = 'block';
     });
 
     socketShifumi.on('wait-opponent', (name: string) => {

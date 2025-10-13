@@ -78,6 +78,7 @@ export function init() {
 
     if (quit)
     {
+        quit.style.display = 'block';
         quit.addEventListener('click', async (e) => {
             e.preventDefault();
             const socketShifumi = getSocket(2);
@@ -93,8 +94,11 @@ export function init() {
     }
     if (next)
     {
-        if (!spectate.spec)
-            next.hidden = true;
+        if (!spectate.spec) {
+            next.style.display = 'none';
+        }
+        else
+            next.style.display = 'block';
         next.addEventListener('click', async  (e) => {
             if (spectate.spec == true)
             {
@@ -114,8 +118,7 @@ export function init() {
         kick.addEventListener('click', async (e) => {
             e.preventDefault();
             const socketShifumi = getSocket(2);
-            if (socketShifumi)
-            {
+            if (socketShifumi) {
                 socketShifumi.emit('kick-opponent');
             }
         });
