@@ -284,7 +284,8 @@ export function init() {
                         }
                     });
                 });
-
+    			const ffBtn = document.getElementById("pong-ff") as HTMLButtonElement;
+				ffBtn.innerText = "Quit";
             }
             catch (err) {
                 console.error("Error spec game:", err)

@@ -126,6 +126,12 @@ export function createPongSocket(socketPong: Socket | null) {
         drawPong(state);
     });
 
+	socketPong.on('spec-out', () => {
+        const path = window.location.pathname;
+        if (path !== '/lobby')
+            navigateTo('/lobby');
+	});
+
     socketPong.on('paddle-reflect', ({ballPos, ballDir}) => {
         handlePaddleReflect(ballPos, ballDir);
     });

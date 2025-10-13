@@ -289,6 +289,8 @@ export function socketManagement(io: Server) {
                 return console.warn(`Game ${lobbyname} not found or finished`);
             console.log(`spec register in room game-${game.gameID}`);
             socket.join(`game-${game.gameID}`);
+			socket.data.gameId = `game-${game.gameID}`;
+			socket.data.lobbyName = lobbyname;
         });
 
         socket.on('left-game', ({ lobbyname }) => {
@@ -315,11 +317,16 @@ export function socketManagement(io: Server) {
             const playerId = socket.data.userId;
             if (!playerId)
                 return;
-            const name = manager.findGameName(playerId.toString());
+            const name = socket.data.lobbyName;
             if (!name)
                 return console.warn(`No active game for player ${playerId}`);
-            const game = manager.findGame(name)!;
-            if (game.state !== 'running')
+			const gameInfo = manager.getGameInfo2(name)!;
+			if(gameInfo.p1 !== playerId && gameInfo.p2 !== playerId) {
+				socket.leave(socket.data.gameId);
+				socket.emit("spec-out");
+				return;
+			}
+            if (gameInfo.game.state !== 'running')
                 return;
             manager.forfeit(name, playerId);
         });
