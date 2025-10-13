@@ -52,6 +52,17 @@ export class GameManager {
         return null;
     }
 
+    getGameInfo2(info: string): {game: Game, p1: number | null, p2: number | null} | null {
+        const entry = this._games.get(info);
+		if (entry) {
+			const game = entry[0];
+			const p1 = entry[1][0];
+			const p2 = entry[1][1];
+			return {game, p1, p2};
+		}
+        return null;
+    }
+
 	findGameName(info: string): string | null {
         for (const [name, [_, [p1, p2]]] of this._games) {
             if (p1?.toString() === info || p2?.toString() === info)
@@ -124,8 +135,9 @@ export class GameManager {
         if (!this._games.has(lobbyName))
             return 1; // lobby doesnt exists
         const [game, [p1, p2]] = this._games.get(lobbyName)!;
-        if (playerID != p1 && playerID != p2)
+        if (playerID != p1 && playerID != p2) {
             return 2 // player isn't in the game
+		}
         game.state = "ended";
         if (p1 === playerID)
             game.score = [0, 11];
