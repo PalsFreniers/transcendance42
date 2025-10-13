@@ -106,6 +106,9 @@ export async function verifyToken(app: FastifyInstance) {
 		const { token } = request.body as { token: string }
 		try {
 			const decoded = app.jwt.verify(token) as { userId: number; username: string };
+            const user = db.prepare(`SELECT * FROM users WHERE id = ?`).get(decoded.userId);
+            if (!user)
+                return reply.code(404).send({ valid: false });
 			db.prepare(`UPDATE users SET is_online = 1 WHERE id = ?`).run(decoded.userId);
 			return reply.send({ valid: true, user: decoded });
 		} catch (err) {
@@ -115,13 +118,10 @@ export async function verifyToken(app: FastifyInstance) {
 	});
 }
 
-
-
-
 export async function logOut(app: FastifyInstance) {
     app.post('/logout', async (request, reply) => {
-        const user = request.user as { userId: number }
-        const userdb = db.prepare('SELECT * FROM users WHERE id = ?').get(user.userId) as { id: number }
+        const user = request.user as { userId: number };
+        const userdb = db.prepare('SELECT * FROM users WHERE id = ?').get(user.userId) as { id: number };
         if (!userdb)
             return reply.code(401).send({ error: 'User dosen\'t exist' });
         db.prepare('UPDATE users SET is_online = 0 WHERE id = ?').run(user.userId);

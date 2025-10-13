@@ -208,20 +208,6 @@ export async function updateProfile(app: FastifyInstance) {
     });
 }
 
-
-export async function deleteProfile(app: FastifyInstance) {
-    app.delete('/profil-delete', async (request, reply) => {
-        try {
-            const user = request.user as { userId: number };
-            const stmt = db.prepare('DELETE FROM users WHERE id = ?');
-            stmt.run(user.userId);
-            return reply.send({ success: true });
-        } catch (err) {
-            return reply.code(500).send({ error: 'Failed to delete profile' });
-        }
-    });
-}
-
 export async function getHistoryGame(app: FastifyInstance) {
     app.get('/history', async (request, reply) => {
         try {

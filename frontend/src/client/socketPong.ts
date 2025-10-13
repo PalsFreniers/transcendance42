@@ -182,10 +182,38 @@ export function createPongSocket(socketPong: Socket | null) {
         const canvas = document.getElementById("pong-canvas") as HTMLCanvasElement;
         const ffBtn = document.getElementById("pong-ff") as HTMLButtonElement;
         const msgGameEnd = document.getElementById("msg-end") as HTMLElement;
+        let msg = "You won"
+        let endMsg = `${data.score[0]} - ${data.score[1]}`
+        if (data.score[0] < data.score[1] && data.player1 == getUsernameFromToken())
+        {
+            msg = "You lost";
+            msgGameEnd.style.color = "#DC143C";
+        }
+        if (data.score[0] < data.score[1] && data.player2 == getUsernameFromToken())
+            endMsg = `${data.score[1]} - ${data.score[0]}`
+        if (data.score[0] > data.score[1] && data.player2 == getUsernameFromToken())
+        {
+            msg = "You lost";
+            endMsg = `${data.score[1]} - ${data.score[0]}`
+            msgGameEnd.style.color = "#DC143C";
+        }
+        if (getUsernameFromToken() != data.player1 && getUsernameFromToken() != data.player2)
+        {
+            if (data.score[0] < data.score[1]){
+                msg = `Player 2 won`;
+                endMsg = `${data.score[1]} - ${data.score[0]}`
+            }
+            else{
+                msg = `Player 1 won`;
+                endMsg = `${data.score[0]} - ${data.score[1]}`
+            }
+        }
+
         msgGameEnd.innerHTML = `
-            <p>${data.msg} with score of ${data.score[0]} - ${data.score[1]}</p>`
+            <p>${msg} with score of ${endMsg}</p>`
         if (!canvas)
             return;
+        
         canvas.style.display = "none";
         ffBtn.style.display = "none";
         clearPong();

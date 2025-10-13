@@ -98,8 +98,8 @@ export function init(){
 		});
 	}
 
-	const but_tes = document.getElementById("friends") as HTMLElement;
-	const but_te = document.getElementById("friends2") as HTMLElement;
+	const but_te = document.getElementById("friends") as HTMLElement;
+	const but_tes = document.getElementById("friends2") as HTMLElement;
 	if (but_tes) {
 		but_tes.style.display = 'block';
 	}

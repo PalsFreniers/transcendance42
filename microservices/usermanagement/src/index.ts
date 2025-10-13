@@ -16,7 +16,6 @@ import {
     friendList,
     profil,
     updateProfile,
-    deleteProfile,
     friendAdd,
     friendDelete,
     addStatsInDB,
@@ -106,7 +105,6 @@ app.register(auth, { prefix: '/api/user' });
 app.register(profil, { prefix: '/api/user' });
 app.register(friendList, { prefix: '/api/user' });
 app.register(updateProfile, { prefix: '/api/user' });
-app.register(deleteProfile, { prefix: '/api/user' });
 app.register(friendAdd, { prefix: '/api/user' });
 app.register(friendDelete, { prefix: '/api/user' });
 app.register(addStatsInDB, { prefix: '/api/user' });

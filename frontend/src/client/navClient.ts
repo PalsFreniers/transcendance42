@@ -97,6 +97,7 @@ function getClient(path: string) {
 export async function handleRoute() {
 	const path = window.location.pathname;
 	const token = localStorage.getItem('token');
+	const socket = getSocket(0);
 	// --- redirect rules ---
 	if (!token && !['/', '/login', '/register'].includes(path)) {
 		history.replaceState(null, '', '/login');
@@ -107,15 +108,8 @@ export async function handleRoute() {
 		return handleRoute();
 	}
 	if (token && !await isTokenValid(token)) {
-		await fetch(`/api/user/logout`, {
-			method: "POST",
-			headers: {
-				"Content-Type": "application/json",
-				Authorization: `Bearer ${token}`
-			},
-			body: JSON.stringify({}),
-		});
 		notify('Token invalid or expire, token was suppress.');
+		socket.disconnect();
 		localStorage.removeItem('token');
 		navigateTo('/login');
 		return;

@@ -1,6 +1,5 @@
 import { getSocket } from './socketClient.js'
 import { getUserIdFromToken } from './loginClient.js'
-import { notify } from './notify.js'
 import { handleRoute } from './navClient.js';
 
 

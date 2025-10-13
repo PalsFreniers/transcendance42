@@ -100,22 +100,16 @@ export function socketManagement(io: Server) {
                     throw new Error(`Couldn't create lobby with name ${lobbyName}`);
                 if (manager.joinLobby(lobbyName, socket.data.userId))
                     throw new Error(`Couldn't join lobby with name ${lobbyName}`);
-
+                socket.data.gameId = `game-${gameId}`;
                 manager.findGame(lobbyName)!.on("game-end",
                     ({ game, players }) => {
                         const score: number[] = Array.from(game.score);
-                        const [p1, p2] = players;
-                        io.to(p1).emit("game-end", {
+                        io.to(socket.data.gameId).emit("game-end", {
                             name: game.name,
-                            msg: score![0] > score![1] ? "You win" : "You loose",
-                            score: [score![0], score![1]]
+                            player1: manager.getUsernameFromSocket(players[0], io),
+                            player2: manager.getUsernameFromSocket(players[1], io),
+                            score: [score![0], score![1]],
                         });
-                        if (p2 !== "-1" || p2 !== "-2")
-                            io.to(p2).emit("game-end", {
-                                name: game.name,
-                                msg: score![1] > score![0] ? "You win" : "You loose",
-                                score: [score![1], score![0]]
-                            });
                     }).on("game-state", (state) => {
                         io.to(`game-${gameId}`).emit("game-state", state)
                     }).on("paddle-reflect", ({ballPos, ballDir}) => {
@@ -125,7 +119,7 @@ export function socketManagement(io: Server) {
                     });
 
                 socket.data.lobbyName = lobbyName;
-                socket.data.gameId = `game-${gameId}`;
+               
 
                 socket.join(socket.data.gameId);
                 if (ia) {
