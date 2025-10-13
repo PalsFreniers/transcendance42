@@ -98,25 +98,16 @@ export function init(){
 		});
 	}
 
-	const but_tes = document.querySelector("#friends");
-	const but_te = document.querySelector("#friends2");
-	const but_test = document.getElementById("friends");
-	const but_tests = document.getElementById("friends2");
+	const but_tes = document.getElementById("friends") as HTMLElement;
+	const but_te = document.getElementById("friends2") as HTMLElement;
 	if (but_tes) {
-		but_tes.addEventListener('click', () => {
-			if (but_test)
-				but_test.style.visibility = "hidden";
-			if (but_tests)
-				but_tests.style.visibility = "visible";
-		});
+		but_tes.style.display = 'block';
 	}
 	if (but_te) {
-		but_te.addEventListener('click', () => {
-			if (but_tests)
-				but_tests.style.visibility = "hidden";
-			if (but_test)
-				but_test.style.visibility = "visible";
-		});
+		if (but_tes.style.display = 'none')
+			but_te.style.display = 'block';
+		else
+			but_te.style.display = 'none';
 	}
 	const offline = document.getElementById("offline");
 	if (offline) {

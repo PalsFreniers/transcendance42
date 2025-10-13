@@ -54,22 +54,26 @@ export function socketManagement(io: Server) {
             const game = manager.findGame(socket.data.userId?.toString());
             if (game) {
                 socket.data.gameId = `game-${game.gameID}`;
-                
+
                 const gameRow = db.prepare(`
                     SELECT lobby_name, status, player_one_id, player_two_id
                     FROM games WHERE id = ?`
-                ).get(game.gameID) as {lobby_name: string, status: string, player_one_id: number, player_two_id: number};
+                ).get(game.gameID) as { lobby_name: string, status: string, player_one_id: number, player_two_id: number };
                 if (!gameRow)
                     return;
                 const playerOneName = manager.getUsernameFromSocket(
                     manager.getSocketId(gameRow.player_one_id)!,
                     io
                 ) || "Unknown";
-
-                const playerTwoName = manager.getUsernameFromSocket(
-                    manager.getSocketId(gameRow.player_two_id)!,
-                    io
-                ) || "-";
+                let playerTwoName = manager.getUsernameFromSocket(
+                        manager.getSocketId(gameRow.player_two_id)!,
+                        io
+                    ) || "-";
+                if (manager.getGameInfo(gameRow.lobby_name, io)!.playerTwoID == -2) {
+                    playerTwoName = 'ia';
+                }
+                if (manager.getGameInfo(gameRow.lobby_name, io)!.playerTwoID == -1)
+                    playerTwoName = manager.findGame(gameRow.lobby_name)!.localPlayer || '';
                 socket.emit("lobby-info", {
                     gameId: game.gameID,
                     lobbyName: gameRow.lobby_name,
@@ -77,6 +81,7 @@ export function socketManagement(io: Server) {
                     playerTwo: playerTwoName,
                     status: gameRow.status,
                 });
+                socket.join(socket.data.gameId);
                 if (gameRow.status === "playing") {
                     socket.emit("in-game");
                 }
@@ -113,10 +118,10 @@ export function socketManagement(io: Server) {
                             });
                     }).on("game-state", (state) => {
                         io.to(`game-${gameId}`).emit("game-state", state)
-                    }).on("paddle-reflect", ({x, y}) => {
-                        io.to(`game-${gameId}`).emit("paddle-reflect", {x, y})
-                    }).on("wall-reflect", ({x, y}) => {
-                        io.to(`game-${gameId}`).emit("wall-reflect", {x, y})
+                    }).on("paddle-reflect", ({ x, y }) => {
+                        io.to(`game-${gameId}`).emit("paddle-reflect", { x, y })
+                    }).on("wall-reflect", ({ x, y }) => {
+                        io.to(`game-${gameId}`).emit("wall-reflect", { x, y })
                     });
 
                 socket.data.lobbyName = lobbyName;
@@ -125,6 +130,7 @@ export function socketManagement(io: Server) {
                 socket.join(socket.data.gameId);
                 if (ia) {
                     new GameAI(lobbyName, io);
+                    db.prepare(`UPDATE games SET status = 'ready' WHERE id = ?`).run(gameId);
                     socket.emit('room-created', {
                         gameId,
                         lobbyName,
@@ -137,6 +143,7 @@ export function socketManagement(io: Server) {
                     const errno = manager.joinLobby(lobbyName, -1);
                     if (errno)
                         throw new Error(`Couldn't make the second player join lobby with name ${lobbyName}: ${errno}`);
+                    db.prepare(`UPDATE games SET status = 'ready' WHERE id = ?`).run(gameId);
                     socket.emit('room-created', {
                         gameId,
                         lobbyName,
@@ -197,6 +204,7 @@ export function socketManagement(io: Server) {
                 if (!lobby) {
                     throw new Error(`Lobby not found for gameId ${gameId}`);
                 }
+                db.prepare(`UPDATE games SET status = 'ready' WHERE id = ?`).run(gameId);
                 const errno = manager.joinLobby(lobby.lobby_name, socket.data.userId);
                 if (errno)
                     throw new Error(`Failed to join lobby: ${errno}`);
@@ -303,18 +311,18 @@ export function socketManagement(io: Server) {
             });
         });
 
-		socket.on('ff', () => {
+        socket.on('ff', () => {
             const playerId = socket.data.userId;
             if (!playerId)
                 return;
             const name = manager.findGameName(playerId.toString());
             if (!name)
                 return console.warn(`No active game for player ${playerId}`);
-			const game = manager.findGame(name)!;
+            const game = manager.findGame(name)!;
             if (game.state !== 'running')
                 return;
-			manager.forfeit(name, playerId);
-		});
+            manager.forfeit(name, playerId);
+        });
 
         socket.on('disconnect', () => {
             manager.unregisterSocket(socket.data.userId);

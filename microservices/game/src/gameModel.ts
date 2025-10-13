@@ -5,7 +5,7 @@ export interface GameRecord {
   playerTwo: null;
   lobbyName: string;
   finalScore?: string;
-  status?: 'waiting' | 'playing' | 'finished';
+  status?: 'waiting' | 'ready' | 'playing' | 'finished';
   startTime?: string;
   endTime?: string;
   gameDate?: string;
@@ -16,7 +16,7 @@ export interface GameRecordGet {
   player_two_id: null | number;
   lobby_name: string;
   game_score?: string;
-  status?: 'waiting' | 'playing' | 'finished';
+  status?: 'waiting' | 'ready' | 'playing' | 'finished';
   start_time?: string;
   end_time?: string;
   date?: string;
