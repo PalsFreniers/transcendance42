@@ -25,43 +25,43 @@ localadress:
 	@if grep -q "^VITE_LOCAL_ADDRESS=" $(ENV_FILE); then \
 		sed -i "/^VITE_LOCAL_ADDRESS=/d" $(ENV_FILE); \
 	fi
-	echo "VITE_LOCAL_ADDRESS=$$($(CMD_LOCAL_NETWORK_ADDR))" >> $(ENV_FILE);
+	@echo "VITE_LOCAL_ADDRESS=$$($(CMD_LOCAL_NETWORK_ADDR))" >> $(ENV_FILE);
 	@echo "VITE_LOCAL_ADDRESS set to $$($(CMD_LOCAL_NETWORK_ADDR)) in $(ENV_FILE)"
 
 all: localadress
-	$(COMPOSE) -f $(COMPOSE_FILE) up -d
+	@$(COMPOSE) -f $(COMPOSE_FILE) up -d
 	@echo "The website run at https://$$($(CMD_LOCAL_NETWORK_ADDR)):8443"
-	$(MAKE) -C . cli --no-print-directory
+	@$(MAKE) -C . cli --no-print-directory
 
 down:
-	$(COMPOSE) -f $(COMPOSE_FILE) down
+	@$(COMPOSE) -f $(COMPOSE_FILE) down
 
 restart:
-	$(COMPOSE) -f $(COMPOSE_FILE) down && $(COMPOSE) -f $(COMPOSE_FILE) up -d
+	@$(COMPOSE) -f $(COMPOSE_FILE) down && $(COMPOSE) -f $(COMPOSE_FILE) up -d
 
 logs:
-	$(COMPOSE) -f $(COMPOSE_FILE) logs -f --tail=100
+	@$(COMPOSE) -f $(COMPOSE_FILE) logs -f --tail=100
 
 build:
-	$(COMPOSE) -f $(COMPOSE_FILE) build --no-cache
+	@$(COMPOSE) -f $(COMPOSE_FILE) build --no-cache
 
 clean:
-	$(COMPOSE) -f $(COMPOSE_FILE) down -v --rmi all --remove-orphans
-	$(MAKE) -C cli clean --no-print-directory
+	@$(COMPOSE) -f $(COMPOSE_FILE) down -v --rmi all --remove-orphans
+	@$(MAKE) -C cli clean --no-print-directory
 
 user:
-	$(COMPOSE) -f $(COMPOSE_FILE) up -d user-service
+	@$(COMPOSE) -f $(COMPOSE_FILE) up -d user-service
 
 nginx:
-	$(COMPOSE) -f $(COMPOSE_FILE) up -d nginx
+	@$(COMPOSE) -f $(COMPOSE_FILE) up -d nginx
 
 front:
-	$(COMPOSE) -f $(COMPOSE_FILE) up -d frontend
+	@$(COMPOSE) -f $(COMPOSE_FILE) up -d frontend
 
 re: clean all
 
 cli:
-	echo "addr:=\"$$($(CMD_LOCAL_NETWORK_ADDR))\"\nport:=\"8443\"" > $(GEN_API_FILE)
-	$(MAKE) -C cli --no-print-directory
+	@echo "addr:=\"$$($(CMD_LOCAL_NETWORK_ADDR))\"\nport:=\"8443\"" > $(GEN_API_FILE)
+	@$(MAKE) -C cli --no-print-directory
 
 .PHONY: help localadress all down restart logs build clean user nginx front cli re
