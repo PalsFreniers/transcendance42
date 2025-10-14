@@ -10,7 +10,8 @@ import {
     auth,
     register,
     logOut,
-    verifyToken
+    verifyToken,
+    logOutHardReload
 } from './authService.js';
 import {
     friendList,
@@ -84,7 +85,7 @@ io.use(async (socket, next) => {
 // JWT auth hook
 app.addHook('onRequest', async (request, reply) => {
     const url = request.raw.url || '';
-    const publicRoutes = ['/api/user/login', '/api/user/register', '/api/user/verify-email', '/uploads/', '/api/user/auth/verify'];
+    const publicRoutes = ['/api/user/login', '/api/user/register', '/api/user/verify-email', '/uploads/', '/api/user/auth/verify', '/api/user/logouthr'];
 
     if (publicRoutes.some(route => url.startsWith(route))) return;
 
@@ -116,6 +117,7 @@ app.register(getPlayerFromList, {prefix: '/api/user'});
 app.register(getHistoryGame, {prefix: '/api/user'});
 app.register(getDatas, {prefix: '/api/user'});
 app.register(verifyToken, {prefix: '/api/user'});
+app.register(logOutHardReload, {prefix: '/api/user'});
 
 // Start Fastify server
 app.listen({ port: Number(PORT), host: `0.0.0.0` }, (err,) => {

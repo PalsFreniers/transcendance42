@@ -32,10 +32,10 @@ export function getUserIdFromToken(): number {
 }
 
 export function getSockets(): [Socket, Socket, Socket] {
-    if (!socketChat && !socketPong && !socketShifumi) {
-        const token = localStorage.getItem('token');
-        const userId = getUserIdFromToken();
-        // SOCKET CHAT
+    const token = localStorage.getItem('token');
+    const userId = getUserIdFromToken();
+    console.log(socketChat);
+    if (!socketChat) {
         socketChat = io(`wss://${import.meta.env.VITE_LOCAL_ADDRESS}:8443`, {
             path: '/chatSocket/',
             auth: { token },
@@ -50,10 +50,10 @@ export function getSockets(): [Socket, Socket, Socket] {
         });
 
         socketChat.on('message', (sender) => {
-			if (sender == friend_select)
-				msg_friend();
-			else
-            	notify(`new message from ${sender}`);
+            if (sender == friend_select)
+                msg_friend();
+            else
+                notify(`new message from ${sender}`);
         });
 
         socketChat.on('error', (text: string) => {
@@ -69,14 +69,17 @@ export function getSockets(): [Socket, Socket, Socket] {
         });
 
         socketChat.on('new-friend-request', () => {
+
             // fait ce que tu veux ici, si tu a besoin du username du sender dit le moi
         });
-
-        // SOCKET PONG
-        socketPong = createPongSocket(socketPong);
-        //SOCKET SHIFUMI
-        socketShifumi = createShifumiSocket(socketShifumi);
     }
+
+    // SOCKET PONG
+    if (!socketPong)
+        socketPong = createPongSocket(socketPong);
+    //SOCKET SHIFUMI
+    if (!socketShifumi)
+        socketShifumi = createShifumiSocket(socketShifumi);
 
     return [socketChat!, socketPong!, socketShifumi!];
 }
