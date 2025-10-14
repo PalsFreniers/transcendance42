@@ -97,23 +97,28 @@ function getClient(path: string) {
 export async function handleRoute() {
 	const path = window.location.pathname;
 	const token = localStorage.getItem('token');
-	const socket = getSocket(0);
+	let socket = getSocket(0);
 	// --- redirect rules ---
 	if (!token && !['/', '/login', '/register'].includes(path)) {
-		history.replaceState(null, '', '/login');
-		return handleRoute();
+		if (socket)
+			socket.disconnect();
+		navigateTo('/login');
+		return;
 	}
 	if (token && ['/login', '/register'].includes(path)) {
-		history.replaceState(null, '', '/lobby');
-		return handleRoute();
+		navigateTo('/lobby');
+		return;
 	}
 	if (token && !await isTokenValid(token)) {
+		if (socket)
+			socket.disconnect();
 		notify('Token invalid or expire, token was suppress.');
-		socket.disconnect();
 		localStorage.removeItem('token');
 		navigateTo('/login');
 		return;
 	}
+	if (token)
+		socket.connect();
 	// --- template injection ---
 	const app = document.getElementById('app');
 	if (!app)

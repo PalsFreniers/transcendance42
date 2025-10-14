@@ -129,3 +129,10 @@ export async function logOut(app: FastifyInstance) {
     });
 }
 
+export async function logOutHardReload(app: FastifyInstance) {
+    app.post('/logouthr', async () => {
+         const socketConnect = db.prepare(`SELECT socket FROM users WHERE is_online = 1`);
+         console.log(socketConnect);
+    })
+}
+
