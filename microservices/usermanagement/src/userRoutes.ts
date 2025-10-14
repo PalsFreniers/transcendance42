@@ -49,16 +49,13 @@ export async function acceptFriend(app: FastifyInstance) {
 export async function friendAdd(app: FastifyInstance) {
     app.post('/add-friend', async (request, reply) => { // a changer pour ajouter la demande dans la db et envoyr un msg a la target
         try {
-            const user = request.user as { userId: number };
+            const user = request.user as { userId: number, username: string };
             const { friendUsername } = request.body as { friendUsername: string };
             const friend = db.prepare('SELECT id, socket FROM users WHERE username = ?').get(friendUsername) as { id: number, socket: string };
-
             if (!friend)
                 return reply.code(404).send({ error: 'Friend not found' });
-
             if (user.userId == friend.id)
                 return reply.code(403).send({ error: 'Unable to be friend with yourself' });
-
             const newRequests: FriendRequests = {
                 id: 0,
                 sender_id: user.userId,
@@ -68,10 +65,13 @@ export async function friendAdd(app: FastifyInstance) {
                 updated_at: Date.toString()
             }
             createRequests(newRequests);
+            io.to(friend.socket).emit('new-friend-request', {
+                id: newRequests.id,
+                sender_id: user.userId,
+                sender_name: (user.username),
+            });
 
-            io.to(friend.socket).emit('new-friend-request');
-
-            return { success: true, message: `${friendUsername} added as a friend` };
+            return { success: true, message: `You send a friend request to ${friendUsername}` };
         } catch (err) {
             console.log(err);
             return reply.code(500).send({ error: 'Failed to add friend' });
@@ -90,10 +90,9 @@ export async function getFriendRequest(app: FastifyInstance) {
     app.get('/get-friend-requests', async (request, reply) => {
         try {
             const user = request.user as { userId: number };
-            const res = db.prepare(`SELECT * FROM friend_requests WHERE receiver_id = ?`).all(user.userId) as FriendRequests[];
+            const res = db.prepare(`SELECT * FROM friend_requests WHERE receiver_id = ? AND status = 'pending'`).all(user.userId) as FriendRequests[];
             if (!res)
                 return reply.code(500).send('fail to get friend request');
-
             let tabRequest: frontFriendRequest[] = [];
             res.forEach(request => {
                 const name = db.prepare(`SELECT username FROM users WHERE id = ?`).get(request.sender_id) as { username: string }

@@ -11,7 +11,6 @@ import {
     register,
     logOut,
     verifyToken,
-    logOutHardReload
 } from './authService.js';
 import {
     friendList,
@@ -26,7 +25,7 @@ import {
     getPlayerFromList,
     getHistoryGame,
 	getDatas,
-    // friendSendMsg
+    getFriendRequest,
 } from './userRoutes.js';
 import { startServer } from './userSocket.js';
 
@@ -49,8 +48,8 @@ await app.register((multipart as any).default, {
 });
 
 await app.register(fastifyStatic, {
-    root: path.join(process.cwd(), 'uploads'), // dossier où tu enregistres les images
-    prefix: '/uploads/',                       // URL publique
+    root: path.join(process.cwd(), 'uploads'),
+    prefix: '/uploads/',
 });
 
 export const io = new Server(app.server, {
@@ -85,8 +84,8 @@ io.use(async (socket, next) => {
 // JWT auth hook
 app.addHook('onRequest', async (request, reply) => {
     const url = request.raw.url || '';
-    const publicRoutes = ['/api/user/login', '/api/user/register', '/api/user/verify-email', '/uploads/', '/api/user/auth/verify', '/api/user/logouthr'];
-
+    const publicRoutes = ['/api/user/login', '/api/user/register', '/api/user/verify-email', '/uploads/', '/api/user/auth/verify'];
+ 
     if (publicRoutes.some(route => url.startsWith(route))) return;
 
     try {
@@ -111,13 +110,13 @@ app.register(friendDelete, { prefix: '/api/user' });
 app.register(addStatsInDB, { prefix: '/api/user' });
 app.register(logOut, { prefix: '/api/user' });
 app.register(getMessage, { prefix: '/api/user' });
-app.register(getMmrShifumi, {prefix: '/api/user'});
-app.register(setMmrShifumi, {prefix: '/api/user'});
-app.register(getPlayerFromList, {prefix: '/api/user'});
-app.register(getHistoryGame, {prefix: '/api/user'});
-app.register(getDatas, {prefix: '/api/user'});
-app.register(verifyToken, {prefix: '/api/user'});
-app.register(logOutHardReload, {prefix: '/api/user'});
+app.register(getMmrShifumi, { prefix: '/api/user' });
+app.register(setMmrShifumi, { prefix: '/api/user' });
+app.register(getPlayerFromList, { prefix: '/api/user' });
+app.register(getHistoryGame, { prefix: '/api/user' });
+app.register(getDatas, { prefix: '/api/user' });
+app.register(verifyToken, { prefix: '/api/user' });
+app.register(getFriendRequest, { prefix: '/api/user'});
 
 // Start Fastify server
 app.listen({ port: Number(PORT), host: `0.0.0.0` }, (err,) => {

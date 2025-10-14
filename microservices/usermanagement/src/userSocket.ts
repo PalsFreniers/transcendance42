@@ -95,16 +95,12 @@ export function startServer(io) {
                 status = 'accepted';
             else
                 status = 'rejected';
-            
             const sender = db.prepare(`SELECT sender_id, receiver_id FROM friend_requests WHERE id = ?`).get(requestsId) as { sender_id : number, receiver_id : number };
             if (!sender)
                 return io.to(socket.id).emit('error', `fail to found friend requests with this id (${requestsId})`);
-            
-            db.prepare(`UPEDATE friend_requests SET status = ?, updated_at = ? WHERE id = ?`).run(status, Date.toString(), requestsId);
-        
+            db.prepare(`UPDATE friend_requests SET status = ?, updated_at = ? WHERE id = ?`).run(status, Date.toString(), requestsId);
             if (!accept)
                 return ;
-            
             let res = addFriend(sender.sender_id, sender.receiver_id);
             if (res.success)
                 return io.to(socket.id).emit('error', res.error);
@@ -112,7 +108,6 @@ export function startServer(io) {
             res = addFriend(sender.receiver_id, sender.sender_id);
             if (res.success)
                 return io.to(socket.id).emit('error', res.error);
-        })
-
+        });
     });
 }

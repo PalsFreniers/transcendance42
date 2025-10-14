@@ -3,42 +3,41 @@ import { getUserIdFromToken } from './loginClient.js'
 import { handleRoute } from './navClient.js';
 
 
-export let friend_select: string = ''; 
+export let friend_select: string = '';
 
-export async function msg_friend()
-{
+export async function msg_friend() {
 	const token = localStorage.getItem('token');
 	const messages = await fetch(`/api/user/get-message`, {
-			method: 'POST',
-			headers: {
-				'Content-Type': 'application/json',
-				'Authorization': `Bearer ${token}`
-			},
-			body: JSON.stringify({ friendUsername: friend_select })
+		method: 'POST',
+		headers: {
+			'Content-Type': 'application/json',
+			'Authorization': `Bearer ${token}`
+		},
+		body: JSON.stringify({ friendUsername: friend_select })
+	});
+	const data = await messages.json();
+	if (data.messages) {
+		const boxMsg = document.getElementById('display-msg') as HTMLElement;
+		boxMsg.innerHTML = ``;
+		data.messages.forEach(msg => {
+			if (!msg)
+				return;
+			const msgElement = document.createElement('p');
+			msgElement.textContent = msg.text;
+			if (msg.userId === getUserIdFromToken())
+				msgElement.className = "user-msg";
+			else
+				msgElement.className = "user-target-msg";
+			boxMsg.appendChild(msgElement);
 		});
-		const data = await messages.json();
-		if (data.messages) {
-			const boxMsg = document.getElementById('display-msg') as HTMLElement;
-			boxMsg.innerHTML = ``;
-			data.messages.forEach(msg => {
-				if (!msg)
-					return;
-				const msgElement = document.createElement('p');
-				msgElement.textContent = msg.text;
-				if (msg.userId === getUserIdFromToken())
-					msgElement.className = "user-msg";
-				else
-					msgElement.className = "user-target-msg";
-				boxMsg.appendChild(msgElement);
-			});
-			boxMsg.scrollTop = boxMsg.scrollHeight;
-			
-		}
+		boxMsg.scrollTop = boxMsg.scrollHeight;
+
+	}
 }
 
-async function friend_reload(){
+async function friend_reload() {
 	const token = localStorage.getItem('token');
-	 const findfriend = await fetch(`/api/user/friend-list`, {
+	const findfriend = await fetch(`/api/user/friend-list`, {
 		method: "GET",
 		headers: {
 			"Content-Type": "application/json",
@@ -54,8 +53,8 @@ async function friend_reload(){
 	const friends = Array.isArray(listfriend.friends) ? listfriend.friends.filter(Boolean) : [];
 	console.log("Nombre d'amis :", friends.length);
 	const cl_friend = document.querySelectorAll<HTMLDivElement>(".fri");
-		cl_friend.forEach((fr) => {
-			fr.remove();
+	cl_friend.forEach((fr) => {
+		fr.remove();
 	});
 	listfriend.friends.forEach(friend => {
 		const friendDiv = document.createElement("div");
@@ -72,12 +71,11 @@ async function friend_reload(){
 		friendDiv.addEventListener("click", async (e) => {
 			e.preventDefault();
 			const cl_friend = document.querySelectorAll<HTMLDivElement>(".fri");
-				cl_friend.forEach((fr) => {
-					fr.style.backgroundColor = "#555";
+			cl_friend.forEach((fr) => {
+				fr.style.backgroundColor = "#555";
 			});
 			friendDiv.style.backgroundColor = "#ac316eff";
-			if (friends_chat)
-			{
+			if (friends_chat) {
 				friends_chat.innerHTML = `
 					<div id="display-msg"> </div>
 					<form id="chat-input">
@@ -88,20 +86,19 @@ async function friend_reload(){
 				friend_select = friend.username;
 				msg_friend();
 				const formMsg = document.getElementById('chat-input') as HTMLFormElement;
-				const msgsend = document.getElementById('msg-send') as HTMLInputElement; 
+				const msgsend = document.getElementById('msg-send') as HTMLInputElement;
 				if (formMsg) {
 					formMsg.addEventListener('submit', async (e) => {
 						e.preventDefault();
 						const server = getSocket(0);
-						if (msgsend.value.length != 0)
-						{
+						if (msgsend.value.length != 0) {
 							server!.emit('message', msgsend.value, getUserIdFromToken(), friend.username)
 							msgsend.value = '';
 							msg_friend();
 						}
 					})
 				}
-				
+
 			}
 		});
 		let url: string;
@@ -115,13 +112,52 @@ async function friend_reload(){
 	});
 }
 
-export async function msg_lobby(event: MouseEvent){
-    const token = localStorage.getItem('token');
-    const chat = document.getElementById('chat');
-    const target = event?.target as Node;
-    if (chat)
-    {
-        chat.innerHTML = `
+async function loadFriendRequests(container: HTMLElement, token: string) {
+	try {
+		const res = await fetch(`/api/user/get-friend-requests`, {
+			method: "GET",
+			headers: {
+				"Content-Type": "application/json",
+				Authorization: `Bearer ${token}`,
+			},
+		});
+		const data = await res.json();
+		if (!data)
+			return;
+		data.friendRequest.forEach((req: any) => {
+			const div = document.createElement("div");
+			div.classList.add("friend-request");
+			div.innerHTML = `
+				<p>${req.sender_username} wants to be your friend</p>
+				<div id="button">
+					<button class="accept">Accept</button>
+					<button class="reject">Reject</button>
+				</div>
+			`;
+			container.appendChild(div);
+			const socketChat = getSocket(0);
+			div.querySelector('.accept')!.addEventListener('click', () => {
+				socketChat!.emit('requests-friend', req.id, true);
+				div.remove();
+			});
+			div.querySelector('.reject')!.addEventListener('click', () => {
+				socketChat!.emit('requests-friend', req.id, false);
+				div.remove();
+			});
+		});
+	} catch (err) {
+		console.error('Error loading friend requests:', err);
+		container.innerHTML = "<p>Failed to load friend requests</p>";
+	}
+}
+
+
+export async function msg_lobby(event: MouseEvent) {
+	const token = localStorage.getItem('token');
+	const chat = document.getElementById('chat');
+	const target = event?.target as Node;
+	if (chat) {
+		chat.innerHTML = `
             <div id="boddy_chat">
                 <div id="page_chat">
                     <div id="lobby_friends">
@@ -131,37 +167,40 @@ export async function msg_lobby(event: MouseEvent){
                 </div>
             </div>
         `;
-        const chat_boddy = document.getElementById('page_chat');
-        const friends_lobby = document.getElementById('lobby_friends');
+		const chat_boddy = document.getElementById('page_chat');
+		const friends_lobby = document.getElementById('lobby_friends');
 
-        if (friends_lobby && token)
-        {
-            try {
-                const findfriend = await fetch(`/api/user/friend-list`, {
-                    method: "GET",
-                    headers: {
-                        "Content-Type": "application/json",
-                        Authorization: `Bearer ${token}`,
-                    },
-                });
-                if (findfriend.ok)
-                {
+		if (friends_lobby && token) {
+			try {
+				const findfriend = await fetch(`/api/user/friend-list`, {
+					method: "GET",
+					headers: {
+						"Content-Type": "application/json",
+						Authorization: `Bearer ${token}`,
+					},
+				});
+				if (findfriend.ok) {
 					const nameFriend = document.createElement("input");
 					nameFriend.id = "friend-username";
 					nameFriend.type = "text";
 					nameFriend.placeholder = "Enter friend username";
+
 					const addFriend = document.createElement("button");
 					addFriend.id = "add-friend-button";
 					addFriend.textContent = "Add Friend";
+
 					friends_lobby.appendChild(nameFriend);
 					friends_lobby.appendChild(addFriend);
+
+					const requestsContainer = document.createElement("div");
+					requestsContainer.id = "friend-requests";
+					friends_lobby.appendChild(requestsContainer);
+
 					addFriend.addEventListener('click', async (e) => {
 						e.preventDefault();
 						const friendUsername = nameFriend.value;
-						if (!friendUsername) {
-							console.error('Friend username is empty');
-							return;
-						}
+						if (!friendUsername) 
+							return console.error('Friend username is empty');
 						try {
 							const res = await fetch(`/api/user/add-friend`, {
 								method: 'POST',
@@ -173,40 +212,37 @@ export async function msg_lobby(event: MouseEvent){
 							});
 							const data = await res.json();
 							if (res.ok) {
-								console.log('friend added:', data.message);
+								console.log('Friend added:', data.message);
 								handleRoute();
-							}
-							else
-								console.log('Failed to add friend', data.error);
-
-						}
-						catch (err) {
+							} else console.log('Failed to add friend', data.error);
+						} catch (err) {
 							console.error('Error:', err);
 						}
 						friend_reload();
 					});
 					friend_reload();
-                }
-            } catch (error) {
-                console.error(error)
-            }
-        }
-        console.log("On ouvre le chat");
-        function click_event(e: MouseEvent){
-            const target = e.target as Node;
-            if (chat && !chat_boddy?.contains(target) ){
-                chat.innerHTML = ``;
+					loadFriendRequests(requestsContainer, token);
+				}
+			} catch (error) {
+				console.error(error)
+			}
+		}
+		console.log("On ouvre le chat");
+		function click_event(e: MouseEvent) {
+			const target = e.target as Node;
+			if (chat && !chat_boddy?.contains(target)) {
+				chat.innerHTML = ``;
 				friend_select = '';
-                document.removeEventListener('click', click_event);
-            }
-        }
-        setTimeout(() =>{
-            document.addEventListener('click', click_event);
-        });
-    }
+				document.removeEventListener('click', click_event);
+			}
+		}
+		setTimeout(() => {
+			document.addEventListener('click', click_event);
+		});
+	}
 }
 
-export	function mini_msg(friend){
+export function mini_msg(friend) {
 	const miniChat = document.getElementById('chat-container') as HTMLElement;
 	if (!miniChat)
 		return
@@ -270,13 +306,12 @@ export	function mini_msg(friend){
 		friend_select = friend.username;
 		msg_friend();
 		const formMsg = document.getElementById('chat-input') as HTMLFormElement;
-		const msgsend = document.getElementById('msg-send') as HTMLInputElement; 
+		const msgsend = document.getElementById('msg-send') as HTMLInputElement;
 		if (formMsg) {
 			formMsg.addEventListener('submit', async (e) => {
 				e.preventDefault();
 				const server = getSocket(0);
-				if (msgsend.value.length != 0)
-				{
+				if (msgsend.value.length != 0) {
 					server!.emit('message', msgsend.value, getUserIdFromToken(), friend.username)
 					msgsend.value = '';
 					msg_friend();

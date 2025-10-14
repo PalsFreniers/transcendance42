@@ -128,11 +128,3 @@ export async function logOut(app: FastifyInstance) {
         return reply.status(200).send({ success: true });
     });
 }
-
-export async function logOutHardReload(app: FastifyInstance) {
-    app.post('/logouthr', async () => {
-         const socketConnect = db.prepare(`SELECT socket FROM users WHERE is_online = 1`);
-         console.log(socketConnect);
-    })
-}
-

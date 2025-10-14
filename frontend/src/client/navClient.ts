@@ -117,8 +117,8 @@ export async function handleRoute() {
 		navigateTo('/login');
 		return;
 	}
-	if (token)
-		socket.connect();
+	if (token && !socket!.connected)
+		socket!.connect();
 	// --- template injection ---
 	const app = document.getElementById('app');
 	if (!app)

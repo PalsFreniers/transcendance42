@@ -34,7 +34,6 @@ export function getUserIdFromToken(): number {
 export function getSockets(): [Socket, Socket, Socket] {
     const token = localStorage.getItem('token');
     const userId = getUserIdFromToken();
-    console.log(socketChat);
     if (!socketChat) {
         socketChat = io(`wss://${import.meta.env.VITE_LOCAL_ADDRESS}:8443`, {
             path: '/chatSocket/',
@@ -68,9 +67,8 @@ export function getSockets(): [Socket, Socket, Socket] {
             console.error('Connection error:', err.message);
         });
 
-        socketChat.on('new-friend-request', () => {
-
-            // fait ce que tu veux ici, si tu a besoin du username du sender dit le moi
+        socketChat.on('new-friend-request', (data) => {
+           notify(`You get a friend request from ${data.sender_name}`);
         });
     }
 

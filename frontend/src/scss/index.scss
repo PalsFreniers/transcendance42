@@ -170,7 +170,7 @@ button {
 		width: 100%;
 		height: 100%;
 		background: url("https://mir-s3-cdn-cf.behance.net/project_modules/fs/9bc27292880429.5e569ff84e4d0.gif"),
-		$color-black;
+			$color-black;
 		background-position: center;
 		background-size: cover;
 	}
@@ -533,6 +533,12 @@ input:-webkit-autofill {
 
 .profil {
 	width: 45%;
+	height: 100%;
+	overflow-y: scroll;
+	overflow-x: hidden;
+	scroll-behavior: smooth;
+	scrollbar-width: thin;
+	scrollbar-color: $color-secondary transparent;
 }
 
 .profil-wrapper {
@@ -548,7 +554,7 @@ input:-webkit-autofill {
 	text-align: center;
 	color: $color-white;
 	box-shadow: 0 4px 10px rgba($color-black, 0.6);
-    height: 50%;
+	height: 50%;
 
 	h2,
 	h3 {
@@ -558,28 +564,28 @@ input:-webkit-autofill {
 		text-shadow: 0 0 5px $color-black;
 	}
 
-    #game-history {
-        height: 100%;
-    	overflow-y: scroll;
-    	overflow-x: hidden;
-    	scroll-behavior: smooth;
-    	scrollbar-width: thin;
-    	scrollbar-color: $color-secondary transparent;
-    
-        ::-webkit-scrollbar-track {
-        	background: transparent;
-        }
-        
-        ::-webkit-scrollbar {
-        	width: 6px;
-        	background-color: transparent;
-        }
-        
-        ::-webkit-scrollbar-thumb {
-        	border-radius: 10px;
-        	background-color: #555;
-        }
-    }
+	#game-history {
+		height: 100%;
+		overflow-y: scroll;
+		overflow-x: hidden;
+		scroll-behavior: smooth;
+		scrollbar-width: thin;
+		scrollbar-color: $color-secondary transparent;
+
+		::-webkit-scrollbar-track {
+			background: transparent;
+		}
+
+		::-webkit-scrollbar {
+			width: 6px;
+			background-color: transparent;
+		}
+
+		::-webkit-scrollbar-thumb {
+			border-radius: 10px;
+			background-color: #555;
+		}
+	}
 }
 
 
@@ -805,7 +811,7 @@ input:-webkit-autofill {
 	margin-bottom: 20px;
 }
 
-#msg-end{
+#msg-end {
 	padding: 10px;
 	background: rgba($color-black, 0.6);
 	color: $color-accent-alt;
@@ -885,7 +891,7 @@ input:-webkit-autofill {
 }
 
 #pong-ff {
-  display: none;
+	display: none;
 }
 
 /******************************************************************************/
@@ -1355,7 +1361,6 @@ input:-webkit-autofill {
 						border-color: $color-accent-alt;
 						box-shadow: 0 0 6px $color-accent-alt;
 					}
-
 				}
 			}
 		}
@@ -1406,6 +1411,29 @@ input:-webkit-autofill {
 			border-top-left-radius: $radius-xl;
 			border-bottom-left-radius: $radius-xl;
 
+			.friend-request{
+				border: 1px solid rgba($color-white, 0.3);
+				display: flex;
+				flex-direction: column;
+				row-gap: 10px;
+				align-items: center;
+				background-color: color.adjust($color-gray, $lightness: -30%);
+				padding: 5px 0px 5px 0px;
+				p {
+					text-align: center;
+					font-size: $font-size-xs;
+					color: $color-white;
+					width: 100%;
+				}
+			}
+
+			#button{
+				display: flex;
+				flex-direction: row;
+				width: 100%;
+				justify-content: space-around;
+			}
+			
 			#friend-username {
 				display: flex;
 				padding: 10px;
@@ -1628,6 +1656,7 @@ input:-webkit-autofill {
 			transform: translateY(-1px) translateX(-2px);
 		}
 	}
+<<<<<<< HEAD
 }
 
 #info-coin {
@@ -1664,3 +1693,6 @@ input:-webkit-autofill {
   transform: rotateX(180deg);
 }
 
+=======
+}
+>>>>>>> c45c9d6 (friend request)
