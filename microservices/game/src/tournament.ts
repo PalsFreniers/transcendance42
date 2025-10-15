@@ -1,5 +1,5 @@
 import {Server} from "socket.io";
-import {Listener} from "./game.js";
+import {Listener, Game} from "./game.js";
 import {GameManager} from "./gameManager.js";
 import {createGameLobby} from "./gameModel.js"
 
@@ -257,7 +257,12 @@ export class Tournament {
             this._isGrandFinale ? "Grand Finale" : "Finale",
             token,
             (t, result) => {
-                this.emit("won", { t: this, result });
+                if (result[0][0] == winner[0]) { // WB won FINALE
+					result[4] = true;
+                } else if (this._isGrandFinale) { // LB won GRAND FINALE
+					result[4] = true;
+                } // LB won FINALE
+				this.emit("won", { t: this, result });
                 const handleTournamentEnd = (tournamentWinner, tournamentLoser) => {
                     this.emit("elimination", { t: this, result });
                     this._leaderboard.push(tournamentLoser);
@@ -290,10 +295,10 @@ export class Tournament {
         round: [player_type, player_type],
         roundName: string,
         token: string,
-        onGameEnd: ((t: Tournament, result: [player_type, player_type]) => void),
+        onGameEnd: ((t: Tournament, result: [player_type, player_type, Game, [number, number], boolean]) => void),
     ) {
         if (round[1][0] === -1) {
-            onGameEnd(this, round);
+            onGameEnd(this, [round[0], round[1], new Game(123456789), [0, 11], false]);
             return;
         }
         // // Create the associated game
@@ -312,6 +317,8 @@ export class Tournament {
         const joinGameWrapper = (playerInfo) => {
             const errno = gameManager.joinLobby(name, playerInfo[0]);
             (this._associatedServer.sockets.sockets as any).get(playerInfo[1]).join(`game-${gameID}`);
+			(this._associatedServer.sockets.sockets as any).get(playerInfo[1]).data.lobbyName = name;
+			(this._associatedServer.sockets.sockets as any).get(playerInfo[1]).data.gameId = gameID;
             const playerUsername = gameManager.getUsernameFromSocket(playerInfo[1], this._associatedServer);
             if (errno) {
                 switch (errno) {
@@ -327,7 +334,9 @@ export class Tournament {
         joinGameWrapper(round[0]);
         joinGameWrapper(round[1]);
         gameManager.findGame(name)!.on("game-end", ({game, _}) => {
-            (game.score[0] > game.score[1]) ? onGameEnd(this, round) : onGameEnd(this, round.reverse() as [player_type, player_type]);
+            (game.score[0] > game.score[1]) ?
+				  onGameEnd(this, [round[0], round[1], game, [game.score[0], game.score[1]], false])
+				: onGameEnd(this, [round[1], round[0], game, [game.score[1], game.score[0]], false]);
         }).on("game-state", (state) => {
 			this._associatedServer.to(`game-${gameID}`).emit("game-state", state);
 		});

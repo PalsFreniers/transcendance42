@@ -22,7 +22,9 @@ export function init() {
     const customBtn = document.getElementById('custom-button') as HTMLButtonElement;
     const tournamentBtn = document.getElementById('tournament-button') as HTMLButtonElement;
     const startTournament = document.getElementById('tournament-start') as HTMLButtonElement;
+    const msgGameEnd = document.getElementById("msg-end") as HTMLElement;
 
+	msgGameEnd.style.display = "none";
     startBtn.style.display = 'none';
     listGame.style.display = 'none';
     lobbyInfo.style.display = 'none';
