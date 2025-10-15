@@ -155,14 +155,14 @@ const templates: Record<string, () => string> = {
 					<button id="quit-button">quit lobby</button>
 					<button id="start-button">Start game</button>
 					<button id="kick-opponent">kick</button>
-					<button class=card id="card1-button">card 1</button>
-					<button class=card id="card2-button">card 2</button>
-					<button class=card id="card3-button">card 3</button>
-					<button class=card id="coin-button">
+					<div class=card id="card1-button">card 1</div>
+					<div class=card id="card2-button">card 2</div>
+					<div class=card id="card3-button">card 3</div>
+					<div class=card id="coin-button">
 					Coin
 					<img id="info-coin" src="/asset/info.png"  width="27" height="29" ></img>
 					<div id="div-info" class="hidden">Bonus Coin is a coin flip bet — on heads, a random card may change; on tails, you choose which card to change and its replacement. (usable only once per game)</div>
-					</button>
+					</div>
 					<p id="card-played"></p>
 					<p id="opponent-card-played"></p>
 				</div>
