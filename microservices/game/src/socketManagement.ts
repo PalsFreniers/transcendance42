@@ -61,6 +61,7 @@ export function socketManagement(io: Server) {
                 ).get(game.gameID) as { lobby_name: string, status: string, player_one_id: number, player_two_id: number };
                 if (!gameRow)
                     return;
+				socket.data.lobbyName = gameRow.lobby_name;
                 const playerOneName = manager.getUsernameFromSocket(
                     manager.getSocketId(gameRow.player_one_id)!,
                     io

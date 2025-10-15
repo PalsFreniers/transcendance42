@@ -14,6 +14,5 @@ COPY . .
 # Expose frontend port
 EXPOSE 5173
 
-ENTRYPOINT [ "./init.sh" ]
 # REMOVE DEV BY START WHEN PROJECT FINISH
-CMD ["npm", "run", "start"]
+CMD ["./init.sh"]
