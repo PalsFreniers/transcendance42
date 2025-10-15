@@ -176,11 +176,29 @@ export function socketManagement(io: Server) {
                 TmManager.getTournament(lobbyName)!.on("game-start", ({ round, name, game }) => {
                     console.log(`${name}: ${round[0][0]} vs ${round[1][0]}`)
                 }).on("won", ({ t, result }) => { // We can chain event listener for better code
-                    console.log(`${result[0][0]} won against ${result[1][0]}`);
+					io.to(socket.data.gameId).emit("game-end", {
+						name: result[2].name,
+						player1: manager.getUsernameFromSocket(result[0][1], io),
+						player2: manager.getUsernameFromSocket(result[1][1], io),
+						score: [result[3][0], result[3][1]],
+						tMsg: "you won! Go in the winner bracket",
+					});
                 }).on("lose", ({ t, result }) => {
-                    console.log(`${result[1][0]} lost against ${result[0][0]}`);
+					io.to(socket.data.gameId).emit("game-end", {
+						name: result[2].name,
+						player1: manager.getUsernameFromSocket(result[0][1], io),
+						player2: manager.getUsernameFromSocket(result[1][1], io),
+						score: [result[3][0], result[3][1]],
+						tMsg: "you lost! Go in the loser bracket",
+					});
                 }).on("elimination", ({ t, result }) => {
-                    console.log(`${result[1][0]} is eliminated and is ${t.remainingPlayers.length}th`);
+					io.to(socket.data.gameId).emit("game-end", {
+						name: result[2].name,
+						player1: manager.getUsernameFromSocket(result[0][1], io),
+						player2: manager.getUsernameFromSocket(result[1][1], io),
+						score: [result[3][0], result[3][1]],
+						tMsg: `you lost! You have been eliminated by ${manager.getUsernameFromSocket(result[0][1], io)}`,
+					});
                 });
             } catch (e) {
                 console.error(e);

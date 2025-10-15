@@ -1,5 +1,5 @@
 import {Server} from "socket.io";
-import {Listener} from "./game.js";
+import {Listener, Game} from "./game.js";
 import {GameManager} from "./gameManager.js";
 import {createGameLobby} from "./gameModel.js"
 
@@ -290,10 +290,10 @@ export class Tournament {
         round: [player_type, player_type],
         roundName: string,
         token: string,
-        onGameEnd: ((t: Tournament, result: [player_type, player_type]) => void),
+        onGameEnd: ((t: Tournament, result: [player_type, player_type, Game, [number, number]]) => void),
     ) {
         if (round[1][0] === -1) {
-            onGameEnd(this, round);
+            onGameEnd(this, [round[0], round[1], new Game(123456789), [0, 11]]);
             return;
         }
         // // Create the associated game
@@ -327,7 +327,9 @@ export class Tournament {
         joinGameWrapper(round[0]);
         joinGameWrapper(round[1]);
         gameManager.findGame(name)!.on("game-end", ({game, _}) => {
-            (game.score[0] > game.score[1]) ? onGameEnd(this, round) : onGameEnd(this, round.reverse() as [player_type, player_type]);
+            (game.score[0] > game.score[1]) ?
+				  onGameEnd(this, [round[0], round[1], game, [game.score[0], game.score[1]]])
+				: onGameEnd(this, [round[1], round[0], game, [game.score[1], game.score[0]]]);
         }).on("game-state", (state) => {
 			this._associatedServer.to(`game-${gameID}`).emit("game-state", state);
 		});

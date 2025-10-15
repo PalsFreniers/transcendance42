@@ -217,6 +217,7 @@ export function createPongSocket(socketPong: Socket | null) {
         canvas.style.display = "none";
         ffBtn.style.display = "none";
         clearPong();
+		if(data.tMsg) notify(data.tMsg);
     })
 
     socketPong.on('disconnect', (reason) => {
