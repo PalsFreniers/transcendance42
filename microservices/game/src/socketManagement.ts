@@ -177,12 +177,16 @@ export function socketManagement(io: Server) {
                     console.log(`${name}: ${round[0][0]} vs ${round[1][0]}`)
                 }).on("won", ({ t, result }) => { // We can chain event listener for better code
 					if(result[0][1] !== socket.id) return;
+					let Msg = "you won! Go in the winner bracket";
+					if(result[4]) {
+						Msg = "you won! You won the tournament";
+					}
 					socket.emit("game-end", {
 						name: result[2].name,
 						player1: manager.getUsernameFromSocket(result[0][1], io),
 						player2: manager.getUsernameFromSocket(result[1][1], io),
 						score: [result[3][0], result[3][1]],
-						tMsg: "you won! Go in the winner bracket",
+						tMsg: Msg,
 					});
                 }).on("lose", ({ t, result }) => {
 					if(result[1][1] !== socket.id) return;
