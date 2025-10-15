@@ -43,6 +43,8 @@ export function createPongSocket(socketPong: Socket | null) {
     socketPong.on("room-created", (data) => {
         console.log("Room created event:", data);
         const lobbyGame = document.getElementById("game-salon") as HTMLDivElement;
+		const returnBtn = document.getElementById('return') as HTMLDivElement;
+		returnBtn.style.display = 'none';
         lobbyGame.innerHTML = `
         <p id="lobbyname"><strong>Lobby name:</strong> ${data.lobbyName}</p>
         <p><strong>Player 1:</strong> ${data.userName}</p>
@@ -53,6 +55,8 @@ export function createPongSocket(socketPong: Socket | null) {
     socketPong.on('player-joined', (data) => {
         console.log("Player joined event:", data);
         const startBtn = document.getElementById('start-game-btn') as HTMLButtonElement;
+		const returnBtn = document.getElementById('return') as HTMLDivElement;
+		returnBtn.style.display = 'none';
         if (!startBtn)
             return;
         // Update UI with both players
@@ -82,6 +86,8 @@ export function createPongSocket(socketPong: Socket | null) {
         const customBtn = document.getElementById('custom-button') as HTMLButtonElement;
         const tournamentBtn = document.getElementById('tournament-button') as HTMLButtonElement;
         const startTournament = document.getElementById('tournament-start') as HTMLButtonElement;
+		const returnBtn = document.getElementById('return') as HTMLDivElement;
+		returnBtn.style.display = 'none';
 
         lobbyGame.style.display = 'block';
         startTournament.style.display = "none";
@@ -113,6 +119,7 @@ export function createPongSocket(socketPong: Socket | null) {
 
     socketPong.on('game-state', (state) => {
     	const ffBtn = document.getElementById("pong-ff") as HTMLButtonElement;
+        const msgGameEnd = document.getElementById("msg-end") as HTMLElement;
 		if(!state.isLocal && ffBtn.style.display != "block") {
 			ffBtn.style.display = "block";
 			ffBtn.addEventListener("click", async (e) => {
@@ -124,6 +131,7 @@ export function createPongSocket(socketPong: Socket | null) {
 				}
 			});
 		}
+		msgGameEnd.style.display = "none";
         drawPong(state);
     });
 
@@ -183,6 +191,9 @@ export function createPongSocket(socketPong: Socket | null) {
         const canvas = document.getElementById("pong-canvas") as HTMLCanvasElement;
         const ffBtn = document.getElementById("pong-ff") as HTMLButtonElement;
         const msgGameEnd = document.getElementById("msg-end") as HTMLElement;
+		const returnBtn = document.getElementById('return') as HTMLDivElement;
+		returnBtn.style.display = 'block';
+		msgGameEnd.style.display = "block";
         let msg = "You won"
         let endMsg = `${data.score[0]} - ${data.score[1]}`
         if (data.score[0] < data.score[1] && data.player1 == getUsernameFromToken())
