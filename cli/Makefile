@@ -7,7 +7,7 @@ transcli:
 all: transcli
 
 clean:
-	./build clean
+	test -f build && ./build clean || echo -n ""
 	rm -fr windowLog.txt cli.conf build src/app/api/gen.c3
 
 re:

@@ -18,4 +18,4 @@ RUN npm run build
 EXPOSE 3002
 
 # REMOVE DEV BY START WHEN PROJECT FINISH
-CMD ["npm", "run", "start"]
+CMD ["./init.sh"]

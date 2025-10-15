@@ -28,10 +28,23 @@ localadress:
 	@echo "VITE_LOCAL_ADDRESS=$$($(CMD_LOCAL_NETWORK_ADDR))" >> $(ENV_FILE);
 	@echo "VITE_LOCAL_ADDRESS set to $$($(CMD_LOCAL_NETWORK_ADDR)) in $(ENV_FILE)"
 
-all: localadress
-	@$(COMPOSE) -f $(COMPOSE_FILE) up -d
-	@echo "The website run at https://$$($(CMD_LOCAL_NETWORK_ADDR)):8443"
+setprod:
+	@if grep -q "^LAUNCH=" $(ENV_FILE); then \
+		sed -i "/^LAUNCH=/d" $(ENV_FILE); \
+	fi
+	@echo "LAUNCH=start" >> $(ENV_FILE);
+	@echo "LAUNCH set to prod in $(ENV_FILE)"
+
+setdev:
+	@if grep -q "^LAUNCH=" $(ENV_FILE); then \
+		sed -i "/^LAUNCH=/d" $(ENV_FILE); \
+	fi
+	@echo "LAUNCH=dev" >> $(ENV_FILE);
+	@echo "LAUNCH set to dev in $(ENV_FILE)"
+
+all: prod
 	@$(MAKE) -C . cli --no-print-directory
+	@echo "The website run at https://$$($(CMD_LOCAL_NETWORK_ADDR)):8443"
 
 down:
 	@$(COMPOSE) -f $(COMPOSE_FILE) down
@@ -52,7 +65,12 @@ clean:
 user:
 	@$(COMPOSE) -f $(COMPOSE_FILE) up -d user-service
 
-prod: localadress
+prod: localadress setprod
+	@$(COMPOSE) -f $(COMPOSE_FILE) up -d --build
+	@echo "Production mode started — built version running."
+	@echo "Website: https://$$($(CMD_LOCAL_NETWORK_ADDR)):8443"
+
+dev: localadress setdev
 	@$(COMPOSE) -f $(COMPOSE_FILE) up -d --build
 	@echo "Production mode started — built version running."
 	@echo "Website: https://$$($(CMD_LOCAL_NETWORK_ADDR)):8443"
@@ -69,4 +87,4 @@ cli:
 	@echo "addr:=\"$$($(CMD_LOCAL_NETWORK_ADDR))\"\nport:=\"8443\"" > $(GEN_API_FILE)
 	@$(MAKE) -C cli --no-print-directory
 
-.PHONY: help localadress all down restart logs build clean user nginx front cli re
+.PHONY: help localadress setprod setdev all down restart logs build clean user prod dev nginx front cli re
