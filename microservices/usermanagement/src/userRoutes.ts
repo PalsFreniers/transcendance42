@@ -35,19 +35,8 @@ export async function profil(app: FastifyInstance) {
     });
 }
 
-export async function acceptFriend(app: FastifyInstance) {
-    app.post('accept-friend', async (request, reply) => {
-        try {
-
-        }
-        catch (err) {
-            return reply.code(500).send({ error: 'Failed to add friend' });
-        }
-    });
-}
-
 export async function friendAdd(app: FastifyInstance) {
-    app.post('/add-friend', async (request, reply) => { // a changer pour ajouter la demande dans la db et envoyr un msg a la target
+    app.post('/add-friend', async (request, reply) => { 
         try {
             const user = request.user as { userId: number, username: string };
             const { friendUsername } = request.body as { friendUsername: string };

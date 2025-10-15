@@ -35,8 +35,6 @@ export function createPongSocket(socketPong: Socket | null) {
         transports: ['websocket'],
     });
     socketPong.on("connect", () => {
-        console.log("Connected to game socket:", socketPong!.id);
-        // Register this socket with backend so manager knows your userId
         socketPong!.emit("register-socket", userId);
     });
 
@@ -45,6 +43,7 @@ export function createPongSocket(socketPong: Socket | null) {
         const lobbyGame = document.getElementById("game-salon") as HTMLDivElement;
 		const returnBtn = document.getElementById('return') as HTMLDivElement;
 		returnBtn.style.display = 'none';
+        notify(`You are in lobby ${data.lobbyName}`);
         lobbyGame.innerHTML = `
         <p id="lobbyname"><strong>Lobby name:</strong> ${data.lobbyName}</p>
         <p><strong>Player 1:</strong> ${data.userName}</p>
@@ -63,6 +62,8 @@ export function createPongSocket(socketPong: Socket | null) {
         lobbyname = data.lobbyName;
         if (data.playerTwo === '-')
             startBtn.style.display = 'block';
+        else
+            notify(`${data.playerTwo} join the lobby`)
         const lobbyGame = document.getElementById("game-salon") as HTMLDivElement;
         lobbyGame.innerHTML = `
         <p id="lobbyname"><strong>Lobby name:</strong> ${data.lobbyName}</p>

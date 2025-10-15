@@ -1,5 +1,6 @@
 import { handleRoute } from "./navClient.js";
 import { msg_lobby } from "./chatClient.js";
+import { notify } from "./notify.js";
 
 async function profil_image(){
 	const token = localStorage.getItem('token');
@@ -14,12 +15,8 @@ async function profil_image(){
 		});
 		const data = await profil.json();
 		const pro = document.getElementById('img_perso') as HTMLImageElement;
-		//const url = `${data.user.profile_image_url || '/assets/default-avatar.png'}`;
 		if (data)
-		{
-			console.log("👉 Réponse API :", data.user);
 			pro.src = data.user.profile_image_url;
-		}
 	} catch (error) {
 		console.error(error);
 	}
@@ -124,10 +121,8 @@ export function init(){
 
 			const data = await res.json();
 			if (data.success) {
-				// remove token from localStorage
+				notify('You are offline now');
 				localStorage.removeItem("token");
-
-				// optional: redirect to login page
 				handleRoute();
 			} else {
 				if (localStorage)
