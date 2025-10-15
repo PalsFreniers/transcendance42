@@ -44,7 +44,6 @@ export function getSockets(): [Socket, Socket, Socket] {
         });
 
         socketChat.on('connect', () => {
-            console.log(`Socket (${socketChat!.id}) connected!`);
             socketChat!.emit('register-socket', userId);
         });
 

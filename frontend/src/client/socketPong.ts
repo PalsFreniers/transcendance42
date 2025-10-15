@@ -2,6 +2,7 @@ import io, { Socket } from 'socket.io-client';
 import { navigateTo } from './navClient.js';
 import { getUsernameFromToken } from './loginClient.js';
 import { clearPong, drawPong, handlePaddleReflect, handleWallReflect } from "./pongUI.js";
+import { notify } from './notify.js';
 
 let lobbyname: String | null = null;
 let keysPressed = {
@@ -34,14 +35,13 @@ export function createPongSocket(socketPong: Socket | null) {
         transports: ['websocket'],
     });
     socketPong.on("connect", () => {
-        console.log("Connected to game socket:", socketPong!.id);
-        // Register this socket with backend so manager knows your userId
         socketPong!.emit("register-socket", userId);
     });
 
     socketPong.on("room-created", (data) => {
         console.log("Room created event:", data);
         const lobbyGame = document.getElementById("game-salon") as HTMLDivElement;
+        notify(`You are in lobby ${data.lobbyName}`);
         lobbyGame.innerHTML = `
         <p id="lobbyname"><strong>Lobby name:</strong> ${data.lobbyName}</p>
         <p><strong>Player 1:</strong> ${data.userName}</p>
@@ -58,6 +58,8 @@ export function createPongSocket(socketPong: Socket | null) {
         lobbyname = data.lobbyName;
         if (data.playerTwo === '-')
             startBtn.style.display = 'block';
+        else
+            notify(`${data.playerTwo} join the lobby`)
         const lobbyGame = document.getElementById("game-salon") as HTMLDivElement;
         lobbyGame.innerHTML = `
         <p id="lobbyname"><strong>Lobby name:</strong> ${data.lobbyName}</p>

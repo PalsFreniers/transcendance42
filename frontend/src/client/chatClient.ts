@@ -1,6 +1,7 @@
 import { getSocket } from './socketClient.js'
 import { getUserIdFromToken } from './loginClient.js'
 import { handleRoute } from './navClient.js';
+import { notify } from './notify.js';
 
 
 export let friend_select: string = '';
@@ -50,8 +51,6 @@ async function friend_reload() {
 	if (!chat || !friends_lobby)
 		return;
 	const listfriend = await findfriend.json();
-	const friends = Array.isArray(listfriend.friends) ? listfriend.friends.filter(Boolean) : [];
-	console.log("Nombre d'amis :", friends.length);
 	const cl_friend = document.querySelectorAll<HTMLDivElement>(".fri");
 	cl_friend.forEach((fr) => {
 		fr.remove();
@@ -65,9 +64,12 @@ async function friend_reload() {
 		img.src = friend.profile_image_url;
 		const p = document.createElement("p");
 		p.textContent = friend.username;
+		const statusDot = document.createElement("span");
+		statusDot.classList.add(friend.is_online === 1 ? "online" : "offline");
 
 		friendDiv.appendChild(img);
 		friendDiv.appendChild(p);
+		friendDiv.appendChild(statusDot);
 		friendDiv.addEventListener("click", async (e) => {
 			e.preventDefault();
 			const cl_friend = document.querySelectorAll<HTMLDivElement>(".fri");
@@ -82,7 +84,6 @@ async function friend_reload() {
 						<input id="msg-send" type="text" placeholder="Écrire un message..." />
 						<button type="submit">Send</button>
 					</form>`;
-				console.log("Tu as cliqué sur :", friend.username);
 				friend_select = friend.username;
 				msg_friend();
 				const formMsg = document.getElementById('chat-input') as HTMLFormElement;
@@ -200,7 +201,7 @@ export async function msg_lobby(event: MouseEvent) {
 						e.preventDefault();
 						const friendUsername = nameFriend.value;
 						if (!friendUsername) 
-							return console.error('Friend username is empty');
+							return notify('Friend username is empty');
 						try {
 							const res = await fetch(`/api/user/add-friend`, {
 								method: 'POST',
@@ -212,9 +213,9 @@ export async function msg_lobby(event: MouseEvent) {
 							});
 							const data = await res.json();
 							if (res.ok) {
-								console.log('Friend added:', data.message);
+								notify(`You send a friend request to ${friendUsername}`);
 								handleRoute();
-							} else console.log('Failed to add friend', data.error);
+							} else notify(`Failed to add friend ${data.error}`);
 						} catch (err) {
 							console.error('Error:', err);
 						}
@@ -227,7 +228,6 @@ export async function msg_lobby(event: MouseEvent) {
 				console.error(error)
 			}
 		}
-		console.log("On ouvre le chat");
 		function click_event(e: MouseEvent) {
 			const target = e.target as Node;
 			if (chat && !chat_boddy?.contains(target)) {

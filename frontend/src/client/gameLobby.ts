@@ -238,7 +238,6 @@ export function init() {
                 return;
             const lobbyText = lobbyElem.textContent || "";
             const nameOnly = lobbyText.replace("Lobby name:", "").trim();
-            console.log('press Quit');
             notify(`Quit lobby: ${nameOnly}`);
             socket!.emit("left-game", { lobbyname: nameOnly });
             navigateTo('/pong');
@@ -284,8 +283,7 @@ export function init() {
                         }
                     });
                 });
-    			const ffBtn = document.getElementById("pong-ff") as HTMLButtonElement;
-				ffBtn.innerText = "Quit";
+
             }
             catch (err) {
                 console.error("Error spec game:", err)
