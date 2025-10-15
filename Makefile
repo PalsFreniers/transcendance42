@@ -15,8 +15,8 @@ help:
 	@echo "  build       Build all images (no cache)"
 	@echo "  clean       Remove containers, images, volumes"
 	@echo "  user        Run only user-service"
-	@echo "  game-dev    Run game service in dev mode (hot reload)"
-	@echo "  game-prod   Run game service in prod mode"
+	@echo "  dev    	 Run project service in dev mode (hot reload)"
+	@echo "  prod    	 Run project service in prod mode"
 	@echo "  nginx       Run only nginx"
 	@echo "  front       Run only frontend"
 	@echo "  cli         compile the cli and open pdf documentation"
@@ -51,6 +51,11 @@ clean:
 
 user:
 	@$(COMPOSE) -f $(COMPOSE_FILE) up -d user-service
+
+prod: localadress
+	@$(COMPOSE) -f $(COMPOSE_FILE) up -d --build
+	@echo "Production mode started — built version running."
+	@echo "Website: https://$$($(CMD_LOCAL_NETWORK_ADDR)):8443"
 
 nginx:
 	@$(COMPOSE) -f $(COMPOSE_FILE) up -d nginx
