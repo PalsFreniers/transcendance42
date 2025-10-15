@@ -176,7 +176,8 @@ export function socketManagement(io: Server) {
                 TmManager.getTournament(lobbyName)!.on("game-start", ({ round, name, game }) => {
                     console.log(`${name}: ${round[0][0]} vs ${round[1][0]}`)
                 }).on("won", ({ t, result }) => { // We can chain event listener for better code
-					io.to(`game-${socket.data.gameId}`).emit("game-end", {
+					if(result[0][1] !== socket.id) return;
+					socket.emit("game-end", {
 						name: result[2].name,
 						player1: manager.getUsernameFromSocket(result[0][1], io),
 						player2: manager.getUsernameFromSocket(result[1][1], io),
@@ -184,7 +185,8 @@ export function socketManagement(io: Server) {
 						tMsg: "you won! Go in the winner bracket",
 					});
                 }).on("lose", ({ t, result }) => {
-					io.to(`game-${socket.data.gameId}`).emit("game-end", {
+					if(result[1][1] !== socket.id) return;
+					socket.emit("game-end", {
 						name: result[2].name,
 						player1: manager.getUsernameFromSocket(result[0][1], io),
 						player2: manager.getUsernameFromSocket(result[1][1], io),
@@ -192,7 +194,8 @@ export function socketManagement(io: Server) {
 						tMsg: "you lost! Go in the loser bracket",
 					});
                 }).on("elimination", ({ t, result }) => {
-					io.to(`game-${socket.data.gameId}`).emit("game-end", {
+					if(result[1][1] !== socket.id) return;
+					socket.emit("game-end", {
 						name: result[2].name,
 						player1: manager.getUsernameFromSocket(result[0][1], io),
 						player2: manager.getUsernameFromSocket(result[1][1], io),
@@ -333,7 +336,9 @@ export function socketManagement(io: Server) {
             const name = socket.data.lobbyName;
             if (!name)
                 return console.warn(`No active game for player ${playerId}`);
-			const gameInfo = manager.getGameInfo2(name)!;
+			const gameInfo = manager.getGameInfo2(name);
+			if(!gameInfo)
+				return;
 			if(gameInfo.p1 !== playerId && gameInfo.p2 !== playerId) {
 				socket.leave(socket.data.gameId);
 				socket.emit("spec-out");

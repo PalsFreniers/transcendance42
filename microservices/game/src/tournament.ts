@@ -312,6 +312,8 @@ export class Tournament {
         const joinGameWrapper = (playerInfo) => {
             const errno = gameManager.joinLobby(name, playerInfo[0]);
             (this._associatedServer.sockets.sockets as any).get(playerInfo[1]).join(`game-${gameID}`);
+			(this._associatedServer.sockets.sockets as any).get(playerInfo[1]).data.lobbyName = name;
+			(this._associatedServer.sockets.sockets as any).get(playerInfo[1]).data.gameId = gameID;
             const playerUsername = gameManager.getUsernameFromSocket(playerInfo[1], this._associatedServer);
             if (errno) {
                 switch (errno) {

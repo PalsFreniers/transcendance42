@@ -2,6 +2,7 @@ import io, { Socket } from 'socket.io-client';
 import { navigateTo } from './navClient.js';
 import { getUsernameFromToken } from './loginClient.js';
 import { clearPong, drawPong, handlePaddleReflect, handleWallReflect } from "./pongUI.js";
+import { notify } from "./notify.js";
 
 let lobbyname: String | null = null;
 let keysPressed = {
