@@ -285,6 +285,12 @@ export function socketManagement(io: Server) {
                                 console.log(`${lobbyName}`);
                                 const errno = TmManager.startTournament(lobbyName, (t) => {
                                         console.log(t.leaderboard);
+                                        for (const player of t.leaderboard) {
+                                                const errno = TmManager.leaveTournament(lobbyName, player);
+                                                console.log(player[0], ": ", errno);
+                                        }
+                                        const errno = TmManager.deleteTournament(lobbyName);
+                                        console.log("errno: ", errno);
                                 }, socket.handshake.auth.token);
                                 if (errno)
                                         throw new Error(`Failed to start tournament ${errno}`);
