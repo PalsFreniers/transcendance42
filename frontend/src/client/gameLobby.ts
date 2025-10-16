@@ -124,13 +124,11 @@ export function init() {
                     console.error("Failed to create game:", data.error);
                     return;
                 }
-                const secondPlayer = prompt("Select the second player's name");
-                if (!secondPlayer)
-                    throw new Error("Invalid name for the second player");
+
                 socket!.emit("create-room", {
                     gameId: data.gameId,
                     lobbyName: data.lobbyName,
-                    local: secondPlayer,
+                    local: data.lobbyName,
                 });
                 lobbyInfo.style.display = 'block';
                 tournamentBtn.style.display = "none";

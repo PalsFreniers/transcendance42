@@ -113,7 +113,7 @@ export function socketManagement(io: Server) {
                                 const userName = socket.data.userName;
                                 if (manager.createLobby(lobbyName, gameId))
                                         throw new Error(`Couldn't create lobby with name ${lobbyName}`);
-                                if (manager.joinLobby(lobbyName, socket.data.userId))
+                                if (!local && manager.joinLobby(lobbyName, socket.data.userId))
                                         throw new Error(`Couldn't join lobby with name ${lobbyName}`);
                                 socket.data.gameId = `game-${gameId}`;
                                 manager.findGame(lobbyName)!.on("game-end", ({ game, players }) => {
@@ -131,10 +131,7 @@ export function socketManagement(io: Server) {
                                 }).on("wall-reflect", ({ballPos, ballDir}) => {
                                         io.to(`game-${gameId}`).emit("wall-reflect", {ballPos, ballDir})
                                 });
-
                                 socket.data.lobbyName = lobbyName;
-
-
                                 socket.join(socket.data.gameId);
                                 if (ia) {
                                         new GameAI(lobbyName, io);
@@ -148,9 +145,12 @@ export function socketManagement(io: Server) {
                                         });
                                 }
                                 else if (local) {
-                                        const errno = manager.joinLobby(lobbyName, -1);
-                                        if (errno)
-                                                throw new Error(`Couldn't make the second player join lobby with name ${lobbyName}: ${errno}`);
+                                        /*let errno =*/ manager.joinLobby(lobbyName, -1);
+                                        // if (errno)
+                                        //         throw new Error(`Couldn't make the second player join lobby with name ${lobbyName}: ${errno}`);
+                                        /*errno =*/ manager.joinLobby(lobbyName, socket.data.userId);
+                                        // if (errno)
+                                        //         throw new Error(`Couldn't make the first player join lobby with name ${lobbyName}: ${errno}`);
                                         db.prepare(`UPDATE games SET status = 'ready' WHERE id = ?`).run(gameId);
                                         socket.emit('room-created', {
                                                 gameId,
@@ -159,7 +159,7 @@ export function socketManagement(io: Server) {
                                                 playerTwo: local,
                                                 status: 'ready'
                                         });
-                                        manager.findGame(lobbyName)!.localPlayer = local;
+                                        manager.findGame(lobbyName)!.localPlayer = lobbyName;
                                 }
                                 else {
                                         socket.emit('room-created', {

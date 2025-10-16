@@ -258,8 +258,8 @@ export class GameManager {
                 const socketp1 = this.getSocketId(p1);
                 const socketp2 = this.getSocketId(p2);
 
-                const p1IsOnline = p1 && io.sockets.sockets.get(socketp1);
-                const p2IsOnline = (p2 && io.sockets.sockets.get(socketp2) || socketp2 === "-2" || p2 == -1);
+                const p1IsOnline = (p1 && io.sockets.sockets.get(socketp1) || socketp1 === "-1" || p1 == -1);
+                const p2IsOnline = (p2 && io.sockets.sockets.get(socketp2) || socketp2 === "-2");
 
                 if (p1IsOnline && p2IsOnline) {
                     PlayerOneTime = 15;
