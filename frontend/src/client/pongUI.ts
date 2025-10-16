@@ -137,7 +137,12 @@ class CircleParticle extends Particle {
 
 let pongInfo: PongInfo = new PongInfo();
 
+const MAX_PARTICLES = 600
+
 function drawAllParticles(ctx: CanvasRenderingContext2D) {
+    console.log(pongInfo.particles.length);
+    if (pongInfo.particles.length > MAX_PARTICLES)
+        pongInfo.particles.splice(0, pongInfo.particles.length - MAX_PARTICLES);
     pongInfo.particles.forEach((p: Particle) => {
         p.draw(ctx);
         p.move();
@@ -344,6 +349,8 @@ export function drawPong(state: any) {
     ctx.fillStyle = "#000000";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
+    ctx.shadowColor = "#c8c8c8";
+    ctx.shadowBlur = 20;
     ctx.strokeStyle = "#000000";
     ctx.lineWidth = 4;
     ctx.strokeRect(
@@ -352,6 +359,7 @@ export function drawPong(state: any) {
         realWidth * scaleX,
         realHeight * scaleY
     );
+    ctx.shadowBlur = 0;
 
     const ballRadius = 0.15 * Math.min(scaleX, scaleY);
     const ballX = state.ballPos.x * scaleX + offsetX;
@@ -405,26 +413,41 @@ export function drawPong(state: any) {
         paddleHeight
     );
 
-    ctx.fillStyle = "#ffdd00";
-    ctx.font = "20px 'Public Pixel'";
-    ctx.textAlign = "center";
-    ctx.fillText(`${state.leftScore} - ${state.rightScore}`, canvas.width / 2, 40);
 
+    ctx.fillStyle = "#ffffff";
+    ctx.font = "20px 'Public Pixel'";
+    ctx.shadowColor = "#c8c8c8";
+    ctx.textAlign = "center";
+    ctx.shadowBlur = 20;
     ctx.fillText(`${state.usernameLeftTeam}`, canvas.width / 5, 40);
     ctx.fillText(`${state.usernameRightTeam}`, canvas.width - canvas.width / 5, 40);
+    ctx.shadowBlur = 20;
 
-    ctx.fillStyle = "#ffdd00";
+    ctx.fillStyle = "#ffffff";
+    ctx.shadowColor = "#ffe96c";
+    ctx.shadowBlur = 20;
     ctx.font = "16px 'Public Pixel'";
     ctx.textAlign = "left";
 
     if (state.state === "idling") {
-        ctx.fillText(`GAME PAUSED - WAITING FOR OPPONENT`, 25, 70);
+        console.log("wait a minute")
+        const idlingStr = `GAME PAUSED - WAITING FOR OPPONENT`;
+        ctx.fillText(idlingStr, offsetX - idlingStr.length / 2 * 16 - 8, 70);
         pongInfo.particles = [];
     }
     else if (state.state === "resume") {
-        ctx.fillText(`GAME RESUMING IN ${state.resumeTimer}`, 150, 70);
+        const resumeStr = `GAME RESUMING IN ${state.resumeTimer}`;
+        ctx.fillText(resumeStr, offsetX - resumeStr.length / 2 * 16 - 8, 70);
         pongInfo.particles = [];
     }
+    else if (state.state === "scored") {
+        ctx.shadowColor = "rgba(255,255,255,0.5)";
+        ctx.fillStyle = "rgba(255,255,255,0.75)";
+        ctx.font = "300px 'Public Pixel'";
+        ctx.textAlign = "center";
+        ctx.fillText(`${state.leftScore}  ${state.rightScore}`, offsetX, offsetY + 125);
+    }
+    ctx.shadowBlur = 0;
 }
 
 export function clearPong() {
