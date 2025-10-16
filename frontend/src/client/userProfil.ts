@@ -161,9 +161,10 @@ export async function init() {
 		});
 		const dataFriend = await resFriends.json();
 		const friendListContainer = document.getElementById('friend-list') as HTMLUListElement;
+		const friendList = document.getElementById('friend-list-title') as HTMLElement;
 		if (dataFriend && Array.isArray(dataFriend.friends) && dataFriend.friends.length > 0) {
 			dataFriend.friends.forEach(friend => {
-				if (path === "/profil")
+				if(path === "/profil")
 				{
 					const li = document.createElement('li');
 					li.textContent = friend.username;
@@ -190,8 +191,14 @@ export async function init() {
 					li.appendChild(button);
 					friendListContainer.appendChild(li);
 				}
+				else{
+					friendListContainer.style.display = 'none';
+					friendList.style.display = 'none';
+					editProfile.style.display = 'none';
+				}
 				mini_msg(friend);
-			});	
+			}
+			);	
 		} else {
 			const display = document.getElementById('chat-display') as HTMLElement;
 			display.style.display = "none";
