@@ -200,25 +200,50 @@ export async function getHistoryGame(app: FastifyInstance) {
     app.get('/history', async (request, reply) => {
         try {
             const user = request.user as { userId: number };
-            const games = db.prepare(`
-				SELECT 
-					id,
-					player_one_id,
-					player_two_id,
-					game_name,
-					final_score,
-					game_time,
-					mmr_gain_player_one,
-					mmr_gain_player_two,
-					date
-				FROM gameStats
-				WHERE player_one_id = ? OR player_two_id = ?
-				ORDER BY date DESC
-			`).all(user.userId, user.userId);
-
+			const { username } = request.query as { username?: string };
+			console.log(username);
+			let games: any;
+			let id_user: any;
+				id_user = db
+                    .prepare('SELECT id FROM users WHERE username = ?')
+                    .get(username) as { username: string };
+			if (username) {
+				games = db.prepare(`
+					SELECT 
+						id,
+						player_one_id,
+						player_two_id,
+						game_name,
+						final_score,
+						game_time,
+						mmr_gain_player_one,
+						mmr_gain_player_two,
+						date
+					FROM gameStats
+					WHERE player_one_id = ? OR player_two_id = ?
+					ORDER BY date DESC
+				`).all(id_user.id, id_user.id);
+			}
+			else
+			{
+				games = db.prepare(`
+					SELECT 
+						id,
+						player_one_id,
+						player_two_id,
+						game_name,
+						final_score,
+						game_time,
+						mmr_gain_player_one,
+						mmr_gain_player_two,
+						date
+					FROM gameStats
+					WHERE player_one_id = ? OR player_two_id = ?
+					ORDER BY date DESC
+				`).all(user.userId, user.userId);
+			}
             if (!games || games.length === 0)
                 return reply.code(404).send({ success: false, message: "No games found" });
-
             return reply.code(200).send({ success: true, games });
         } catch (err) {
             console.error(err);
