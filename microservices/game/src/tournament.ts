@@ -334,12 +334,17 @@ export class Tournament {
         joinGameWrapper(round[0]);
         joinGameWrapper(round[1]);
         gameManager.findGame(name)!.on("game-end", ({game, _}) => {
-            (game.score[0] > game.score[1]) ?
-				  onGameEnd(this, [round[0], round[1], game, [game.score[0], game.score[1]], false])
-				: onGameEnd(this, [round[1], round[0], game, [game.score[1], game.score[0]], false]);
+                (game.score[0] > game.score[1]) ?
+                        onGameEnd(this, [round[0], round[1], game, [game.score[0], game.score[1]], false])
+                                : onGameEnd(this, [round[1], round[0], game, [game.score[1], game.score[0]], false]);
+
         }).on("game-state", (state) => {
-			this._associatedServer.to(`game-${gameID}`).emit("game-state", state);
-		});
+                this._associatedServer.to(`game-${gameID}`).emit("game-state", state);
+        }).on("paddle-reflect", ({ballPos, ballDir}) => {
+                io.to(`game-${gameId}`).emit("paddle-reflect", {ballPos, ballDir})
+        }).on("wall-reflect", ({ballPos, ballDir}) => {
+                io.to(`game-${gameId}`).emit("wall-reflect", {ballPos, ballDir})
+        });
         // Starts, and wait until game is finished
         const errno = gameManager.startGame(name, gameID.toString(), this._associatedServer, token);
         if (errno) {

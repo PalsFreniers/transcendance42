@@ -19,7 +19,6 @@ export function init() {
     const listGame = document.getElementById('game-list') as HTMLElement;
     const lobbyInfo = document.getElementById('game-salon') as HTMLElement;
     const quitBtn = document.getElementById('quit-game-button') as HTMLButtonElement;
-    const customBtn = document.getElementById('custom-button') as HTMLButtonElement;
     const tournamentBtn = document.getElementById('tournament-button') as HTMLButtonElement;
     const startTournament = document.getElementById('tournament-start') as HTMLButtonElement;
     const msgGameEnd = document.getElementById("msg-end") as HTMLElement;
@@ -62,7 +61,6 @@ export function init() {
                 createGameButton.style.display = "none";
                 joinGameButton.style.display = "none";
                 specBtn.style.display = "none";
-                customBtn.style.display = "none"
                 startBtn.style.display = "block";
                 quitBtn.style.display = 'block';
             } catch (err) {
@@ -101,7 +99,6 @@ export function init() {
                 createGameButton.style.display = "none";
                 joinGameButton.style.display = "none";
                 specBtn.style.display = "none";
-                customBtn.style.display = "none"
                 startBtn.style.display = "block";
                 quitBtn.style.display = 'block';
             } catch (err) {
@@ -143,7 +140,6 @@ export function init() {
                 createGameButton.style.display = "none";
                 joinGameButton.style.display = "none";
                 specBtn.style.display = "none";
-                customBtn.style.display = "none"
                 startBtn.style.display = "block";
                 quitBtn.style.display = 'block';
             } catch (err) {
@@ -166,7 +162,6 @@ export function init() {
                 iaBtn.style.display = 'none';
                 localGameBtn.style.display = 'none';
                 specBtn.style.display = "none";
-                customBtn.style.display = "none"
                 startBtn.style.display = "none";
                 startTournament.style.display = "block";
                 quitBtn.style.display = 'block';
@@ -222,7 +217,6 @@ export function init() {
                 iaBtn.style.display = 'none';
                 localGameBtn.style.display = 'none';
                 specBtn.style.display = "none";
-                customBtn.style.display = "none"
                 createGameButton.style.display = "none";
                 joinGameButton.style.display = "none";
                 specBtn.style.display = "none";
