@@ -168,7 +168,7 @@ export function handlePaddleReflect(ballPos: { x: number, y: number }, ballDir: 
         ));
 	    pongInfo.particles.push(new CircleParticle(
             { x: ballPos.x + 10 + (Math.random() - 0.5) * 0.5, y: ballPos.y + 5 + (Math.random() - 0.5) * 0.1 }, // pos
-            { x: Math.cos(angle), y: dir * Math.sin(angle) }, // dir
+            { x: dir * Math.cos(angle), y: Math.sin(angle) }, // dir
             2 + 8 * Math.random(), // radius
             color.toString(), // color
             5 + 15 * Math.random(), // speed
