@@ -108,10 +108,10 @@ fn void drawBoard(Object* obj) {
 	String unameRS = "No one";
 	if(!unameR.is_null()) unameRS = obj.get_string("usernameRightTeam")!!;
 	score.appendf("%s %d - %d %s",
-		unameRS,
+		unameLS,
 		obj.get_int("leftScore")!!,
 		obj.get_int("rightScore")!!,
-		unameLS
+		unameRS
 	);
 	String s = score.str_view();
 	w.putStr(s, {w.width() / 2 - s.len / 2, 1 * win::CHAR_HEIGHT}, win::PWHITE, win::BLACK);
