@@ -1,4 +1,4 @@
-import { handleRoute } from "./navClient.js";
+import { handleRoute, navigateTo } from "./navClient.js";
 import { notify } from "./notify.js";
 import { mini_msg } from "./chatClient.js";
 
@@ -18,6 +18,8 @@ export async function init() {
 			},
 		});
 		const data = await res.json();
+		if (!res.ok)
+			return navigateTo('/profil');
 		const profil = document.getElementById('profil') as HTMLElement;
 		profil.innerHTML = `
     		<div class="profil-card">
