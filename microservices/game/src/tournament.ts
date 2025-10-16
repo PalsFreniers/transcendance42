@@ -341,9 +341,9 @@ export class Tournament {
         }).on("game-state", (state) => {
                 this._associatedServer.to(`game-${gameID}`).emit("game-state", state);
         }).on("paddle-reflect", ({ballPos, ballDir}) => {
-                io.to(`game-${gameId}`).emit("paddle-reflect", {ballPos, ballDir})
+                this._associatedServer.to(`game-${gameId}`).emit("paddle-reflect", {ballPos, ballDir})
         }).on("wall-reflect", ({ballPos, ballDir}) => {
-                io.to(`game-${gameId}`).emit("wall-reflect", {ballPos, ballDir})
+                this._associatedServer.to(`game-${gameId}`).emit("wall-reflect", {ballPos, ballDir})
         });
         // Starts, and wait until game is finished
         const errno = gameManager.startGame(name, gameID.toString(), this._associatedServer, token);
