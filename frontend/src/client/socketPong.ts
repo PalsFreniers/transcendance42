@@ -84,7 +84,6 @@ export function createPongSocket(socketPong: Socket | null) {
         const localGameBtn = document.getElementById('game-local') as HTMLElement;
         const joinGameButton = document.getElementById('join-button') as HTMLButtonElement;
         const specBtn = document.getElementById('spectator-btn') as HTMLButtonElement;
-        const customBtn = document.getElementById('custom-button') as HTMLButtonElement;
         const tournamentBtn = document.getElementById('tournament-button') as HTMLButtonElement;
         const startTournament = document.getElementById('tournament-start') as HTMLButtonElement;
 		const returnBtn = document.getElementById('return') as HTMLDivElement;
@@ -99,7 +98,6 @@ export function createPongSocket(socketPong: Socket | null) {
         createGameButton.style.display = "none";
         joinGameButton.style.display = "none";
         specBtn.style.display = "none";
-        customBtn.style.display = "none"
         if (getUsernameFromToken() === data.playerOne)
             startBtn.style.display = "block";
         quitBtn.style.display = 'block';
