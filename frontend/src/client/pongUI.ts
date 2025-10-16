@@ -187,19 +187,7 @@ export function handlePaddleReflect(ballPos: { x: number, y: number }, ballDir: 
             1, // alpha
             300, // lifetime
             { x: size, y: 11 }, // size
-            1/180, // rate
-        )
-    );
-
-    pongInfo.particles.push(
-        new RectangleColorFlash(
-            {x: 0, y: 0}, // pos
-            {x: 0, y: 0}, // dir
-            color.toString(), // color
-            0, // speed
-            0.2, // alpha
-            120, // lifetime
-            { x: 20, y: 10 }, // size
+            // 1, // rate
         )
     );
 
@@ -218,11 +206,9 @@ export function handlePaddleReflect(ballPos: { x: number, y: number }, ballDir: 
 
 export function handleWallReflect(ballPos: { x: number, y: number }, ballDir: { x: number, y: number }) {
     const color = mapRange(ballPos.x, -8, 8, 190, 356);
-    let dir;
+    let dir = 1;
     if (ballPos.y < 0)
         dir = -1;
-    else
-        dir = 1;
     for (let i = 0; i < 50; i++) {
         const angle = Math.PI / 2 * Math.random() - Math.PI * 3 / 4;
         pongInfo.particles.push(new CircleParticle(
@@ -255,7 +241,7 @@ export function handleWallReflect(ballPos: { x: number, y: number }, ballDir: { 
             1, // alpha
             120, // lifetime
             { x: 20, y: size }, // size
-            1/120 // rate
+            // 1 // rate
         )
     );
 }
