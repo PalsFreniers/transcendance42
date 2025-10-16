@@ -221,8 +221,8 @@ export async function msg_lobby(event: MouseEvent) {
 						}
 						friend_reload();
 					});
-					friend_reload();
 					loadFriendRequests(requestsContainer, token);
+					friend_reload();
 				}
 			} catch (error) {
 				console.error(error)

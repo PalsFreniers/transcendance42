@@ -1,4 +1,4 @@
-import { handleRoute } from "./navClient.js";
+import { handleRoute, navigateTo } from "./navClient.js";
 import { notify } from "./notify.js";
 import { mini_msg } from "./chatClient.js";
 
@@ -18,6 +18,8 @@ export async function init() {
 			},
 		});
 		const data = await res.json();
+		if (!res.ok)
+			return navigateTo('/profil');
 		const profil = document.getElementById('profil') as HTMLElement;
 		profil.innerHTML = `
     		<div class="profil-card">
@@ -30,7 +32,10 @@ export async function init() {
     		</div>`
 		const gamesContainer = document.getElementById('game-history') as HTMLElement;
 		if (gamesContainer) {
-			const gamesRes = await fetch(`/api/user/history`, {
+			const urls = profil_path
+			? `/api/user/history?username=${encodeURIComponent(profil_path)}`
+			: `/api/user/history`;
+			const gamesRes = await fetch(urls, {
 				method: 'GET',
 				headers: {
 					'Content-Type': 'application/json',
@@ -158,35 +163,44 @@ export async function init() {
 		});
 		const dataFriend = await resFriends.json();
 		const friendListContainer = document.getElementById('friend-list') as HTMLUListElement;
+		const friendList = document.getElementById('friend-list-title') as HTMLElement;
 		if (dataFriend && Array.isArray(dataFriend.friends) && dataFriend.friends.length > 0) {
 			dataFriend.friends.forEach(friend => {
-				const li = document.createElement('li');
-				li.textContent = friend.username;
-				const button = document.createElement('button');
-				button.textContent = 'Delete';
-				button.addEventListener('click', async (e) => {
-					e.preventDefault();
-					const res = await fetch(`/api/user/delete-friend`, {
-						method: 'POST',
-						headers: {
-							'Content-Type': 'application/json',
-							'Authorization': `Bearer ${token}`
-						},
-						body: JSON.stringify({ friendUsername: friend.username })
+				if(path === "/profil")
+				{
+					const li = document.createElement('li');
+					li.textContent = friend.username;
+					const button = document.createElement('button');
+					button.textContent = 'Delete';
+					button.addEventListener('click', async (e) => {
+						e.preventDefault();
+						const res = await fetch(`/api/user/delete-friend`, {
+							method: 'POST',
+							headers: {
+								'Content-Type': 'application/json',
+								'Authorization': `Bearer ${token}`
+							},
+							body: JSON.stringify({ friendUsername: friend.username })
+						});
+						const data = await res.json();
+						if (res.ok) {
+							notify(`friend deleted: ${data.message}`)
+							handleRoute();
+						}
+						else
+							console.log('failed to delete friend', data.error);
 					});
-					const data = await res.json();
-					if (res.ok) {
-						notify(`friend deleted: ${data.message}`)
-						handleRoute();
-					}
-					else
-						console.log('failed to delete friend', data.error);
-				});
-				li.appendChild(button);
-				friendListContainer.appendChild(li);
+					li.appendChild(button);
+					friendListContainer.appendChild(li);
+				}
+				else{
+					friendListContainer.style.display = 'none';
+					friendList.style.display = 'none';
+					editProfile.style.display = 'none';
+				}
 				mini_msg(friend);
-
-			});
+			}
+			);	
 		} else {
 			const display = document.getElementById('chat-display') as HTMLElement;
 			display.style.display = "none";

@@ -137,7 +137,7 @@ const templates: Record<string, () => string> = {
 							<a href="/lobby" data-link>Lobby</a>
 							<button id="edit-profil">Edit Profil</button>
 							<form id="form-profil"></form>
-							<h3>List of friends</h3>
+							<h3 id="friend-list-title">List of friends</h3>
 							<ul id="friend-list"></ul>
 						</div>
 						<div id="game-history">

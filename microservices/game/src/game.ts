@@ -243,7 +243,7 @@ export class Game {
             this._state = "ended";
             return;
         }
-        this._state = "idling";
+        this._state = "scored";
         setTimeout(() => {
             this._ball.speed = this._ball.baseSpeed;
             this._ball.dir = new Vec2D.Vector(0.5 - scoringTeam, 0);

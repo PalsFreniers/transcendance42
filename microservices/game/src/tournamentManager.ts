@@ -21,6 +21,15 @@ export class TournamentManager {
         return 0;
     }
 
+    deleteTournament(name: string) {
+        if (!this._tournaments.has(name))
+            return 1; // tournament doesn't exist
+        if (!this.isTournamentFinished(name))
+            return 2; // tournament isnt finished
+        this._tournaments.delete(name);
+        return 0;
+    }
+
     // player_type is [playerID, playerSocketID]
     joinTournament(name: string,  player: player_type) {
         if (!this._tournaments.has(name))

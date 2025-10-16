@@ -76,32 +76,36 @@ export function createPongSocket(socketPong: Socket | null) {
         const path = window.location.pathname;
         if (path !== '/pong')
             navigateTo('/pong')
-        const lobbyGame = document.getElementById("game-salon") as HTMLDivElement;
         const startBtn = document.getElementById('start-game-btn') as HTMLButtonElement;
+        const startTournament = document.getElementById('tournament-start') as HTMLButtonElement;
         const quitBtn = document.getElementById('quit-game-button') as HTMLButtonElement;
+        if (data.gameId == 'Tournament')
+        {
+            startTournament.style.display = "block";
+            quitBtn.style.display = 'none';
+        }
+        else{
+            startTournament.style.display = "none";
+            quitBtn.style.display = 'block';
+        }
+        const tournamentBtn = document.getElementById('tournament-button') as HTMLButtonElement;
+        const lobbyGame = document.getElementById("game-salon") as HTMLDivElement;
         const createGameButton = document.getElementById('game-button') as HTMLButtonElement;
         const iaBtn = document.getElementById('game-vs-ia') as HTMLElement;
         const localGameBtn = document.getElementById('game-local') as HTMLElement;
         const joinGameButton = document.getElementById('join-button') as HTMLButtonElement;
         const specBtn = document.getElementById('spectator-btn') as HTMLButtonElement;
-        const tournamentBtn = document.getElementById('tournament-button') as HTMLButtonElement;
-        const startTournament = document.getElementById('tournament-start') as HTMLButtonElement;
 		const returnBtn = document.getElementById('return') as HTMLDivElement;
 		returnBtn.style.display = 'none';
-
         lobbyGame.style.display = 'block';
-        startTournament.style.display = "none";
         iaBtn.style.display = 'none';
         localGameBtn.style.display = 'none';
         tournamentBtn.style.display = "none";
-        startTournament.style.display = "none";
         createGameButton.style.display = "none";
         joinGameButton.style.display = "none";
         specBtn.style.display = "none";
-        if (getUsernameFromToken() === data.playerOne)
+        if (data.gameId != 'Tournament' && getUsernameFromToken() === data.playerOne)
             startBtn.style.display = "block";
-        quitBtn.style.display = 'block';
-
         lobbyGame.innerHTML = `
             <p id="lobbyname"><strong>Lobby name:</strong> ${data.lobbyName}</p>
             <p><strong>Player 1:</strong> ${data.playerOne}</p>
@@ -119,6 +123,7 @@ export function createPongSocket(socketPong: Socket | null) {
     socketPong.on('game-state', (state) => {
     	const ffBtn = document.getElementById("pong-ff") as HTMLButtonElement;
         const msgGameEnd = document.getElementById("msg-end") as HTMLElement;
+        const returnBtn = document.getElementById("return") as HTMLElement;
 		if(!state.isLocal && ffBtn.style.display != "block") {
 			ffBtn.style.display = "block";
 			ffBtn.addEventListener("click", async (e) => {
@@ -131,6 +136,7 @@ export function createPongSocket(socketPong: Socket | null) {
 			});
 		}
 		msgGameEnd.style.display = "none";
+        returnBtn.style.display = "none";
         drawPong(state);
     });
 
@@ -219,7 +225,6 @@ export function createPongSocket(socketPong: Socket | null) {
                 endMsg = `${data.score[0]} - ${data.score[1]}`
             }
         }
-
         msgGameEnd.innerHTML = `
             <p>${msg} with score of ${endMsg}</p>`
         if (!canvas)

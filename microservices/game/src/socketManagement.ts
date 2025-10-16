@@ -51,10 +51,26 @@ export function socketManagement(io: Server) {
                         socket.data.userId = getUserIdFromToken(socket.handshake.auth.token);
                         socket.data.userName = getUsernameFromToken(socket.handshake.auth.token);
                         manager.registerSocket(socket.data.userId, socket.id);
+                        const gameTm = TmManager.isPlayerRegistered(socket.data.userId as number);
                         const game = manager.findGame(socket.data.userId?.toString());
+                        if (gameTm){
+                                const p = gameTm._players.find((p) => {
+                                        return p[0] == socket.data.userId;
+                                });
+                                if(p) {
+                                        p[1] = socket.id;
+                                        socket.data.lobbyName = gameTm.name;
+                                        socket.emit("lobby-info", {
+                                                gameId: 'Tournament',
+                                                lobbyName: 'Tournament ' + gameTm.name,
+                                                playerOne: socket.data.userName,
+                                                playerTwo: '-',
+                                                status: 'waiting',
+                                        });
+                                }
+                        }
                         if (game) {
                                 socket.data.gameId = `game-${game.gameID}`;
-
                                 const gameRow = db.prepare(`SELECT lobby_name, status, player_one_id, player_two_id FROM games WHERE id = ?`)
                                 .get(game.gameID) as { lobby_name: string, status: string, player_one_id: number, player_two_id: number };
                                 if (!gameRow)
@@ -97,7 +113,7 @@ export function socketManagement(io: Server) {
                                 const userName = socket.data.userName;
                                 if (manager.createLobby(lobbyName, gameId))
                                         throw new Error(`Couldn't create lobby with name ${lobbyName}`);
-                                if (manager.joinLobby(lobbyName, socket.data.userId))
+                                if (!local && manager.joinLobby(lobbyName, socket.data.userId))
                                         throw new Error(`Couldn't join lobby with name ${lobbyName}`);
                                 socket.data.gameId = `game-${gameId}`;
                                 manager.findGame(lobbyName)!.on("game-end", ({ game, players }) => {
@@ -115,10 +131,7 @@ export function socketManagement(io: Server) {
                                 }).on("wall-reflect", ({ballPos, ballDir}) => {
                                         io.to(`game-${gameId}`).emit("wall-reflect", {ballPos, ballDir})
                                 });
-
                                 socket.data.lobbyName = lobbyName;
-
-
                                 socket.join(socket.data.gameId);
                                 if (ia) {
                                         new GameAI(lobbyName, io);
@@ -132,9 +145,12 @@ export function socketManagement(io: Server) {
                                         });
                                 }
                                 else if (local) {
-                                        const errno = manager.joinLobby(lobbyName, -1);
-                                        if (errno)
-                                                throw new Error(`Couldn't make the second player join lobby with name ${lobbyName}: ${errno}`);
+                                        /*let errno =*/ manager.joinLobby(lobbyName, -1);
+                                        // if (errno)
+                                        //         throw new Error(`Couldn't make the second player join lobby with name ${lobbyName}: ${errno}`);
+                                        /*errno =*/ manager.joinLobby(lobbyName, socket.data.userId);
+                                        // if (errno)
+                                        //         throw new Error(`Couldn't make the first player join lobby with name ${lobbyName}: ${errno}`);
                                         db.prepare(`UPDATE games SET status = 'ready' WHERE id = ?`).run(gameId);
                                         socket.emit('room-created', {
                                                 gameId,
@@ -143,7 +159,7 @@ export function socketManagement(io: Server) {
                                                 playerTwo: local,
                                                 status: 'ready'
                                         });
-                                        manager.findGame(lobbyName)!.localPlayer = local;
+                                        manager.findGame(lobbyName)!.localPlayer = lobbyName;
                                 }
                                 else {
                                         socket.emit('room-created', {
@@ -173,12 +189,12 @@ export function socketManagement(io: Server) {
                                 TmManager.getTournament(lobbyName)!.on("game-start", ({ round, name, game }) => {
                                         console.log(`${name}: ${round[0][0]} vs ${round[1][0]}`)
                                 }).on("won", ({ t, result }) => { // We can chain event listener for better code
-                                        if(result[0][1] !== socket.id) return;
+                                        if(result[0][1] !== (io.sockets.sockets as any).get(t._players.find((p) => p[0] == socket.data.userId)[1]).id) return;
                                         let Msg = "you won! Go in the winner bracket";
                                         if(result[4]) {
                                                 Msg = "you won! You won the tournament";
                                         }
-                                        socket.emit("game-end", {
+                                        (io.sockets.sockets as any).get(t._players.find((p) => p[0] == socket.data.userId)[1]).emit("game-end", {
                                                 name: result[2].name,
                                                 player1: manager.getUsernameFromSocket(result[0][1], io),
                                                 player2: manager.getUsernameFromSocket(result[1][1], io),
@@ -186,8 +202,8 @@ export function socketManagement(io: Server) {
                                                 tMsg: Msg,
                                         });
                                 }).on("lose", ({ t, result }) => {
-                                        if(result[1][1] !== socket.id) return;
-                                        socket.emit("game-end", {
+                                        if(result[1][1] !== (io.sockets.sockets as any).get(t._players.find((p) => p[0] == socket.data.userId)[1]).id) return;
+                                        (io.sockets.sockets as any).get(t._players.find((p) => p[0] == socket.data.userId)[1]).emit("game-end", {
                                                 name: result[2].name,
                                                 player1: manager.getUsernameFromSocket(result[0][1], io),
                                                 player2: manager.getUsernameFromSocket(result[1][1], io),
@@ -195,8 +211,8 @@ export function socketManagement(io: Server) {
                                                 tMsg: "you lost! Go in the loser bracket",
                                         });
                                 }).on("elimination", ({ t, result }) => {
-                                        if(result[1][1] !== socket.id) return;
-                                        socket.emit("game-end", {
+                                        if(result[1][1] !== (io.sockets.sockets as any).get(t._players.find((p) => p[0] == socket.data.userId)[1]).id) return;
+                                        (io.sockets.sockets as any).get(t._players.find((p) => p[0] == socket.data.userId)[1]).emit("game-end", {
                                                 name: result[2].name,
                                                 player1: manager.getUsernameFromSocket(result[0][1], io),
                                                 player2: manager.getUsernameFromSocket(result[1][1], io),
@@ -270,6 +286,12 @@ export function socketManagement(io: Server) {
                                 console.log(`${lobbyName}`);
                                 const errno = TmManager.startTournament(lobbyName, (t) => {
                                         console.log(t.leaderboard);
+                                        for (const player of t.leaderboard) {
+                                                const errno = TmManager.leaveTournament(lobbyName, player);
+                                                console.log(player[0], ": ", errno);
+                                        }
+                                        const errno = TmManager.deleteTournament(lobbyName);
+                                        console.log("errno: ", errno);
                                 }, socket.handshake.auth.token);
                                 if (errno)
                                         throw new Error(`Failed to start tournament ${errno}`);
