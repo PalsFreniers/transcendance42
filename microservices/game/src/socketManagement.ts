@@ -59,6 +59,7 @@ export function socketManagement(io: Server) {
                                 });
                                 if(p) {
                                         p[1] = socket.id;
+                                        socket.data.lobbyName = gameTm.name;
                                         socket.emit("lobby-info", {
                                                 gameId: 'Tournament',
                                                 lobbyName: 'Tournament ' + gameTm.name,
