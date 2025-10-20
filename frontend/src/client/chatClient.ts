@@ -36,7 +36,7 @@ export async function msg_friend() {
 	}
 }
 
-async function friend_reload() {
+export async function friend_reload() {
 	const token = localStorage.getItem('token');
 	const findfriend = await fetch(`/api/user/friend-list`, {
 		method: "GET",
@@ -113,7 +113,7 @@ async function friend_reload() {
 	});
 }
 
-async function loadFriendRequests(container: HTMLElement, token: string) {
+export async function loadFriendRequests(container: HTMLElement, token: string) {
 	try {
 		const res = await fetch(`/api/user/get-friend-requests`, {
 			method: "GET",
@@ -131,19 +131,21 @@ async function loadFriendRequests(container: HTMLElement, token: string) {
 			div.innerHTML = `
 				<p>${req.sender_username} wants to be your friend</p>
 				<div id="button">
-					<button class="accept">Accept</button>
-					<button class="reject">Reject</button>
+					<button class="accept" data-ignore-click-outside>Accept</button>
+					<button class="reject" data-ignore-click-outside>Reject</button>
 				</div>
 			`;
 			container.appendChild(div);
 			const socketChat = getSocket(0);
-			div.querySelector('.accept')!.addEventListener('click', () => {
+			div.querySelector('.accept')!.addEventListener('click', (e) => {
 				socketChat!.emit('requests-friend', req.id, true);
 				div.remove();
+				friend_reload();
 			});
-			div.querySelector('.reject')!.addEventListener('click', () => {
+			div.querySelector('.reject')!.addEventListener('click', (e) => {
 				socketChat!.emit('requests-friend', req.id, false);
 				div.remove();
+				friend_reload();
 			});
 		});
 	} catch (err) {
@@ -168,7 +170,6 @@ export async function msg_lobby(event: MouseEvent) {
                 </div>
             </div>
         `;
-		const chat_boddy = document.getElementById('page_chat');
 		const friends_lobby = document.getElementById('lobby_friends');
 
 		if (friends_lobby && token) {
@@ -196,7 +197,7 @@ export async function msg_lobby(event: MouseEvent) {
 					const requestsContainer = document.createElement("div");
 					requestsContainer.id = "friend-requests";
 					friends_lobby.appendChild(requestsContainer);
-
+					friend_reload();
 					addFriend.addEventListener('click', async (e) => {
 						e.preventDefault();
 						const friendUsername = nameFriend.value;
@@ -229,8 +230,13 @@ export async function msg_lobby(event: MouseEvent) {
 			}
 		}
 		function click_event(e: MouseEvent) {
-			const target = e.target as Node;
-			if (chat && !chat_boddy?.contains(target)) {
+			const target = e.target as HTMLElement;
+			const chat_bod = document.querySelector('#page_chat');
+			const chat = document.querySelector('#chat');
+			if ((target.closest('[data-ignore-click-outside]'))) {
+				return;
+			}
+			if (chat && !chat_bod?.contains(target)) {
 				chat.innerHTML = ``;
 				friend_select = '';
 				document.removeEventListener('click', click_event);

@@ -174,7 +174,8 @@ export async function init() {
 					button.textContent = 'Delete';
 					button.addEventListener('click', async (e) => {
 						e.preventDefault();
-						const res = await fetch(`/api/user/delete-friend`, {
+						let res: any;
+						res = await fetch(`/api/user/delete-friend`, {
 							method: 'POST',
 							headers: {
 								'Content-Type': 'application/json',
