@@ -119,7 +119,7 @@ export function createShifumiSocket(socketShifumi: Socket | null) {
     socketShifumi.on('kick', () => {
         history.pushState(null, '', '/shifumi-lobby');
         handleRoute();
-        notify('you have been kick !');
+        notify('you have been kicked!');
     });
 
     socketShifumi.on('opponent-leave', (reason : string) => {
@@ -175,7 +175,7 @@ export function createShifumiSocket(socketShifumi: Socket | null) {
     });
 
     socketShifumi.on('wait-opponent', (name: string) => {
-      notify(`${name} as been disconnected he have 15 seconds for rejoined the game`);
+      notify(`${name} has been disconnected. They have 15 seconds to rejoin the game.`);
     });
 
     socketShifumi.on('opponent-reconnected', (name) => {

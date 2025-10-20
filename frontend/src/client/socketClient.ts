@@ -2,7 +2,7 @@ import io, { Socket } from 'socket.io-client';
 import { createShifumiSocket } from './socketShifumi.js';
 import { createPongSocket } from './socketPong.js';
 import { notify } from './notify.js'
-import { friend_select, msg_friend } from './chatClient.js'
+import { friend_select, msg_friend, loadFriendRequests, friend_reload } from './chatClient.js'
 
 interface ChatMessage {
     from: string;
@@ -67,8 +67,20 @@ export function getSockets(): [Socket, Socket, Socket] {
         });
 
         socketChat.on('new-friend-request', (data) => {
-           notify(`You get a friend request from ${data.sender_name}`);
+			notify(`You get a friend request from ${data.sender_name}`);
+			const requestsContainer = document.getElementById('friend-requests') as HTMLFormElement;
+			if (token)
+				loadFriendRequests(requestsContainer, token);
         });
+
+		socketChat.on('requests-friend-accept', () => {
+			notify('friend requests accepted');
+			friend_reload();
+		});
+		socketChat.on('friend-delete', () => {
+			notify('friend delete');
+			friend_reload();
+		});
     }
 
     // SOCKET PONG

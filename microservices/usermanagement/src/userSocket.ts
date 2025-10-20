@@ -105,6 +105,9 @@ export function startServer(io) {
             if (res.success)
                 return io.to(socket.id).emit('error', res.error);
             
+			const senderSocket = db.prepare(`SELECT socket FROM users WHERE id = ?`).get(sender.sender_id) as {socket: string};
+			if (senderSocket)
+				io.to(senderSocket.socket).emit('requests-friend-accept');
             res = addFriend(sender.receiver_id, sender.sender_id);
             if (res.success)
                 return io.to(socket.id).emit('error', res.error);

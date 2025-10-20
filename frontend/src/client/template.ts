@@ -82,7 +82,7 @@ const templates: Record<string, () => string> = {
 					
 				</div>
 				  <form id="chat-input">
-					  <input id="msg-send" type="text" placeholder="Écrire un message..." />
+					  <input id="msg-send" type="text" placeholder="Write a message..." />
 					  <button type="submit">Send</button>
 				  </form>
 			  </div>
@@ -216,7 +216,6 @@ const templates: Record<string, () => string> = {
           <button id="game-button">Create Room</button>
           <button id="join-button">Join Room</button>
           <button id="spec-button">Spectator</button>
-          <button id="custom-button">Customisation</button>
         </div>
         <div id="game-list" class="shifumi-lobby">
       <h4></h4>

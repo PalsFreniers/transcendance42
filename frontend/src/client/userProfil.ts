@@ -72,7 +72,7 @@ export async function init() {
 							<p>Against: ${otherName}</p>
 							<p>Score: ${fScore}</p>
 							${game.game_name === 'shifumi' ? `<p>MMR: ${mmrGain > 0 ? '+' : ''}${mmrGain}</p>` : ''}
-							<p>Durée: ${game.game_time}s</p>
+							<p>Duration: ${game.game_time}s</p>
 							<p>Date: ${game.date.split('T')[0]}</p>
 						</div>
 						`;
@@ -80,43 +80,19 @@ export async function init() {
 				)
 				gamesContainer.innerHTML = gamesMapped.join('');
 			} else {
-				gamesContainer.innerHTML = `<p>Aucune partie trouvée.</p>`;
+				gamesContainer.innerHTML = `<p>No games found.</p>`;
 			}
 		}
 		const editProfile = document.getElementById('edit-profil') as HTMLButtonElement;
 		const form = document.getElementById('form-profil') as HTMLFormElement;
-		editProfile.addEventListener('click', async (e) => {
-			e.preventDefault();
-			form.innerHTML = `
-				<input id="bio" type="text" bio="bio" placeholder="bio" />
-				<input id="old-password" type="password" placeholder="old password"/>
-				<input id="new-password" type="password" placeholder="new password">
-				<input id="confirm-password" type"password" placeholder="confirm new password"/>
-				<div class="file-upload">
-					<label for="img-profil">📷 Upload profile picture</label>
-					<input id="img-profil" type="file" accept="image/*"/>
-					<span class="file-name">No file chosen</span>
-				</div>
-				<img id="preview-profil" src="${data.user.profile_image_url || '/assets/default-avatar.png'}"/>
-				<button type="submit">Save</button>
-			`;
-			const oldPassword = document.getElementById('old-password') as HTMLInputElement;
-			const newPassword = document.getElementById('new-password') as HTMLInputElement;
-			const confirmPassword = document.getElementById('confirm-password') as HTMLInputElement;
-			const bio = document.getElementById('bio') as HTMLInputElement;
-			const pp = document.getElementById('img-profil') as HTMLInputElement;
-			const fileName = document.querySelector(".file-name") as HTMLElement;
-			const preview = document.getElementById("preview-profil") as HTMLImageElement;
-			pp.addEventListener('change', () => {
-				const file = pp.files?.[0];
-				if (!file)
-					return;
-				fileName.textContent = file.name;
-				preview.src = URL.createObjectURL(file);
-			});
-			form.addEventListener('submit', async (e) => {
+		let isPresent:boolean = false;
+		form.addEventListener('submit', async (e) => {
 				e.preventDefault();
-
+				const oldPassword = document.getElementById('old-password') as HTMLInputElement;
+				const newPassword = document.getElementById('new-password') as HTMLInputElement;
+				const confirmPassword = document.getElementById('confirm-password') as HTMLInputElement;
+				const bio = document.getElementById('bio') as HTMLInputElement;
+				const pp = document.getElementById('img-profil') as HTMLInputElement;
 				const formData = new FormData();
 				formData.append("oldPassword", oldPassword.value);
 				formData.append("newPassword", newPassword.value);
@@ -144,16 +120,49 @@ export async function init() {
 				const data = await changeProfil.json();
 				notify(`profile well updated !`)
 				profil.innerHTML = `
-				  <div class="profil-card">
+				<div class="profil-card">
 					<img src="${data.user.profile_image_url || '/assets/default-avatar.png'}" class="profil-avatar" />
 					<div class="profil-info">
-					  <h2 class="profil-username">${data.user.username}</h2>
-					  <p class="profil-email">${data.user.email}</p>
-					  <p class="profil-bio">${data.user.bio || 'No bio yet.'}</p>
+					<h2 class="profil-username">${data.user.username}</h2>
+					<p class="profil-email">${data.user.email}</p>
+					<p class="profil-bio">${data.user.bio || 'No bio yet.'}</p>
 					</div>
-				  </div>`;
+				</div>`;
+				handleRoute();
 			});
-		});
+		editProfile.addEventListener('click', async (e) => {
+			isPresent = !isPresent;
+			if (isPresent)
+			{
+				e.preventDefault();
+				form.innerHTML = `
+					<input id="bio" type="text" bio="bio" placeholder="bio" />
+					<input id="old-password" type="password" placeholder="old password"/>
+					<input id="new-password" type="password" placeholder="new password">
+					<input id="confirm-password" type="password" placeholder="confirm new password"/>
+					<div class="file-upload">
+						<label for="img-profil">📷 Upload profile picture</label>
+						<input id="img-profil" type="file" accept="image/*"/>
+						<span class="file-name">No file chosen</span>
+					</div>
+					<img id="preview-profil" src="${data.user.profile_image_url || '/assets/default-avatar.png'}"/>
+					<button type="submit">Save</button>
+				`;
+				const pp = document.getElementById('img-profil') as HTMLInputElement;
+				const fileName = document.querySelector(".file-name") as HTMLElement;
+				const preview = document.getElementById("preview-profil") as HTMLImageElement;
+				pp.addEventListener('change', () => {
+					const file = pp.files?.[0];
+					if (!file)
+						return;
+					fileName.textContent = file.name;
+					preview.src = URL.createObjectURL(file);
+				});
+			}
+			else
+				form.innerHTML = ``;
+			
+	});
 		const resFriends = await fetch(`/api/user/friend-list`, {
 			method: 'GET',
 			headers: {
@@ -174,7 +183,8 @@ export async function init() {
 					button.textContent = 'Delete';
 					button.addEventListener('click', async (e) => {
 						e.preventDefault();
-						const res = await fetch(`/api/user/delete-friend`, {
+						let res: any;
+						res = await fetch(`/api/user/delete-friend`, {
 							method: 'POST',
 							headers: {
 								'Content-Type': 'application/json',
