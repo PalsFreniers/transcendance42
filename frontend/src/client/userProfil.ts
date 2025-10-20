@@ -86,6 +86,50 @@ export async function init() {
 		const editProfile = document.getElementById('edit-profil') as HTMLButtonElement;
 		const form = document.getElementById('form-profil') as HTMLFormElement;
 		let isPresent:boolean = false;
+		form.addEventListener('submit', async (e) => {
+				e.preventDefault();
+				const oldPassword = document.getElementById('old-password') as HTMLInputElement;
+				const newPassword = document.getElementById('new-password') as HTMLInputElement;
+				const confirmPassword = document.getElementById('confirm-password') as HTMLInputElement;
+				const bio = document.getElementById('bio') as HTMLInputElement;
+				const pp = document.getElementById('img-profil') as HTMLInputElement;
+				const formData = new FormData();
+				formData.append("oldPassword", oldPassword.value);
+				formData.append("newPassword", newPassword.value);
+				formData.append("confirmPassword", confirmPassword.value);
+				formData.append("bio", bio.value);
+				if (pp.files?.[0]) {
+					formData.append("profile_image_url", pp.files[0]);
+				}
+
+				const changeProfil = await fetch(
+					`/api/user/update`,
+					{
+						method: 'PUT',
+						headers: {
+							'Authorization': `Bearer ${token}`,
+						},
+						body: formData,
+					}
+				);
+				if (!changeProfil.ok) {
+					const err = await changeProfil.json();
+					notify(`Failed to update profile: Error ${err.error}`);
+					return;
+				}
+				const data = await changeProfil.json();
+				notify(`profile well updated !`)
+				profil.innerHTML = `
+				<div class="profil-card">
+					<img src="${data.user.profile_image_url || '/assets/default-avatar.png'}" class="profil-avatar" />
+					<div class="profil-info">
+					<h2 class="profil-username">${data.user.username}</h2>
+					<p class="profil-email">${data.user.email}</p>
+					<p class="profil-bio">${data.user.bio || 'No bio yet.'}</p>
+					</div>
+				</div>`;
+				handleRoute();
+			});
 		editProfile.addEventListener('click', async (e) => {
 			isPresent = !isPresent;
 			if (isPresent)
@@ -95,7 +139,7 @@ export async function init() {
 					<input id="bio" type="text" bio="bio" placeholder="bio" />
 					<input id="old-password" type="password" placeholder="old password"/>
 					<input id="new-password" type="password" placeholder="new password">
-					<input id="confirm-password" type"password" placeholder="confirm new password"/>
+					<input id="confirm-password" type="password" placeholder="confirm new password"/>
 					<div class="file-upload">
 						<label for="img-profil">📷 Upload profile picture</label>
 						<input id="img-profil" type="file" accept="image/*"/>
@@ -104,10 +148,6 @@ export async function init() {
 					<img id="preview-profil" src="${data.user.profile_image_url || '/assets/default-avatar.png'}"/>
 					<button type="submit">Save</button>
 				`;
-				const oldPassword = document.getElementById('old-password') as HTMLInputElement;
-				const newPassword = document.getElementById('new-password') as HTMLInputElement;
-				const confirmPassword = document.getElementById('confirm-password') as HTMLInputElement;
-				const bio = document.getElementById('bio') as HTMLInputElement;
 				const pp = document.getElementById('img-profil') as HTMLInputElement;
 				const fileName = document.querySelector(".file-name") as HTMLElement;
 				const preview = document.getElementById("preview-profil") as HTMLImageElement;
@@ -118,49 +158,11 @@ export async function init() {
 					fileName.textContent = file.name;
 					preview.src = URL.createObjectURL(file);
 				});
-				form.addEventListener('submit', async (e) => {
-					e.preventDefault();
-
-					const formData = new FormData();
-					formData.append("oldPassword", oldPassword.value);
-					formData.append("newPassword", newPassword.value);
-					formData.append("confirmPassword", confirmPassword.value);
-					formData.append("bio", bio.value);
-					if (pp.files?.[0]) {
-						formData.append("profile_image_url", pp.files[0]);
-					}
-
-					const changeProfil = await fetch(
-						`/api/user/update`,
-						{
-							method: 'PUT',
-							headers: {
-								'Authorization': `Bearer ${token}`,
-							},
-							body: formData,
-						}
-					);
-					if (!changeProfil.ok) {
-						const err = await changeProfil.json();
-						notify(`Failed to update profile: Error ${err.error}`);
-						return;
-					}
-					const data = await changeProfil.json();
-					notify(`profile well updated !`)
-					profil.innerHTML = `
-					<div class="profil-card">
-						<img src="${data.user.profile_image_url || '/assets/default-avatar.png'}" class="profil-avatar" />
-						<div class="profil-info">
-						<h2 class="profil-username">${data.user.username}</h2>
-						<p class="profil-email">${data.user.email}</p>
-						<p class="profil-bio">${data.user.bio || 'No bio yet.'}</p>
-						</div>
-					</div>`;
-				});
 			}
 			else
 				form.innerHTML = ``;
-		});
+			
+	});
 		const resFriends = await fetch(`/api/user/friend-list`, {
 			method: 'GET',
 			headers: {
