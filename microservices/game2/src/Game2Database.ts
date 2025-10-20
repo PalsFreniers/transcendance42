@@ -99,7 +99,7 @@ export function forfeit(gameId: number, player: number, score: number, gameTime:
         up = db.prepare(`UPDATE games2 SET game_score = '${score} - forfeit' , game_time = ? , status = 'finished', round_nmb = ? WHERE id = ?`);
     else
         up = db.prepare(`UPDATE games2 SET game_score = 'forfeit - forfeit' , game_time = ? , status = 'finished', round_nmb = ? WHERE id = ?`);
-    up.run(gameTime, round_nmb, gameId);
+    up.run(Math.floor(gameTime / 4), round_nmb, gameId);
     return true;
 }
 
