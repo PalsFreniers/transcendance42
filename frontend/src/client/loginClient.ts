@@ -61,9 +61,9 @@ export function init() {
 			console.log(data);
 			if (res.ok && twofaCheckBox) {
 				if (res.ok && data.message === "OTP sent") {
-					const otp = prompt("Un code de vérification a été envoyé à votre email. Entrez-le ici :");
+					const otp = prompt("A verification code has been sent to your email. Please enter it here:");
 					if (!otp) {
-						notify("Vous devez entrer un code OTP");
+						notify("Please enter an OTP code");
 						return;
 					}
 					const verifyRes = await fetch(`/api/user/verify-email`, {
