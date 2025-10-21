@@ -34,7 +34,7 @@ async function isTokenValid(token: string): Promise<boolean> {
 		return data?.valid === true;
 	} catch (err) {
 		console.error('Token validation error:', err);
-		return false;
+		return true;
 	}
 }
 
@@ -112,7 +112,7 @@ export async function handleRoute() {
 	if (token && !await isTokenValid(token)) {
 		if (socket)
 			socket.disconnect();
-		notify('Token invalid or expire, token was suppress.');
+		notify('Token invalid or expire, token was suppressed.');
 		localStorage.removeItem('token');
 		navigateTo('/login');
 		return;
