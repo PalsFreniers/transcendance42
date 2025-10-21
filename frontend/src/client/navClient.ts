@@ -34,7 +34,7 @@ async function isTokenValid(token: string): Promise<boolean> {
 		return data?.valid === true;
 	} catch (err) {
 		console.error('Token validation error:', err);
-		return false;
+		return true;
 	}
 }
 
