@@ -88,6 +88,9 @@ export class game
             if (!this.playerOne.IsOnline || !this.playerTwo.IsOnline) {
                 if (await this.playerIsOffline()) {
                     saveStats(this.gameId, token, await calculMmr(this.gameId, this.playerOne, this.playerTwo, token), await calculMmr(this.gameId, this.playerTwo, this.playerOne, token));
+                    await clearRoom(`${this.gameId}.1`);
+                    await clearRoom(`${this.gameId}.2`);
+                    IaManager.getInstance().deleteIaByGameId(this.gameId);
                     return deleteGameFromDB(this.gameId);
                 }
             }
@@ -337,6 +340,30 @@ export class game
                 }
             }, this.delay / 4);
         });
+    }
+
+    public async Playerforfeit(userId: number, token: string) {
+        if (userId == this.playerOne.Id) {
+            this.playerOne.Forfeit = true;
+            forfeit(this.gameId, 1, this.playerTwo.Point, this.gameTime, this.round_nmb);
+            io.to(`${this.gameId}.1`).to(`${this.gameId}.2`).emit('forfeit', getPlayerName(this.gameId)?.playerOneName);
+            io.to(`${this.gameId}.1`).to(`${this.gameId}.2`).emit('game-ended');
+            await clearRoom(`${this.gameId}.1`);
+            await clearRoom(`${this.gameId}.2`);
+            saveStats(this.gameId, token, await calculMmr(this.gameId, this.playerOne, this.playerTwo, token), await calculMmr(this.gameId, this.playerTwo, this.playerOne, token));
+            deleteGameFromDB(this.gameId);
+            IaManager.getInstance().deleteIaByGameId(this.gameId);
+        } else if (userId == this.playerTwo.Id) {
+            this.playerTwo.Forfeit = true;
+            forfeit(this.gameId, 2, this.playerOne.Point, this.gameTime, this.round_nmb);
+            io.to(`${this.gameId}.1`).to(`${this.gameId}.2`).emit('forfeit', getPlayerName(this.gameId)?.playerTwoName);
+            io.to(`${this.gameId}.1`).to(`${this.gameId}.2`).emit('game-ended');
+            await clearRoom(`${this.gameId}.1`);
+            await clearRoom(`${this.gameId}.2`);
+            saveStats(this.gameId, token, await calculMmr(this.gameId, this.playerOne, this.playerTwo, token), await calculMmr(this.gameId, this.playerTwo, this.playerOne, token));
+            deleteGameFromDB(this.gameId);
+            IaManager.getInstance().deleteIaByGameId(this.gameId);
+        }
     }
 
     private sleep(ms: number): Promise<void>

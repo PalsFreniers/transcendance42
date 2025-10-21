@@ -112,7 +112,7 @@ export async function handleRoute() {
 	if (token && !await isTokenValid(token)) {
 		if (socket)
 			socket.disconnect();
-		notify('Token invalid or expire, token was suppressed.');
+		notify('Token invalid or expired, token was removed.');
 		localStorage.removeItem('token');
 		navigateTo('/login');
 		return;

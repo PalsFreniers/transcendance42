@@ -1056,6 +1056,7 @@ input:-webkit-autofill {
 	#change-player,
 	#quit-button,
 	#start-button,
+	#forfeit-button,
 	#kick-opponent {
 		background: linear-gradient(180deg, lighten($bg-light, 6%), $bg-light);
 		color: $color-black;
@@ -1073,6 +1074,7 @@ input:-webkit-autofill {
 		color: $color-white;
 	}
 
+	.forfeit,
 	.card {
 		display: inline-block;
 		min-width: 110px;
@@ -1192,6 +1194,31 @@ input:-webkit-autofill {
 		display: flex;
 		align-items: center;
 		justify-content: center;
+	}
+
+	#forfeit-button {
+		background: linear-gradient(180deg, $color-accent, darken($color-accent, 8%));
+		color: $color-white;
+		position: absolute;
+		top: 50%;
+		left: calc(50% + 220px);
+		transform: translateY(-60%);
+		border-radius: 10px;
+		padding: 10px;
+		font-size: 13px;
+		line-height: 1.3;
+		box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+
+		&:active {
+			transform: translateY(1px) scale(.995);
+			box-shadow: none;
+		}
+
+		&:hover {
+			background: $btn-hover-bg;
+			border-color: $btn-hover-border;
+			box-shadow: 6px 6px 0 rgba(0, 0, 0, 0.35);
+		}
 	}
 }
 
@@ -1379,7 +1406,6 @@ input:-webkit-autofill {
 	display: flex;
 	flex-direction: row;
 	z-index: 29;
-
 
 	#page_chat {
 		position: absolute;
@@ -1685,26 +1711,26 @@ input:-webkit-autofill {
 	position: absolute;
 }
 
-#div-info {
-	position: absolute;
-	background-color: #333;
-	color: #fff;
-	padding: 8px 12px;
-	border-radius: 8px;
-	font-size: 14px;
-	width: 25%;
-	pointer-events: none; // évite d'interférer avec la souris
-	transition: opacity 0.2s ease;
-	opacity: 0;
-
-	&.visible {
-		opacity: 1;
-	}
-
-	&.hidden {
-		display: none;
-	}
-}
+//#div-info {
+//	position: absolute;
+//	background-color: #333;
+//	color: #fff;
+//	padding: 8px 12px;
+//	border-radius: 8px;
+//	font-size: 14px;
+//	width: 25%;
+//	pointer-events: none;
+//	transition: opacity 0.2s ease;
+//	opacity: 0;
+//
+//	&.visible {
+//		opacity: 1;
+//	}
+//
+//	&.hidden {
+//		display: none;
+//	}
+//}
 
 #coin-button {
 	transition: transform 0.3s ease;

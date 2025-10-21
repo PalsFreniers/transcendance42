@@ -119,7 +119,7 @@ export function createShifumiSocket(socketShifumi: Socket | null) {
     socketShifumi.on('kick', () => {
         history.pushState(null, '', '/shifumi-lobby');
         handleRoute();
-        notify('you have been kick !');
+        notify('you have been kicked!');
     });
 
     socketShifumi.on('opponent-leave', (reason : string) => {
@@ -147,6 +147,7 @@ export function createShifumiSocket(socketShifumi: Socket | null) {
         gameIdShifumi = gameId; // a mettre aussi dans la fonction pour rerejoindre un partie
 
         // a passer dans un fonction a appeler pour rendre le code plus propre 
+        const forfeit = document.getElementById('forfeit-button');
         const start = document.getElementById('start-button');
         const quit = document.getElementById('quit-button');
         const card1 = document.getElementById('card1-button');
@@ -155,6 +156,8 @@ export function createShifumiSocket(socketShifumi: Socket | null) {
         const pointsText = document.getElementById('points');
         const coin = document.getElementById('coin-button');
 
+        if (forfeit)
+            forfeit.style.display = 'block';
         if (pointsText)
             pointsText.textContent = `0 - 0`
         if (quit)
@@ -172,7 +175,7 @@ export function createShifumiSocket(socketShifumi: Socket | null) {
     });
 
     socketShifumi.on('wait-opponent', (name: string) => {
-      notify(`${name} as been disconnected he have 15 seconds for rejoined the game`);
+      notify(`${name} has been disconnected. They have 15 seconds to rejoin the game.`);
     });
 
     socketShifumi.on('opponent-reconnected', (name) => {

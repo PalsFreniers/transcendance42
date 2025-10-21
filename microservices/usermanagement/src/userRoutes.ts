@@ -41,10 +41,17 @@ export async function friendAdd(app: FastifyInstance) {
             const user = request.user as { userId: number, username: string };
             const { friendUsername } = request.body as { friendUsername: string };
             const friend = db.prepare('SELECT id, socket FROM users WHERE username = ?').get(friendUsername) as { id: number, socket: string };
-            if (!friend)
+			console.log("test");
+            const req_friend = db
+								.prepare(`SELECT id, sender_id, receiver_id, status FROM friend_requests WHERE (((sender_id = ? AND receiver_id = ? ) OR (receiver_id = ? AND sender_id = ?)) AND status = 'pending')`)
+								.get(user.userId, friend.id, friend.id, user.userId) as { id: number };
+			console.log(req_friend);
+			if (!friend)
                 return reply.code(404).send({ error: 'Friend not found' });
             if (user.userId == friend.id)
                 return reply.code(403).send({ error: 'Unable to be friend with yourself' });
+			if (req_friend)
+				 return reply.code(408).send({ error: 'request !' });
             const newRequests: FriendRequests = {
                 id: 0,
                 sender_id: user.userId,
@@ -102,7 +109,7 @@ export async function getFriendRequest(app: FastifyInstance) {
 }
 
 export async function friendDelete(app: FastifyInstance) {
-    app.post('/delete-friend', async (request, reply) => { // a appeler deux fois pour supr des deux coter
+    app.post('/delete-friend', async (request, reply) => {
         try {
             const user = request.user as { userId: number };
             const { friendUsername } = request.body as { friendUsername: string };
@@ -114,13 +121,13 @@ export async function friendDelete(app: FastifyInstance) {
             friends = friends.filter((fid: number) => fid !== friend.id);
             db.prepare('UPDATE users SET friends = ? WHERE id = ?').run(JSON.stringify(friends), user.userId);
 
-            //const FriendUser = db.prepare('SELECT friends FROM users WHERE id = ?').get(friend.id) as { friends: string };
-            friends = JSON.parse(currentUser.friends || '[]');
+            const FriendUser = db.prepare('SELECT friends FROM users WHERE id = ?').get(friend.id) as { friends: string };
+            friends = JSON.parse(FriendUser.friends || '[]');
             friends = friends.filter((fid: number) => fid !== user.userId);
             db.prepare('UPDATE users SET friends = ? WHERE id = ?').run(JSON.stringify(friends), friend.id);
-
-
-
+			const senderSocket = db.prepare(`SELECT socket FROM users WHERE id = ?`).get(friend.id) as {socket: string};
+			if (senderSocket)
+				io.to(senderSocket.socket).emit('friend-delete');
             return { success: true, message: `${friendUsername} removed from friends` };
         } catch (err) {
             return reply.code(500).send({ error: 'Failed to remove friend' });

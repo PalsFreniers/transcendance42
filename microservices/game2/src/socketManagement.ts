@@ -378,7 +378,12 @@ export function socketManagemente(io: Server) {
             }
         });
 
-        // ajouter l'abandont du joueur
+        socket.on('forfeit', async () => {
+            const game = manager.getGame(socket.data.gameId)
+            if (!game)
+                return io.to(socket.id).emit('error', "error, you are not in a game");
+           await game.Playerforfeit(getUserIdFromToken(socket.handshake.auth.token), socket.handshake.auth.token);
+        });
 
         /******************************************************************************/
         /*                                                                            */

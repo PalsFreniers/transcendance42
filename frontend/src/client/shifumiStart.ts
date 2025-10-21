@@ -103,6 +103,7 @@ export function init() {
         window.location.href = '/login';
         return;
     }
+    const forfeit = document.getElementById('forfeit-button');
     const quit = document.getElementById('quit-button');
     const next = document.getElementById('change-player');
     const start = document.getElementById('start-button');
@@ -113,6 +114,15 @@ export function init() {
     const coin = document.getElementById('coin-button');
     const info = document.getElementById('info-coin');
 
+    if (forfeit) {
+        forfeit.style.display = 'none';
+        forfeit.addEventListener( 'click', async (e) => {
+            e.preventDefault();
+            const sock = getSocket(2);
+            if (sock)
+                sock.emit('forfeit');
+        });
+    }
 
     if (info)
     {
@@ -121,7 +131,6 @@ export function init() {
             const text = document.getElementById("div-info");
             text!.classList.remove("hidden");
             text!.classList.add("visible");
-            const rect = info.getBoundingClientRect();
         })
 
         info.addEventListener('mouseleave', async (e) => {
@@ -192,6 +201,8 @@ export function init() {
                 kick.hidden = true;
             if (quit)
                 quit.hidden = true;
+            if (forfeit)
+                forfeit.style.display = 'block';
         });
         start.hidden = true;
     }

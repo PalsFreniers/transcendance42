@@ -131,7 +131,7 @@ export function init() {
 					const lobbyName = document.getElementById('lobby-name') as HTMLInputElement;
 
 					if (!lobbyName.value) {
-						notify('the lobby must have a name');
+						notify('The lobby must have a name.');
 						return ('error, lobby name not found !');
 					}
 					e.preventDefault();
@@ -196,7 +196,7 @@ export function init() {
 						const lobbyName = document.getElementById('lobby-name') as HTMLInputElement;
 
 						if (!lobbyName.value) {
-							notify('the lobby must have a name');
+							notify('The lobby must have a name.');
 							return ('error, lobby name not found !');
 						}
 						e.preventDefault();

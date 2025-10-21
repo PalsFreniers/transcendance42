@@ -82,7 +82,7 @@ const templates: Record<string, () => string> = {
 					
 				</div>
 				  <form id="chat-input">
-					  <input id="msg-send" type="text" placeholder="Écrire un message..." />
+					  <input id="msg-send" type="text" placeholder="Write a message..." />
 					  <button type="submit">Send</button>
 				  </form>
 			  </div>
@@ -159,12 +159,13 @@ const templates: Record<string, () => string> = {
 					<div class=card id="card2-button">card 2</div>
 					<div class=card id="card3-button">card 3</div>
 					<div class=card id="coin-button">
-					Coin
-					<img id="info-coin" src="/asset/info.png"  width="27" height="29" ></img>
-					<div id="div-info" class="hidden">Bonus Coin is a coin flip bet — on heads, a random card may change; on tails, you choose which card to change and its replacement. (usable only once per game)</div>
+						Coin
+						<img id="info-coin" src="/asset/info.png"  width="27" height="29" ></img>
+						<div id="div-info" class="hidden">Bonus Coin is a coin flip bet — on heads, a random card may change; on tails, you choose which card to change and its replacement. (usable only once per game)</div>
 					</div>
 					<p id="card-played"></p>
 					<p id="opponent-card-played"></p>
+					<button id="forfeit-button" class="forfeit">forfeit</button>
 				</div>
 			</div>
 			`,
@@ -215,7 +216,6 @@ const templates: Record<string, () => string> = {
           <button id="game-button">Create Room</button>
           <button id="join-button">Join Room</button>
           <button id="spec-button">Spectator</button>
-          <button id="custom-button">Customisation</button>
         </div>
         <div id="game-list" class="shifumi-lobby">
       <h4></h4>
